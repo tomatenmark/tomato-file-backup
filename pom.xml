@@ -8,11 +8,6 @@
     <artifactId>tomato-file-backup</artifactId>
     <version>1.0_alpha1</version>
 
-    <properties>
-        <lwjgl.version>3.2.3</lwjgl.version>
-        <lwjgl.natives>natives-linux</lwjgl.natives>
-    </properties>
-
     <dependencies>
         <!-- https://mvnrepository.com/artifact/org.junit.jupiter/junit-jupiter-api -->
         <dependency>
