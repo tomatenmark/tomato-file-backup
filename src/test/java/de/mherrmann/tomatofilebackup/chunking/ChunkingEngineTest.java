@@ -8,19 +8,19 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.RandomAccessFile;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 
-public class ChunkingEngineTest {
+class ChunkingEngineTest {
 
+    @SuppressWarnings("ResultOfMethodCallIgnored")
     @AfterEach
     public void tearDown(){
         new File("./test.bin").delete();
     }
 
     @Test
-    public void shouldGetChunksForSmallSizeFile() throws Exception {
+    void shouldGetChunksForSmallSizeFile() throws Exception {
         RandomAccessFile file = buildRandomTestFile(ChunkingEngine.MIN_CHUNK_SIZE);
         ChunkingEngine engine = new ChunkingEngine();
 
@@ -33,7 +33,7 @@ public class ChunkingEngineTest {
     }
 
     @Test
-    public void shouldGetChunksForMediumSizeFile() throws Exception {
+    void shouldGetChunksForMediumSizeFile() throws Exception {
         RandomAccessFile file = buildRandomTestFile(ChunkingEngine.PORTION);
         ChunkingEngine engine = new ChunkingEngine();
 
@@ -43,7 +43,7 @@ public class ChunkingEngineTest {
     }
 
     @Test
-    public void shouldGetChunksForLargeSizeFile() throws Exception {
+    void shouldGetChunksForLargeSizeFile() throws Exception {
         RandomAccessFile file = buildRandomTestFile(ChunkingEngine.PORTION * 2 + ChunkingEngine.MAX_CHUNK_SIZE*10);
         ChunkingEngine engine = new ChunkingEngine();
 
@@ -103,6 +103,7 @@ public class ChunkingEngineTest {
         return totalLength;
     }
 
+    @SuppressWarnings("ResultOfMethodCallIgnored")
     private RandomAccessFile buildRandomTestFile(long length) throws Exception {
         Random random = new Random();
         long remaining = length;

@@ -6,10 +6,10 @@ import org.junit.jupiter.api.Test;
 
 import java.util.Random;
 
-public class ChecksumEngineTest {
+class ChecksumEngineTest {
 
     @Test
-    public void shouldGetChecksumFromFixedMessage(){
+    void shouldGetChecksumFromFixedMessage(){
         byte[] bytes = "HASH".getBytes();
 
         String checksum = ChecksumEngine.getChecksum(bytes, 0, bytes.length);
@@ -18,7 +18,7 @@ public class ChecksumEngineTest {
     }
 
     @Test
-    public void shouldGetChecksumFromReproducibleRandomBytes(){
+    void shouldGetChecksumFromReproducibleRandomBytes(){
         byte[] bytes = buildReproducibleRandomTestBytes();
 
         String checksum = ChecksumEngine.getChecksum(bytes, 0, bytes.length);

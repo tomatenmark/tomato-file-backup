@@ -6,10 +6,10 @@ import org.junit.jupiter.api.Test;
 
 import java.util.Random;
 
-public class FastCDCTest {
+class FastCDCTest {
 
     @Test
-    public void shouldGetFirstChunk() {
+    void shouldGetFirstChunk() {
         byte[] source = buildReproducibleRandomTestBytes();
         FastCDC fastCDC = new FastCDC(source, ChunkingEngine.MIN_CHUNK_SIZE, ChunkingEngine.AVG_CHUNK_SIZE, ChunkingEngine.MAX_CHUNK_SIZE);
 
@@ -23,7 +23,7 @@ public class FastCDCTest {
     }
 
     @Test
-    public void shouldHaveNext() {
+    void shouldHaveNext() {
         byte[] source = buildReproducibleRandomTestBytes();
         FastCDC fastCDC = new FastCDC(source, ChunkingEngine.MIN_CHUNK_SIZE, ChunkingEngine.AVG_CHUNK_SIZE, ChunkingEngine.MAX_CHUNK_SIZE);
 
@@ -33,7 +33,7 @@ public class FastCDCTest {
     }
 
     @Test
-    public void shouldNotHaveNext() {
+    void shouldNotHaveNext() {
         byte[] source = buildReproducibleRandomTestBytes();
         FastCDC fastCDC = new FastCDC(source, ChunkingEngine.MIN_CHUNK_SIZE, ChunkingEngine.AVG_CHUNK_SIZE, ChunkingEngine.MAX_CHUNK_SIZE);
         fastCDC.next();

@@ -4,6 +4,8 @@ import org.apache.commons.codec.digest.MurmurHash3;
 
 class ChecksumEngine {
 
+    private ChecksumEngine(){}
+
     /**
      * Creates a checksum using MurMurHash3
      * (link)
