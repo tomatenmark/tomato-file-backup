@@ -2,6 +2,7 @@ package de.mherrmann.tomatofilebackup.chunking;
 
 import java.io.*;
 import java.util.ArrayList;
+import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicLong;
 
@@ -15,13 +16,12 @@ public class ChunkingEngine {
     static final int MAX_CHUNK_SIZE = 4*MB;
 
     private RandomAccessFile file;
-    private final ChecksumEngine checksumEngine;
     private long fileProcessed;
     private long chunkingProcessed;
     private final AtomicLong processedChecksums;
     private final AtomicLong chunkCount;
     private final AtomicBoolean finished;
-    private ArrayList<Chunk> chunks;
+    private List<Chunk> chunks;
 
     private byte[] previousPortion;
     private int previousPortionReuse;
@@ -30,10 +30,9 @@ public class ChunkingEngine {
         processedChecksums = new AtomicLong(0);
         chunkCount = new AtomicLong(-1);
         finished = new AtomicBoolean(false);
-        this.checksumEngine = new ChecksumEngine(processedChecksums, chunkCount, finished);
     }
 
-    public ArrayList<Chunk> getChunks(RandomAccessFile file) throws IOException {
+    public List<Chunk> getChunks(RandomAccessFile file) throws IOException {
         init(file);
         chunks = new ArrayList<>();
         long length = file.length();
@@ -134,8 +133,26 @@ public class ChunkingEngine {
         if(lastChunk){
             chunkCount.set(chunks.size());
         }
-        checksumEngine.setChecksum(source, chunk);
+        setChecksum(source, chunk);
         chunk.addProcessedOffset(chunkingProcessed);
+    }
+
+    private void setChecksum(byte[] bytes, Chunk chunk){
+        int start = (int)chunk.getOffset();
+        int length = chunk.getLength();
+        Thread thread = new Thread(() -> setChecksumInSubThread(bytes, start, length, chunk));
+        thread.start();
+    }
+
+    private void setChecksumInSubThread(byte[] bytes, int start, int length, Chunk chunk){
+        chunk.setChecksum(ChecksumEngine.getChecksum(bytes, start, length));
+        long finishedChecksums = this.processedChecksums.incrementAndGet();
+        if(finishedChecksums == chunkCount.get()){
+            synchronized (finished){
+                finished.set(true);
+                finished.notifyAll();
+            }
+        }
     }
 
     private void waitForChecksums() {
@@ -145,6 +162,8 @@ public class ChunkingEngine {
                     finished.wait();
                 }
             }
-        } catch(InterruptedException ignored){}
+        } catch(InterruptedException ignored){
+            Thread.currentThread().interrupt();
+        }
     }
 }
