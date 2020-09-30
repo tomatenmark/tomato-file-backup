@@ -7,8 +7,7 @@ class ChecksumEngine {
     private ChecksumEngine(){}
 
     /**
-     * Creates a checksum using MurMurHash3
-     * (link)
+     * Creates a checksum using MurMurHash3 (128 bits long, x64 type)
      * @param bytes - the bytes to hash
      * @param start - start at index <code>start</code>
      * @param length - use <code>length</code> bytes beginning at <code>start</code>
