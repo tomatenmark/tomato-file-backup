@@ -2,14 +2,13 @@ package de.mherrmann.tomatofilebackup.chunking;
 
 import static org.junit.jupiter.api.Assertions.*;
 
+import de.mherrmann.tomatofilebackup.TestUtil;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 import java.io.File;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.RandomAccessFile;
 import java.util.List;
-import java.util.Random;
 
 class ChunkingEngineTest {
 
@@ -21,7 +20,7 @@ class ChunkingEngineTest {
 
     @Test
     void shouldGetChunksForSmallSizeFile() throws Exception {
-        RandomAccessFile file = buildRandomTestFile(ChunkingEngine.MIN_CHUNK_SIZE);
+        RandomAccessFile file = TestUtil.buildRandomTestFile(ChunkingEngine.MIN_CHUNK_SIZE);
         ChunkingEngine engine = new ChunkingEngine();
 
         List<Chunk> chunks = engine.getChunks(file);
@@ -34,7 +33,7 @@ class ChunkingEngineTest {
 
     @Test
     void shouldGetChunksForMediumSizeFile() throws Exception {
-        RandomAccessFile file = buildRandomTestFile(ChunkingEngine.PORTION);
+        RandomAccessFile file = TestUtil.buildRandomTestFile(ChunkingEngine.PORTION);
         ChunkingEngine engine = new ChunkingEngine();
 
         List<Chunk> chunks = engine.getChunks(file);
@@ -44,7 +43,7 @@ class ChunkingEngineTest {
 
     @Test
     void shouldGetChunksForLargeSizeFile() throws Exception {
-        RandomAccessFile file = buildRandomTestFile(ChunkingEngine.PORTION * 2 + ChunkingEngine.MAX_CHUNK_SIZE*10);
+        RandomAccessFile file = TestUtil.buildRandomTestFile(ChunkingEngine.PORTION * 2 + ChunkingEngine.MAX_CHUNK_SIZE*10);
         ChunkingEngine engine = new ChunkingEngine();
 
         List<Chunk> chunks = engine.getChunks(file);
@@ -101,25 +100,5 @@ class ChunkingEngineTest {
             totalLength += chunk.getLength();
         }
         return totalLength;
-    }
-
-    @SuppressWarnings("ResultOfMethodCallIgnored")
-    private RandomAccessFile buildRandomTestFile(long length) throws Exception {
-        Random random = new Random();
-        long remaining = length;
-        long maxStepLength = 1024*1024*1024;
-        File file = new File("./test.bin");
-        file.createNewFile();
-        FileOutputStream outputStream = new FileOutputStream(file);
-        while(remaining > 0){
-            int nextLength = (int) Long.min(remaining, maxStepLength);
-            remaining -= nextLength;
-            byte[] bytes = new byte[nextLength];
-            random.nextBytes(bytes);
-            outputStream.write(bytes);
-        }
-        outputStream.close();
-        outputStream.flush();
-        return new RandomAccessFile(file, "r");
     }
 }

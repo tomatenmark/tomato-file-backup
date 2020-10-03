@@ -2,9 +2,8 @@ package de.mherrmann.tomatofilebackup.chunking;
 
 import static org.junit.jupiter.api.Assertions.*;
 
+import de.mherrmann.tomatofilebackup.TestUtil;
 import org.junit.jupiter.api.Test;
-
-import java.util.Random;
 
 class ChecksumEngineTest {
 
@@ -19,18 +18,11 @@ class ChecksumEngineTest {
 
     @Test
     void shouldGetChecksumFromReproducibleRandomBytes(){
-        byte[] bytes = buildReproducibleRandomTestBytes();
+        byte[] bytes = TestUtil.buildReproducibleRandomTestBytes();
 
         String checksum = ChecksumEngine.getChecksum(bytes, 0, bytes.length);
 
         assertEquals("BD09C7FCA1866E2CA6FB601FB9E9626F", checksum);
-    }
-
-    private byte[] buildReproducibleRandomTestBytes() {
-        Random random = new Random(42);
-        byte[] bytes = new byte[769557];
-        random.nextBytes(bytes);
-        return bytes;
     }
 
 }

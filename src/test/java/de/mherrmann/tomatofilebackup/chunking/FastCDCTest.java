@@ -2,15 +2,14 @@ package de.mherrmann.tomatofilebackup.chunking;
 
 import static org.junit.jupiter.api.Assertions.*;
 
+import de.mherrmann.tomatofilebackup.TestUtil;
 import org.junit.jupiter.api.Test;
-
-import java.util.Random;
 
 class FastCDCTest {
 
     @Test
     void shouldGetFirstChunk() {
-        byte[] source = buildReproducibleRandomTestBytes();
+        byte[] source = TestUtil.buildReproducibleRandomTestBytes();
         FastCDC fastCDC = new FastCDC(source, ChunkingEngine.MIN_CHUNK_SIZE, ChunkingEngine.AVG_CHUNK_SIZE, ChunkingEngine.MAX_CHUNK_SIZE);
 
         Chunk chunk1 = fastCDC.next();
@@ -24,7 +23,7 @@ class FastCDCTest {
 
     @Test
     void shouldHaveNext() {
-        byte[] source = buildReproducibleRandomTestBytes();
+        byte[] source = TestUtil.buildReproducibleRandomTestBytes();
         FastCDC fastCDC = new FastCDC(source, ChunkingEngine.MIN_CHUNK_SIZE, ChunkingEngine.AVG_CHUNK_SIZE, ChunkingEngine.MAX_CHUNK_SIZE);
 
         boolean hasNext = fastCDC.hasNext();
@@ -34,7 +33,7 @@ class FastCDCTest {
 
     @Test
     void shouldNotHaveNext() {
-        byte[] source = buildReproducibleRandomTestBytes();
+        byte[] source = TestUtil.buildReproducibleRandomTestBytes();
         FastCDC fastCDC = new FastCDC(source, ChunkingEngine.MIN_CHUNK_SIZE, ChunkingEngine.AVG_CHUNK_SIZE, ChunkingEngine.MAX_CHUNK_SIZE);
         fastCDC.next();
         fastCDC.next();
@@ -44,10 +43,4 @@ class FastCDCTest {
         assertFalse(hasNext);
     }
 
-    private byte[] buildReproducibleRandomTestBytes() {
-        Random random = new Random(42);
-        byte[] bytes = new byte[769557];
-        random.nextBytes(bytes);
-        return bytes;
-    }
 }
