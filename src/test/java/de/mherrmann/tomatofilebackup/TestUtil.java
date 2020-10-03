@@ -15,7 +15,7 @@ public class TestUtil {
     }
 
     @SuppressWarnings("ResultOfMethodCallIgnored")
-    public static RandomAccessFile buildRandomTestFile(long length) throws Exception {
+    public static File buildRandomTestFile(long length) throws Exception {
         Random random = new Random();
         long remaining = length;
         long maxStepLength = 1024*1024*1024;
@@ -31,6 +31,10 @@ public class TestUtil {
         }
         outputStream.close();
         outputStream.flush();
-        return new RandomAccessFile(file, "r");
+        return file;
+    }
+
+    public static RandomAccessFile buildRandomTestRandomAccessFile(long length) throws Exception {
+        return new RandomAccessFile(buildRandomTestFile(length), "r");
     }
 }

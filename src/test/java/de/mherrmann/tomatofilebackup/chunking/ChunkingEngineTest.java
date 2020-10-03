@@ -20,7 +20,7 @@ class ChunkingEngineTest {
 
     @Test
     void shouldGetChunksForSmallSizeFile() throws Exception {
-        RandomAccessFile file = TestUtil.buildRandomTestFile(ChunkingEngine.MIN_CHUNK_SIZE);
+        RandomAccessFile file = TestUtil.buildRandomTestRandomAccessFile(ChunkingEngine.MIN_CHUNK_SIZE);
         ChunkingEngine engine = new ChunkingEngine();
 
         List<Chunk> chunks = engine.getChunks(file, true);
@@ -34,7 +34,7 @@ class ChunkingEngineTest {
 
     @Test
     void shouldGetChunksForMediumSizeFile() throws Exception {
-        RandomAccessFile file = TestUtil.buildRandomTestFile(ChunkingEngine.PORTION);
+        RandomAccessFile file = TestUtil.buildRandomTestRandomAccessFile(ChunkingEngine.PORTION);
         ChunkingEngine engine = new ChunkingEngine();
 
         List<Chunk> chunks = engine.getChunks(file, false);
@@ -45,7 +45,7 @@ class ChunkingEngineTest {
 
     @Test
     void shouldGetChunksForLargeSizeFile() throws Exception {
-        RandomAccessFile file = TestUtil.buildRandomTestFile(ChunkingEngine.PORTION * 2 + ChunkingEngine.MAX_CHUNK_SIZE*10);
+        RandomAccessFile file = TestUtil.buildRandomTestRandomAccessFile(ChunkingEngine.PORTION * 2 + ChunkingEngine.MAX_CHUNK_SIZE*10);
         ChunkingEngine engine = new ChunkingEngine();
 
         List<Chunk> chunks = engine.getChunks(file, false);
