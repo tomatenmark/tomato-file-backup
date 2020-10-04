@@ -11,9 +11,9 @@ public class ChunkingEngine {
     private static final int KB = 1024;
     private static final int MB = 1024*KB;
     static final int PORTION = 16*MB;
-    static final int MIN_CHUNK_SIZE = 128*KB;
-    static final int AVG_CHUNK_SIZE = 512*KB;
-    static final int MAX_CHUNK_SIZE = 4*MB;
+    static final int MIN_CHUNK_SIZE = 512*KB;
+    static final int AVG_CHUNK_SIZE = MB;
+    static final int MAX_CHUNK_SIZE = 8*MB;
 
     private RandomAccessFile file;
     private long fileProcessed;
