@@ -19,11 +19,18 @@ public class CompressionEngine {
     }
 
     public static byte[] unzip(File sourceFile, int unzippedLength) throws IOException {
-        FileInputStream fis = new FileInputStream(sourceFile);
-        GZIPInputStream gzipIS = new GZIPInputStream(fis);
-        byte[] unzipped = new byte[unzippedLength];
-        gzipIS.read(unzipped);
-        return unzipped;
+        try (
+                GZIPInputStream gzipIS = new GZIPInputStream(new FileInputStream(sourceFile))
+        ){
+            byte[] unzipped = new byte[unzippedLength];
+            int read = 0;
+            while (read < unzippedLength){
+                read += gzipIS.read(unzipped, read, unzippedLength-read);
+            }
+            return unzipped;
+        } catch (IOException exception){
+            throw new IOException("Error while decompression", exception);
+        }
     }
 
 }
