@@ -9,10 +9,13 @@ public class CompressionEngine {
     private CompressionEngine(){}
 
     public static void zip(byte[] unzipped, FileOutputStream targetFileStream) throws IOException {
-        GZIPOutputStream gzipOS = new GZIPOutputStream(targetFileStream);
-        gzipOS.write(unzipped);
-        gzipOS.close();
-        targetFileStream.close();
+        try (
+                GZIPOutputStream gzipOS = new GZIPOutputStream(targetFileStream)
+        ){
+            gzipOS.write(unzipped);
+        } catch (IOException exception){
+            throw new IOException("Error while compressing chunk", exception);
+        }
     }
 
     public static byte[] unzip(File sourceFile, int unzippedLength) throws IOException {
