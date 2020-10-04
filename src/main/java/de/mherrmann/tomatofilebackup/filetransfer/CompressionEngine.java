@@ -14,7 +14,7 @@ public class CompressionEngine {
         ){
             gzipOS.write(unzipped);
         } catch (IOException exception){
-            throw new IOException("Error while compressing chunk", exception);
+            throw new IOException("Error while compression", exception);
         }
     }
 
