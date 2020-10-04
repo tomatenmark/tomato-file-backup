@@ -10,7 +10,7 @@ public class StoreChunkEngine {
     private StoreChunkEngine(){}
 
     public static void storeChunk(File source, String targetDirectoryPath, Chunk chunk) throws IOException {
-        File target = new File(targetDirectoryPath+File.separator+chunk.getChecksum());
+        File target = new File(targetDirectoryPath, chunk.getChecksum());
         boolean created = target.createNewFile();
         if(!created){
             throw new IOException("Unknown Error - Chunk file was not created. Checksum: " + chunk.getChecksum());
