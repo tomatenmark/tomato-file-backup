@@ -41,7 +41,7 @@ public class TestUtil {
 
     @SuppressWarnings("ResultOfMethodCallIgnored")
     public static void createTestDirectory() {
-        File dir = new File("./files");
+        File dir = new File("./test");
         if(!dir.exists()){
             dir.mkdir();
         }
