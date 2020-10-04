@@ -2,7 +2,9 @@ package de.mherrmann.tomatofilebackup;
 
 import java.io.File;
 import java.io.FileOutputStream;
+import java.io.IOException;
 import java.io.RandomAccessFile;
+import java.util.Objects;
 import java.util.Random;
 
 public class TestUtil {
@@ -36,5 +38,26 @@ public class TestUtil {
 
     public static RandomAccessFile buildRandomTestRandomAccessFile(long length) throws Exception {
         return new RandomAccessFile(buildRandomTestFile(length), "r");
+    }
+
+    @SuppressWarnings("ResultOfMethodCallIgnored")
+    public static void createTestDirectory() {
+        File dir = new File("./files");
+        if(!dir.exists()){
+            dir.mkdir();
+        }
+    }
+
+    @SuppressWarnings("ResultOfMethodCallIgnored")
+    public static void removeTestFiles() {
+        File directory = new File("./test");
+        if(!directory.exists()){
+            return;
+        }
+        for (File file : Objects.requireNonNull(directory.listFiles())) {
+                file.delete();
+        }
+        directory.delete();
+        new File("./test.bin").delete();
     }
 }
