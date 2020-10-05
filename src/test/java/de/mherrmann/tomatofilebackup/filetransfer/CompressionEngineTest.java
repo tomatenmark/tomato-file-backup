@@ -11,35 +11,35 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.util.Arrays;
 
-public class CompressionEngineTest {
+class CompressionEngineTest {
 
     private final byte[] unzipped = get1024Zeros();
-    private final byte[] zipped = getZipped();
+    private final byte[] zipped = getExpectedCompressed();
     private File testFile;
 
     @SuppressWarnings("ResultOfMethodCallIgnored")
     @BeforeEach
-    public void setUp() throws IOException {
+    void setUp() throws IOException {
         testFile = new File("./test.gz");
         testFile.createNewFile();
     }
 
     @SuppressWarnings("ResultOfMethodCallIgnored")
     @AfterEach
-    public void tearDown() {
+    void tearDown() {
         testFile = new File("./test.gz");
         testFile.delete();
     }
 
     @Test
-    public void shouldZip() throws IOException {
+    void shouldCompress() throws IOException {
         CompressionEngine.storeCompressed(unzipped, testFile);
 
         assertArrayEquals(zipped, Files.readAllBytes(testFile.toPath()));
     }
 
     @Test
-    public void shouldUnzip() throws IOException {
+    void shouldDecompress() throws IOException {
         Files.write(testFile.toPath(), zipped);
 
         byte[] bytesUncompressed = CompressionEngine.unzip(testFile, unzipped.length);
@@ -53,7 +53,7 @@ public class CompressionEngineTest {
         return bytes;
     }
 
-    private byte[] getZipped() {
+    private byte[] getExpectedCompressed() {
         return new byte[]{
                 31, -117, 8, 0, 0, 0, 0, 0, 0, 0, 51, 48, 24, 5, -93, 96, 20, -116, 84, 0, 0, -4, 118, -34, -84, 0, 4, 0, 0
         };

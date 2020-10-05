@@ -13,47 +13,42 @@ import java.io.File;
 import java.io.IOException;
 import java.io.RandomAccessFile;
 
-public class StoreChunkEngineTest {
+class TransferEngineTest {
 
     private File sourceFile;
     private final File targetDirectory = new File("./test");
 
     @BeforeEach
-    public void setUp() throws Exception {
+    void setUp() {
         TestUtil.createTestDirectory();
     }
 
     @AfterEach
-    public void tearDown(){
+    void tearDown(){
         TestUtil.removeTestFiles();
     }
 
     @Test
-    public void shouldStoreChunkToTestDirectoryUncompressed() throws Exception {
+    void shouldStoreChunkToTestDirectoryUncompressed() throws Exception {
         sourceFile = TestUtil.buildRandomTestFile(5*1024*1024);
         Chunk chunk = prepareChunk(false);
-        RandomAccessFile randomAccessFile = new RandomAccessFile(sourceFile, "r");
+        byte[] chunkBytes = getChunkBytes(chunk);
         String targetPath = targetDirectory.getAbsolutePath();
-        StoreChunkEngine engine = new StoreChunkEngine();
+        TransferEngine engine = new TransferEngine();
 
-        long start = System.nanoTime();
-        engine.storeChunk(randomAccessFile, targetPath, chunk);
-        long end = System.nanoTime();
-        System.out.println(end-start);
+        engine.storeChunk(chunkBytes, targetPath, chunk);
 
         assertValidStored(chunk, false);
     }
 
     @Test
-    public void shouldStoreChunkToTestDirectoryCompressed() throws Exception {
+    void shouldStoreChunkToTestDirectoryCompressed() throws Exception {
         sourceFile = TestUtil.buildTestFileWithZeroChars(5*1024*1024);
         Chunk chunk = prepareChunk(true);
-        StoreChunkEngine engine = new StoreChunkEngine();
+        byte[] chunkBytes = getChunkBytes(chunk);
+        TransferEngine engine = new TransferEngine();
 
-        long start = System.nanoTime();
-        engine.storeChunk(new RandomAccessFile(sourceFile, "r"), targetDirectory.getAbsolutePath(), chunk);
-        long end = System.nanoTime();
-        System.out.println(end-start);
+        engine.storeChunk(chunkBytes, targetDirectory.getAbsolutePath(), chunk);
 
         assertValidStored(chunk, true);
     }

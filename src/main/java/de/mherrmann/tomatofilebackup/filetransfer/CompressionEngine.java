@@ -8,19 +8,14 @@ public class CompressionEngine {
 
     private CompressionEngine(){}
 
-    public static void storeCompressed(byte[] unzipped, File targetFile) throws IOException {
-        long start = 0;
-        long end = 0;
+    public static void storeCompressed(byte[] uncompressed, File targetFile) throws IOException {
         try (
                 GZIPOutputStream gzipOS = new GZIPOutputStream(new FileOutputStream(targetFile))
         ){
-            start = System.nanoTime();
-            gzipOS.write(unzipped);
-            end = System.nanoTime();
+            gzipOS.write(uncompressed);
         } catch (IOException exception){
             throw new IOException("Error while compression", exception);
         }
-        System.out.println(end-start);
     }
 
     public static byte[] unzip(File sourceFile, int unzippedLength) throws IOException {
