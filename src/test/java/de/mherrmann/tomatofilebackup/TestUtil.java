@@ -3,6 +3,7 @@ package de.mherrmann.tomatofilebackup;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.RandomAccessFile;
+import java.util.Arrays;
 import java.util.Objects;
 import java.util.Random;
 
@@ -35,6 +36,19 @@ public class TestUtil {
         return file;
     }
 
+    @SuppressWarnings("ResultOfMethodCallIgnored")
+    public static File buildTestFileWithZeroChars(int length) throws Exception {
+        File file = new File("./test.bin");
+        file.createNewFile();
+        FileOutputStream outputStream = new FileOutputStream(file);
+        byte[] bytes = new byte[length];
+        Arrays.fill(bytes, (byte) 0x30); //ascii char 0
+        outputStream.write(bytes);
+        outputStream.close();
+        outputStream.flush();
+        return file;
+    }
+
     public static RandomAccessFile buildRandomTestRandomAccessFile(long length) throws Exception {
         return new RandomAccessFile(buildRandomTestFile(length), "r");
     }
@@ -50,13 +64,12 @@ public class TestUtil {
     @SuppressWarnings("ResultOfMethodCallIgnored")
     public static void removeTestFiles() {
         File directory = new File("./test");
-        if(!directory.exists()){
-            return;
-        }
-        for (File file : Objects.requireNonNull(directory.listFiles())) {
+        if(directory.exists()){
+            for (File file : Objects.requireNonNull(directory.listFiles())) {
                 file.delete();
+            }
+            directory.delete();
         }
-        directory.delete();
         new File("./test.bin").delete();
     }
 }

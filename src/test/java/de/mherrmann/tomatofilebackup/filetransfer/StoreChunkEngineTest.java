@@ -20,7 +20,6 @@ public class StoreChunkEngineTest {
 
     @BeforeEach
     public void setUp() throws Exception {
-        sourceFile = TestUtil.buildRandomTestFile(5*1024*1024);
         TestUtil.createTestDirectory();
     }
 
@@ -30,19 +29,31 @@ public class StoreChunkEngineTest {
     }
 
     @Test
-    public void shouldStoreChunkToTestDirectoryUncompressed() throws IOException {
+    public void shouldStoreChunkToTestDirectoryUncompressed() throws Exception {
+        sourceFile = TestUtil.buildRandomTestFile(5*1024*1024);
         Chunk chunk = prepareChunk(false);
+        RandomAccessFile randomAccessFile = new RandomAccessFile(sourceFile, "r");
+        String targetPath = targetDirectory.getAbsolutePath();
+        StoreChunkEngine engine = new StoreChunkEngine();
 
-        StoreChunkEngine.storeChunk(sourceFile, targetDirectory.getAbsolutePath(), chunk);
+        long start = System.nanoTime();
+        engine.storeChunk(randomAccessFile, targetPath, chunk);
+        long end = System.nanoTime();
+        System.out.println(end-start);
 
         assertValidStored(chunk, false);
     }
 
     @Test
-    public void shouldStoreChunkToTestDirectoryCompressed() throws IOException {
+    public void shouldStoreChunkToTestDirectoryCompressed() throws Exception {
+        sourceFile = TestUtil.buildTestFileWithZeroChars(5*1024*1024);
         Chunk chunk = prepareChunk(true);
+        StoreChunkEngine engine = new StoreChunkEngine();
 
-        StoreChunkEngine.storeChunk(sourceFile, targetDirectory.getAbsolutePath(), chunk);
+        long start = System.nanoTime();
+        engine.storeChunk(new RandomAccessFile(sourceFile, "r"), targetDirectory.getAbsolutePath(), chunk);
+        long end = System.nanoTime();
+        System.out.println(end-start);
 
         assertValidStored(chunk, true);
     }

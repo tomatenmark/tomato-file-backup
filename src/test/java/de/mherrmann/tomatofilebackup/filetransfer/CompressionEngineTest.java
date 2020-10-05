@@ -7,7 +7,6 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import java.io.File;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.util.Arrays;
@@ -34,8 +33,7 @@ public class CompressionEngineTest {
 
     @Test
     public void shouldZip() throws IOException {
-        FileOutputStream fos = new FileOutputStream(testFile);
-        CompressionEngine.zip(unzipped, fos);
+        CompressionEngine.storeCompressed(unzipped, testFile);
 
         assertArrayEquals(zipped, Files.readAllBytes(testFile.toPath()));
     }
