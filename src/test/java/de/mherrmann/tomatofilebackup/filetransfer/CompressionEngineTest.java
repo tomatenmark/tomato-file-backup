@@ -42,7 +42,7 @@ class CompressionEngineTest {
     void shouldDecompress() throws IOException {
         Files.write(testFile.toPath(), zipped);
 
-        byte[] bytesUncompressed = CompressionEngine.unzip(testFile, unzipped.length);
+        byte[] bytesUncompressed = CompressionEngine.restoreDecompressed(testFile, unzipped.length);
 
         assertArrayEquals(unzipped, bytesUncompressed);
     }

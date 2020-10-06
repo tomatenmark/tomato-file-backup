@@ -18,7 +18,7 @@ public class CompressionEngine {
         }
     }
 
-    public static byte[] unzip(File sourceFile, int unzippedLength) throws IOException {
+    public static byte[] restoreDecompressed(File sourceFile, int unzippedLength) throws IOException {
         try (
                 GZIPInputStream gzipIS = new GZIPInputStream(new FileInputStream(sourceFile))
         ){

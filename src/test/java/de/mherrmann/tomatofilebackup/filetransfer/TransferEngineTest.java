@@ -12,6 +12,7 @@ import org.junit.jupiter.api.Test;
 import java.io.File;
 import java.io.IOException;
 import java.io.RandomAccessFile;
+import java.nio.channels.FileChannel;
 
 class TransferEngineTest {
 
@@ -32,11 +33,12 @@ class TransferEngineTest {
     void shouldStoreChunkToTestDirectoryUncompressed() throws Exception {
         sourceFile = TestUtil.buildRandomTestFile(5*1024*1024);
         Chunk chunk = prepareChunk(false);
-        byte[] chunkBytes = getChunkBytes(chunk);
         String targetPath = targetDirectory.getAbsolutePath();
         TransferEngine engine = new TransferEngine();
+        RandomAccessFile source = new RandomAccessFile(sourceFile, "r");
+        FileChannel sourceChannel = source.getChannel();
 
-        engine.storeChunk(chunkBytes, targetPath, chunk);
+        engine.storeChunk(source, sourceChannel, targetPath, chunk);
 
         assertValidStored(chunk, false);
     }
@@ -45,10 +47,14 @@ class TransferEngineTest {
     void shouldStoreChunkToTestDirectoryCompressed() throws Exception {
         sourceFile = TestUtil.buildTestFileWithZeroChars(5*1024*1024);
         Chunk chunk = prepareChunk(true);
-        byte[] chunkBytes = getChunkBytes(chunk);
         TransferEngine engine = new TransferEngine();
+        RandomAccessFile source = new RandomAccessFile(sourceFile, "r");
+        FileChannel sourceChannel = source.getChannel();
 
-        engine.storeChunk(chunkBytes, targetDirectory.getAbsolutePath(), chunk);
+        long start = System.nanoTime();
+        engine.storeChunk(source, sourceChannel, targetDirectory.getAbsolutePath(), chunk);
+        long end = System.nanoTime();
+        System.out.println(end-start);
 
         assertValidStored(chunk, true);
     }
@@ -61,7 +67,7 @@ class TransferEngineTest {
         randomAccessFile.read(bytes);
         if(compressed){
             assertNotEquals(bytes.length, chunk.getLength());
-            bytes = CompressionEngine.unzip(file, chunk.getLength());
+            bytes = CompressionEngine.restoreDecompressed(file, chunk.getLength());
         }
         assertEquals(chunk.getLength(), bytes.length);
         String checksum = ChecksumEngine.getChecksum(bytes, 0, bytes.length);
