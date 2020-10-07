@@ -13,6 +13,8 @@ import java.io.File;
 import java.io.IOException;
 import java.io.RandomAccessFile;
 import java.nio.channels.FileChannel;
+import java.util.ArrayList;
+import java.util.List;
 
 class TransferEngineTest {
 
@@ -30,28 +32,32 @@ class TransferEngineTest {
     }
 
     @Test
-    void shouldStoreChunkToTestDirectoryUncompressed() throws Exception {
+    void shouldStoreChunkFromListToTestDirectoryUncompressed() throws Exception {
         sourceFile = TestUtil.buildRandomTestFile(5*1024*1024);
         Chunk chunk = prepareChunk(false);
         String targetPath = targetDirectory.getAbsolutePath();
         TransferEngine engine = new TransferEngine();
         RandomAccessFile source = new RandomAccessFile(sourceFile, "r");
         FileChannel sourceChannel = source.getChannel();
+        List<Chunk> chunks = new ArrayList<>();
+        chunks.add(chunk);
 
-        engine.storeChunk(source, sourceChannel, targetPath, chunk);
+        engine.storeChunks(source, sourceChannel, targetPath, chunks);
 
         assertValidStored(chunk, false);
     }
 
     @Test
-    void shouldStoreChunkToTestDirectoryCompressed() throws Exception {
+    void shouldStoreChunkFromListToTestDirectoryCompressed() throws Exception {
         sourceFile = TestUtil.buildTestFileWithZeroChars(5*1024*1024);
         Chunk chunk = prepareChunk(true);
         TransferEngine engine = new TransferEngine();
         RandomAccessFile source = new RandomAccessFile(sourceFile, "r");
         FileChannel sourceChannel = source.getChannel();
+        List<Chunk> chunks = new ArrayList<>();
+        chunks.add(chunk);
 
-        engine.storeChunk(source, sourceChannel, targetDirectory.getAbsolutePath(), chunk);
+        engine.storeChunks(source, sourceChannel, targetDirectory.getAbsolutePath(), chunks);
 
         assertValidStored(chunk, true);
     }

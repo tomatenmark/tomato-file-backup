@@ -4,10 +4,18 @@ import de.mherrmann.tomatofilebackup.chunking.Chunk;
 
 import java.io.*;
 import java.nio.channels.FileChannel;
+import java.util.List;
 
 public class TransferEngine {
 
-    public void storeChunk(RandomAccessFile source, FileChannel sourceChannel,
+    public void storeChunks(RandomAccessFile source, FileChannel sourceChannel,
+                            String targetDirectoryPath, List<Chunk> chunks) throws IOException {
+        for (Chunk chunk : chunks) {
+            storeChunk(source, sourceChannel, targetDirectoryPath, chunk);
+        }
+    }
+
+    private void storeChunk(RandomAccessFile source, FileChannel sourceChannel,
                            String targetDirectoryPath, Chunk chunk) throws IOException {
         File targetFile = new File(targetDirectoryPath, chunk.getChecksum());
         boolean created = targetFile.createNewFile();
