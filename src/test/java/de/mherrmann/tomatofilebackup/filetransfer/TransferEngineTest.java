@@ -51,10 +51,7 @@ class TransferEngineTest {
         RandomAccessFile source = new RandomAccessFile(sourceFile, "r");
         FileChannel sourceChannel = source.getChannel();
 
-        long start = System.nanoTime();
         engine.storeChunk(source, sourceChannel, targetDirectory.getAbsolutePath(), chunk);
-        long end = System.nanoTime();
-        System.out.println(end-start);
 
         assertValidStored(chunk, true);
     }
