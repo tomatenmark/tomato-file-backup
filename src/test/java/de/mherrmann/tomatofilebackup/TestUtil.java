@@ -16,6 +16,13 @@ public class TestUtil {
         return bytes;
     }
 
+    public static byte[] buildBiggerReproducibleRandomTestBytes() {
+        Random random = new Random(42);
+        byte[] bytes = new byte[2008580];
+        random.nextBytes(bytes);
+        return bytes;
+    }
+
     @SuppressWarnings("ResultOfMethodCallIgnored")
     public static File buildRandomTestFile(long length) throws Exception {
         Random random = new Random();
