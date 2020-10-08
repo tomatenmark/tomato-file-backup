@@ -9,14 +9,14 @@ import java.util.List;
 public class TransferEngine {
 
     public void storeChunks(RandomAccessFile source, FileChannel sourceChannel,
-                            String targetDirectoryPath, List<Chunk> chunks) throws IOException {
+                            String targetDirectoryPath, List<Chunk> chunks, boolean compress) throws IOException {
         for (Chunk chunk : chunks) {
-            storeChunk(source, sourceChannel, targetDirectoryPath, chunk);
+            storeChunk(source, sourceChannel, targetDirectoryPath, chunk, compress);
         }
     }
 
     private void storeChunk(RandomAccessFile source, FileChannel sourceChannel,
-                           String targetDirectoryPath, Chunk chunk) throws IOException {
+                           String targetDirectoryPath, Chunk chunk, boolean compress) throws IOException {
         File targetFile = new File(targetDirectoryPath, chunk.getChecksum());
         boolean created = targetFile.createNewFile();
         if(!created){
@@ -26,7 +26,7 @@ public class TransferEngine {
                 RandomAccessFile targetRandomAccessFile = new RandomAccessFile(targetFile, "rw");
                 FileChannel targetChannel = targetRandomAccessFile.getChannel()
         ){
-            if(chunk.isCompressed()){
+            if(compress){
                 byte[] chunkBytes = new byte[chunk.getLength()];
                 source.seek(chunk.getOffset());
                 source.read(chunkBytes);

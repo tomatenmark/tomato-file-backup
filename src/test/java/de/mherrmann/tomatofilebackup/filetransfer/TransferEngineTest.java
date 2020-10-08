@@ -34,7 +34,7 @@ class TransferEngineTest {
     @Test
     void shouldStoreChunkFromListToTestDirectoryUncompressed() throws Exception {
         sourceFile = TestUtil.buildRandomTestFile(5*1024*1024);
-        Chunk chunk = prepareChunk(false);
+        Chunk chunk = prepareChunk();
         String targetPath = targetDirectory.getAbsolutePath();
         TransferEngine engine = new TransferEngine();
         RandomAccessFile source = new RandomAccessFile(sourceFile, "r");
@@ -42,7 +42,7 @@ class TransferEngineTest {
         List<Chunk> chunks = new ArrayList<>();
         chunks.add(chunk);
 
-        engine.storeChunks(source, sourceChannel, targetPath, chunks);
+        engine.storeChunks(source, sourceChannel, targetPath, chunks, false);
 
         assertValidStored(chunk, false);
     }
@@ -50,14 +50,14 @@ class TransferEngineTest {
     @Test
     void shouldStoreChunkFromListToTestDirectoryCompressed() throws Exception {
         sourceFile = TestUtil.buildTestFileWithZeroChars(5*1024*1024);
-        Chunk chunk = prepareChunk(true);
+        Chunk chunk = prepareChunk();
         TransferEngine engine = new TransferEngine();
         RandomAccessFile source = new RandomAccessFile(sourceFile, "r");
         FileChannel sourceChannel = source.getChannel();
         List<Chunk> chunks = new ArrayList<>();
         chunks.add(chunk);
 
-        engine.storeChunks(source, sourceChannel, targetDirectory.getAbsolutePath(), chunks);
+        engine.storeChunks(source, sourceChannel, targetDirectory.getAbsolutePath(), chunks, true);
 
         assertValidStored(chunk, true);
     }
@@ -77,9 +77,8 @@ class TransferEngineTest {
         assertEquals(chunk.getChecksum(), checksum);
     }
 
-    private Chunk prepareChunk(boolean compress) throws IOException {
+    private Chunk prepareChunk() throws IOException {
         Chunk chunk = new Chunk(368123, 468346);
-        chunk.setCompressed(compress);
         byte[] bytes = getChunkBytes(chunk);
         chunk.setChecksum(ChecksumEngine.getChecksum(bytes, 0, bytes.length));
         return chunk;

@@ -26,16 +26,14 @@ public class ChunkingEngine {
     private byte[] previousPortion;
     private int previousPortionReuse;
 
-    private boolean compress;
-
     public ChunkingEngine(){
         processedChecksums = new AtomicLong(0);
         chunkCount = new AtomicLong(-1);
         finished = new AtomicBoolean(false);
     }
 
-    public List<Chunk> getChunks(RandomAccessFile file, boolean compress) throws IOException {
-        init(file, compress);
+    public List<Chunk> getChunks(RandomAccessFile file) throws IOException {
+        init(file);
         chunks = new ArrayList<>();
         long length = file.length();
         if(length <= MIN_CHUNK_SIZE){
@@ -49,7 +47,7 @@ public class ChunkingEngine {
         return chunks;
     }
 
-    private void init(RandomAccessFile file, boolean compress) {
+    private void init(RandomAccessFile file) {
         this.file = file;
         fileProcessed = 0;
         chunkingProcessed = 0;
@@ -58,7 +56,6 @@ public class ChunkingEngine {
         finished.set(false);
         previousPortion = new byte[]{};
         previousPortionReuse = 0;
-        this.compress = compress;
     }
 
     private void findChunksForSmallSizeFile(int length) throws IOException {
@@ -132,7 +129,6 @@ public class ChunkingEngine {
     }
 
     private void addChunk(Chunk chunk, byte[] source, boolean lastChunk){
-        chunk.setCompressed(compress);
         chunks.add(chunk);
         if(lastChunk){
             chunkCount.set(chunks.size());

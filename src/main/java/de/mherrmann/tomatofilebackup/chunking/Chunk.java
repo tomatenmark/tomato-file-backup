@@ -4,7 +4,6 @@ public class Chunk {
     private long offset;
     private final int length;
     private String checksum;
-    private boolean compressed;
 
     public Chunk(long offset, int length) {
         this.offset = offset;
@@ -29,14 +28,6 @@ public class Chunk {
 
     public int getLength() {
         return length;
-    }
-
-    public void setCompressed(boolean compressed){
-        this.compressed = compressed;
-    }
-
-    public boolean isCompressed(){
-        return compressed;
     }
 
     @Override

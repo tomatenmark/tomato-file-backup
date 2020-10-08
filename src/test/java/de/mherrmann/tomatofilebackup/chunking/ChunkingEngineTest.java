@@ -23,11 +23,10 @@ class ChunkingEngineTest {
         RandomAccessFile file = TestUtil.buildRandomTestRandomAccessFile(ChunkingEngine.MIN_CHUNK_SIZE);
         ChunkingEngine engine = new ChunkingEngine();
 
-        List<Chunk> chunks = engine.getChunks(file, true);
+        List<Chunk> chunks = engine.getChunks(file);
 
         assertEquals(1, chunks.size());
         assertEquals(0, chunks.get(0).getOffset());
-        assertTrue(chunks.get(0).isCompressed());
         assertEquals(ChunkingEngine.MIN_CHUNK_SIZE, chunks.get(0).getLength());
         assertValidChecksums(chunks, file);
     }
@@ -37,9 +36,8 @@ class ChunkingEngineTest {
         RandomAccessFile file = TestUtil.buildRandomTestRandomAccessFile(ChunkingEngine.PORTION);
         ChunkingEngine engine = new ChunkingEngine();
 
-        List<Chunk> chunks = engine.getChunks(file, false);
+        List<Chunk> chunks = engine.getChunks(file);
 
-        assertTrue(chunks.get(0).isCompressed());
         assertValidChunking(chunks, file);
     }
 
@@ -48,7 +46,7 @@ class ChunkingEngineTest {
         RandomAccessFile file = TestUtil.buildRandomTestRandomAccessFile(ChunkingEngine.PORTION * 2 + ChunkingEngine.MAX_CHUNK_SIZE*10);
         ChunkingEngine engine = new ChunkingEngine();
 
-        List<Chunk> chunks = engine.getChunks(file, false);
+        List<Chunk> chunks = engine.getChunks(file);
 
         assertValidChunking(chunks, file);
     }
