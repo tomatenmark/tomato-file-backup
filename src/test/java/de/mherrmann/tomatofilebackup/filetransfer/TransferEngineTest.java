@@ -38,11 +38,10 @@ class TransferEngineTest {
         String targetPath = targetDirectory.getAbsolutePath();
         TransferEngine engine = new TransferEngine();
         RandomAccessFile source = new RandomAccessFile(sourceFile, "r");
-        FileChannel sourceChannel = source.getChannel();
         List<Chunk> chunks = new ArrayList<>();
         chunks.add(chunk);
 
-        engine.storeChunks(source, sourceChannel, targetPath, chunks, false);
+        engine.storeChunks(source, targetPath, chunks, false);
 
         assertValidStored(chunk, false);
     }
@@ -53,11 +52,10 @@ class TransferEngineTest {
         Chunk chunk = prepareChunk();
         TransferEngine engine = new TransferEngine();
         RandomAccessFile source = new RandomAccessFile(sourceFile, "r");
-        FileChannel sourceChannel = source.getChannel();
         List<Chunk> chunks = new ArrayList<>();
         chunks.add(chunk);
 
-        engine.storeChunks(source, sourceChannel, targetDirectory.getAbsolutePath(), chunks, true);
+        engine.storeChunks(source, targetDirectory.getAbsolutePath(), chunks, true);
 
         assertValidStored(chunk, true);
     }

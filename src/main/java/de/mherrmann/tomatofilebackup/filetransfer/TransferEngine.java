@@ -8,8 +8,9 @@ import java.util.List;
 
 public class TransferEngine {
 
-    public void storeChunks(RandomAccessFile source, FileChannel sourceChannel,
-                            String targetDirectoryPath, List<Chunk> chunks, boolean compress) throws IOException {
+    public void storeChunks(RandomAccessFile source, String targetDirectoryPath,
+                            List<Chunk> chunks, boolean compress) throws IOException {
+        FileChannel sourceChannel = source.getChannel();
         for (Chunk chunk : chunks) {
             storeChunk(source, sourceChannel, targetDirectoryPath, chunk, compress);
         }
