@@ -2,7 +2,6 @@ package de.mherrmann.tomatofilebackup;
 
 import java.io.File;
 import java.io.FileOutputStream;
-import java.io.RandomAccessFile;
 import java.util.Arrays;
 import java.util.Objects;
 import java.util.Random;
@@ -54,10 +53,6 @@ public class TestUtil {
         outputStream.close();
         outputStream.flush();
         return file;
-    }
-
-    public static RandomAccessFile buildRandomTestRandomAccessFile(long length) throws Exception {
-        return new RandomAccessFile(buildRandomTestFile(length), "r");
     }
 
     @SuppressWarnings("ResultOfMethodCallIgnored")

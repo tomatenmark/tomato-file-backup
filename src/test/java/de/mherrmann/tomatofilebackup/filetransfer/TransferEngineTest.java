@@ -35,13 +35,11 @@ class TransferEngineTest {
     void shouldStoreChunkFromListToTestDirectoryUncompressed() throws Exception {
         sourceFile = TestUtil.buildRandomTestFile(5*1024*1024);
         Chunk chunk = prepareChunk();
-        String targetPath = targetDirectory.getAbsolutePath();
         TransferEngine engine = new TransferEngine();
-        RandomAccessFile source = new RandomAccessFile(sourceFile, "r");
         List<Chunk> chunks = new ArrayList<>();
         chunks.add(chunk);
 
-        engine.storeChunks(source, targetPath, chunks, false);
+        engine.storeChunks(sourceFile, targetDirectory, chunks, false);
 
         assertValidStored(chunk, false);
     }
@@ -51,11 +49,10 @@ class TransferEngineTest {
         sourceFile = TestUtil.buildTestFileWithZeroChars(5*1024*1024);
         Chunk chunk = prepareChunk();
         TransferEngine engine = new TransferEngine();
-        RandomAccessFile source = new RandomAccessFile(sourceFile, "r");
         List<Chunk> chunks = new ArrayList<>();
         chunks.add(chunk);
 
-        engine.storeChunks(source, targetDirectory.getAbsolutePath(), chunks, true);
+        engine.storeChunks(sourceFile, targetDirectory, chunks, true);
 
         assertValidStored(chunk, true);
     }

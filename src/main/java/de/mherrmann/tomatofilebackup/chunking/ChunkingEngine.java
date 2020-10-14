@@ -15,7 +15,7 @@ public class ChunkingEngine {
     static final int AVG_CHUNK_SIZE = MB;
     static final int MAX_CHUNK_SIZE = 8*MB;
 
-    private RandomAccessFile file;
+    private RandomAccessFile randomAccessFile;
     private long fileProcessed;
     private long chunkingProcessed;
     private final AtomicLong processedChecksums;
@@ -32,8 +32,9 @@ public class ChunkingEngine {
         finished = new AtomicBoolean(false);
     }
 
-    public List<Chunk> getChunks(RandomAccessFile file) throws IOException {
-        init(file);
+    public List<Chunk> getChunks(File file) throws IOException {
+        randomAccessFile = new RandomAccessFile(file, "r");
+        init();
         chunks = new ArrayList<>();
         long length = file.length();
         if(length <= MIN_CHUNK_SIZE){
@@ -47,8 +48,7 @@ public class ChunkingEngine {
         return chunks;
     }
 
-    private void init(RandomAccessFile file) {
-        this.file = file;
+    private void init() {
         fileProcessed = 0;
         chunkingProcessed = 0;
         processedChecksums.set(0);
@@ -60,12 +60,12 @@ public class ChunkingEngine {
 
     private void findChunksForSmallSizeFile(int length) throws IOException {
         Chunk chunk = new Chunk(0, length);
-        byte[] source = getNextFilePartArrayForMediumSizeFile(file, length);
+        byte[] source = getNextFilePartArrayForMediumSizeFile(randomAccessFile, length);
         addChunk(chunk, source, true);
     }
 
     private void findChunksForMediumSizeFile(int length) throws IOException {
-        byte[] source = getNextFilePartArrayForMediumSizeFile(file, length);
+        byte[] source = getNextFilePartArrayForMediumSizeFile(randomAccessFile, length);
         processForMediumSizeFile(source);
     }
 
@@ -81,7 +81,7 @@ public class ChunkingEngine {
         if(source.length == 0){
             return true;
         }
-        boolean lastPortion = file.length() == fileProcessed;
+        boolean lastPortion = randomAccessFile.length() == fileProcessed;
         processForLargeSizeFilePortion(source, lastPortion);
         return lastPortion;
     }
@@ -111,13 +111,13 @@ public class ChunkingEngine {
     }
 
     private byte[] getNextFilePartArrayForLargeSizeFile() throws IOException {
-        long remaining = file.length() - fileProcessed;
+        long remaining = randomAccessFile.length() - fileProcessed;
         int nextPortionSize = (int)Math.min(PORTION, remaining);
         byte[] bytes = new byte[nextPortionSize + previousPortionReuse];
         if(previousPortionReuse > 0){
             System.arraycopy(previousPortion, previousPortion.length-previousPortionReuse, bytes, 0, previousPortionReuse);
         }
-        file.read(bytes, previousPortionReuse, nextPortionSize);
+        randomAccessFile.read(bytes, previousPortionReuse, nextPortionSize);
         fileProcessed += nextPortionSize;
         return bytes;
     }

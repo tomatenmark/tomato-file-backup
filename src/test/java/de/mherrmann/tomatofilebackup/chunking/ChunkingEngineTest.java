@@ -20,7 +20,7 @@ class ChunkingEngineTest {
 
     @Test
     void shouldGetChunksForSmallSizeFile() throws Exception {
-        RandomAccessFile file = TestUtil.buildRandomTestRandomAccessFile(ChunkingEngine.MIN_CHUNK_SIZE);
+        File file = TestUtil.buildRandomTestFile(ChunkingEngine.MIN_CHUNK_SIZE);
         ChunkingEngine engine = new ChunkingEngine();
 
         List<Chunk> chunks = engine.getChunks(file);
@@ -28,27 +28,27 @@ class ChunkingEngineTest {
         assertEquals(1, chunks.size());
         assertEquals(0, chunks.get(0).getOffset());
         assertEquals(ChunkingEngine.MIN_CHUNK_SIZE, chunks.get(0).getLength());
-        assertValidChecksums(chunks, file);
+        assertValidChecksums(chunks, new RandomAccessFile(file, "rw"));
     }
 
     @Test
     void shouldGetChunksForMediumSizeFile() throws Exception {
-        RandomAccessFile file = TestUtil.buildRandomTestRandomAccessFile(ChunkingEngine.PORTION);
+        File file = TestUtil.buildRandomTestFile(ChunkingEngine.PORTION);
         ChunkingEngine engine = new ChunkingEngine();
 
         List<Chunk> chunks = engine.getChunks(file);
 
-        assertValidChunking(chunks, file);
+        assertValidChunking(chunks, new RandomAccessFile(file, "rw"));
     }
 
     @Test
     void shouldGetChunksForLargeSizeFile() throws Exception {
-        RandomAccessFile file = TestUtil.buildRandomTestRandomAccessFile(ChunkingEngine.PORTION * 2 + ChunkingEngine.MAX_CHUNK_SIZE*10);
+        File file = TestUtil.buildRandomTestFile(ChunkingEngine.PORTION * 2 + ChunkingEngine.MAX_CHUNK_SIZE*10);
         ChunkingEngine engine = new ChunkingEngine();
 
         List<Chunk> chunks = engine.getChunks(file);
 
-        assertValidChunking(chunks, file);
+        assertValidChunking(chunks, new RandomAccessFile(file, "rw"));
     }
 
     private void assertValidChunking(List<Chunk> chunks, RandomAccessFile file) throws Exception {
