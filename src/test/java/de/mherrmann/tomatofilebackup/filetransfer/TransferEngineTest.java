@@ -5,6 +5,7 @@ import static org.junit.jupiter.api.Assertions.*;
 import de.mherrmann.tomatofilebackup.TestUtil;
 import de.mherrmann.tomatofilebackup.chunking.ChecksumEngine;
 import de.mherrmann.tomatofilebackup.chunking.Chunk;
+import de.mherrmann.tomatofilebackup.chunking.ChunkingEngine;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -12,18 +13,19 @@ import org.junit.jupiter.api.Test;
 import java.io.File;
 import java.io.IOException;
 import java.io.RandomAccessFile;
-import java.nio.channels.FileChannel;
+import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.List;
 
 class TransferEngineTest {
 
     private File sourceFile;
-    private final File targetDirectory = new File("./test");
+    private final File chunksDirectory = new File("./test");
 
     @BeforeEach
-    void setUp() {
+    void setUp() throws Exception {
         TestUtil.createTestDirectory();
+        sourceFile = TestUtil.buildRandomTestFile(5*1024*1024);
     }
 
     @AfterEach
@@ -33,32 +35,56 @@ class TransferEngineTest {
 
     @Test
     void shouldStoreChunkFromListToTestDirectoryUncompressed() throws Exception {
-        sourceFile = TestUtil.buildRandomTestFile(5*1024*1024);
         Chunk chunk = prepareChunk();
         TransferEngine engine = new TransferEngine();
         List<Chunk> chunks = new ArrayList<>();
         chunks.add(chunk);
 
-        engine.storeChunks(sourceFile, targetDirectory, chunks, false);
+        engine.storeChunks(sourceFile, chunksDirectory, chunks, false);
 
         assertValidStored(chunk, false);
     }
 
     @Test
     void shouldStoreChunkFromListToTestDirectoryCompressed() throws Exception {
-        sourceFile = TestUtil.buildTestFileWithZeroChars(5*1024*1024);
         Chunk chunk = prepareChunk();
         TransferEngine engine = new TransferEngine();
         List<Chunk> chunks = new ArrayList<>();
         chunks.add(chunk);
 
-        engine.storeChunks(sourceFile, targetDirectory, chunks, true);
+        engine.storeChunks(sourceFile, chunksDirectory, chunks, true);
 
         assertValidStored(chunk, true);
     }
 
+    @Test
+    void shouldRestoreFileFromUncompressedChunks() throws Exception {
+        TransferEngine transferEngine = new TransferEngine();
+        ChunkingEngine chunkingEngine = new ChunkingEngine();
+        List<Chunk> chunks = chunkingEngine.getChunks(sourceFile);
+        transferEngine.storeChunks(sourceFile, chunksDirectory, chunks, false);
+        File testFile = new File(sourceFile.getAbsolutePath()+".restored");
+
+        transferEngine.restoreFile(testFile, chunksDirectory, chunks, false);
+
+        assertArrayEquals(Files.readAllBytes(sourceFile.toPath()), Files.readAllBytes(testFile.toPath()));
+    }
+
+    @Test
+    void shouldRestoreFileFromCompressedChunks() throws Exception {
+        TransferEngine transferEngine = new TransferEngine();
+        ChunkingEngine chunkingEngine = new ChunkingEngine();
+        List<Chunk> chunks = chunkingEngine.getChunks(sourceFile);
+        transferEngine.storeChunks(sourceFile, chunksDirectory, chunks, true);
+        File testFile = new File(sourceFile.getAbsolutePath()+".restored");
+
+        transferEngine.restoreFile(testFile, chunksDirectory, chunks, true);
+
+        assertArrayEquals(Files.readAllBytes(sourceFile.toPath()), Files.readAllBytes(testFile.toPath()));
+    }
+
     private void assertValidStored(Chunk chunk, boolean compressed) throws IOException {
-        File file = new File(targetDirectory.getAbsolutePath()+"/"+chunk.getChecksum());
+        File file = new File(chunksDirectory.getAbsolutePath()+"/"+chunk.getChecksum());
         assertTrue(file.exists());
         RandomAccessFile randomAccessFile = new RandomAccessFile(file, "r");
         byte[] bytes = new byte[(int) randomAccessFile.length()];
