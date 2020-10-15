@@ -73,5 +73,6 @@ public class TestUtil {
             directory.delete();
         }
         new File("./test.bin").delete();
+        new File("./test.bin.restored").delete();
     }
 }
