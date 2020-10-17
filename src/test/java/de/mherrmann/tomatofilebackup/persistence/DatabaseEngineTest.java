@@ -26,6 +26,9 @@ public class DatabaseEngineTest {
     private static final long TEST_INODE = 234654;
     private static final long TEST_MTIME = 1234567890;
     private static final String TEST_SNAPSHOT_UUID = UUID.randomUUID().toString();
+    private static final String TEST_SOURCE_PATH = "/home/max/";
+    private static final String TEST_HOST = "pcmax";
+    private static final long TEST_CTIME = 1987654321;
 
     private DatabaseEngine engine;
 
@@ -53,15 +56,17 @@ public class DatabaseEngineTest {
     }
 
     @Test
-    void shouldAddChunkFileRelation(){
-
-    }
-
-    @Test
     void shouldAddFile() throws SQLException {
         engine.addFile(TEST_FILE_PATH, TEST_SIZE, TEST_INODE, TEST_MTIME, false, TEST_SNAPSHOT_UUID);
 
         assertValidFile();
+    }
+
+    @Test
+    void shouldAddSnapshot() throws SQLException {
+        engine.addSnapshot(TEST_SOURCE_PATH, TEST_HOST, TEST_CTIME);
+
+        assertValidSnapshot();
     }
 
     private void assertValidChunk() throws SQLException {
@@ -86,6 +91,16 @@ public class DatabaseEngineTest {
         assertEquals(TEST_MTIME, resultSet.getLong("mtime"));
         assertEquals(0, resultSet.getInt("compressed"));
         assertValidSnapshotFileRelation(resultSet.getString("file_uuid"));
+    }
+
+    private void assertValidSnapshot() throws SQLException {
+        String sql = "SELECT * FROM snapshot WHERE source = ? AND host = ?";
+        PreparedStatement preparedStatement = engine.connection.prepareStatement(sql);
+        preparedStatement.setString(1, TEST_SOURCE_PATH);
+        preparedStatement.setString(2, TEST_HOST);
+        ResultSet resultSet = preparedStatement.executeQuery();
+        resultSet.next();
+        assertEquals(TEST_CTIME, resultSet.getLong("ctime"));
     }
 
     private void assertValidChunkFileRelation(String chunkUuid) throws SQLException {

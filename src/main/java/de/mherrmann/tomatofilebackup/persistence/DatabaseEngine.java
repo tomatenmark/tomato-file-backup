@@ -74,6 +74,17 @@ public class DatabaseEngine {
         connection.setAutoCommit(true);
     }
 
+    public void addSnapshot(String sourcePath, String host, long ctime) throws SQLException {
+        String snapshotUuid = UUID.randomUUID().toString();
+        String sql = "INSERT INTO snapshot(snapshot_uuid,source,host,ctime) VALUES(?,?,?,?);";
+        PreparedStatement preparedStatement = connection.prepareStatement(sql);
+        preparedStatement.setString(1, snapshotUuid);
+        preparedStatement.setString(2, sourcePath);
+        preparedStatement.setString(3, host);
+        preparedStatement.setLong(4, ctime);
+        preparedStatement.executeUpdate();
+    }
+
     public void addChunkFileRelation(String fileUuid, String chunkUuid, int ordinal) throws SQLException {
         String relationUuid = UUID.randomUUID().toString();
         String sql = "INSERT INTO file_chunk_relation(relation_uuid,file_uuid,chunk_uuid,ordinal) VALUES(?,?,?,?);";
