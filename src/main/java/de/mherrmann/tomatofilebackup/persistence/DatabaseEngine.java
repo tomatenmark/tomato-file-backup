@@ -4,6 +4,7 @@ import de.mherrmann.tomatofilebackup.Constants;
 import de.mherrmann.tomatofilebackup.chunking.ChecksumEngine;
 import de.mherrmann.tomatofilebackup.chunking.Chunk;
 import de.mherrmann.tomatofilebackup.persistence.entities.FileEntity;
+import de.mherrmann.tomatofilebackup.persistence.entities.SnapshotEntity;
 
 import java.io.File;
 import java.io.IOException;
@@ -154,6 +155,92 @@ public class DatabaseEngine {
             files.add(fileEntity);
         }
         return files;
+    }
+
+    public SnapshotEntity getSnapshotByHashId(String hashId) throws SQLException {
+        String sql = "SELECT * FROM snapshot WHERE hash_id = ?";
+        PreparedStatement preparedStatement = connection.prepareStatement(sql);
+        preparedStatement.setString(1, hashId);
+        ResultSet resultSet = preparedStatement.executeQuery();
+        resultSet.next();
+        return buildSnapshotEntity(resultSet);
+    }
+
+    public List<SnapshotEntity> getAllSnapshots() throws SQLException {
+        String sql = "SELECT * FROM snapshot";
+        PreparedStatement preparedStatement = connection.prepareStatement(sql);
+        return buildSnapshotEntityList(preparedStatement);
+    }
+
+    public List<SnapshotEntity> getAllSnapshotsSince(long ctimeThreshold) throws SQLException {
+        String sql = "SELECT * FROM snapshot WHERE ctime >= ?";
+        PreparedStatement preparedStatement = connection.prepareStatement(sql);
+        preparedStatement.setLong(1, ctimeThreshold);
+        return buildSnapshotEntityList(preparedStatement);
+    }
+
+    public List<SnapshotEntity> getSnapshotsBySource(String source) throws SQLException {
+        String sql = "SELECT * FROM snapshot WHERE source = ?";
+        PreparedStatement preparedStatement = connection.prepareStatement(sql);
+        preparedStatement.setString(1, source);
+        return buildSnapshotEntityList(preparedStatement);
+    }
+
+    public List<SnapshotEntity> getSnapshotsBySourceSince(String source, long ctimeThreshold) throws SQLException {
+        String sql = "SELECT * FROM snapshot WHERE source = ? AND ctime >= ?";
+        PreparedStatement preparedStatement = connection.prepareStatement(sql);
+        preparedStatement.setString(1, source);
+        preparedStatement.setLong(2, ctimeThreshold);
+        return buildSnapshotEntityList(preparedStatement);
+    }
+
+    public List<SnapshotEntity> getSnapshotsByHost(String host) throws SQLException {
+        String sql = "SELECT * FROM snapshot WHERE host = ?";
+        PreparedStatement preparedStatement = connection.prepareStatement(sql);
+        preparedStatement.setString(1, host);
+        return buildSnapshotEntityList(preparedStatement);
+    }
+
+    public List<SnapshotEntity> getSnapshotsByHostSince(String host, long ctimeThreshold) throws SQLException {
+        String sql = "SELECT * FROM snapshot WHERE host = ? AND ctime >= ?";
+        PreparedStatement preparedStatement = connection.prepareStatement(sql);
+        preparedStatement.setString(1, host);
+        preparedStatement.setLong(2, ctimeThreshold);
+        return buildSnapshotEntityList(preparedStatement);
+    }
+
+    public List<SnapshotEntity> getSnapshotsBySourceAndHost(String source, String host) throws SQLException {
+        String sql = "SELECT * FROM snapshot WHERE source = ? AND host = ?";
+        PreparedStatement preparedStatement = connection.prepareStatement(sql);
+        preparedStatement.setString(1, source);
+        preparedStatement.setString(2, host);
+        return buildSnapshotEntityList(preparedStatement);
+    }
+
+    public List<SnapshotEntity> getSnapshotsBySourceAndHostSince(String source, String host, long ctimeThreshold) throws SQLException {
+        String sql = "SELECT * FROM snapshot WHERE source = ? AND host = ? AND ctime >= ?";
+        PreparedStatement preparedStatement = connection.prepareStatement(sql);
+        preparedStatement.setString(1, source);
+        preparedStatement.setString(2, host);
+        preparedStatement.setLong(2, ctimeThreshold);
+        return buildSnapshotEntityList(preparedStatement);
+    }
+
+    private List<SnapshotEntity> buildSnapshotEntityList(PreparedStatement preparedStatement) throws SQLException {
+        List<SnapshotEntity> snapshots = new ArrayList<>();
+        ResultSet resultSet = preparedStatement.executeQuery();
+        while(resultSet.next()){
+            snapshots.add(buildSnapshotEntity(resultSet));
+        }
+        return snapshots;
+    }
+
+    private SnapshotEntity buildSnapshotEntity(ResultSet resultSet) throws SQLException {
+        return new SnapshotEntity(
+                resultSet.getString("source"),
+                resultSet.getString("host"),
+                resultSet.getLong("ctime")
+        );
     }
 
     private void addFile(String path, long size, long inode, long mtime,
