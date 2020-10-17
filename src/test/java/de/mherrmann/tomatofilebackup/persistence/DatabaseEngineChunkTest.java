@@ -116,6 +116,24 @@ public class DatabaseEngineChunkTest {
         assertEquals(TEST_CHECKSUM+2, chunks.get(1).getChecksum());
     }
 
+    @Test
+    void shouldRemoveOrphanedChunks() throws SQLException {
+        SnapshotEntity snapshotEntity = engine.addSnapshot("test", "test", 1234567890);
+        engine.addRegularFile(TEST_FILE_PATH, TEST_SIZE, TEST_FILE_INODE, TEST_MTIME, false, snapshotEntity);
+        Chunk chunk = new Chunk(TEST_OFFSET, TEST_LENGTH);
+        Chunk chunk2 = new Chunk(TEST_OFFSET+TEST_LENGTH, TEST_LENGTH);
+        chunk.setChecksum(TEST_CHECKSUM);
+        chunk2.setChecksum(TEST_CHECKSUM+2);
+        ChunkEntity chunkExpectedToBeRemoved = engine.addChunk(chunk2, TEST_FILE_UUID, TEST_CHUNK2_ORDINAL);
+        ChunkEntity chunkExpectedToBeRemained = engine.addChunk(chunk, TEST_FILE_UUID, TEST_CHUNK1_ORDINAL);
+        orphanageChunk(chunkExpectedToBeRemoved);
+
+        engine.removeOrphanedChunks();
+
+        assertRemoved(chunkExpectedToBeRemoved);
+        assertRemained(chunkExpectedToBeRemained);
+    }
+
     private void assertValidChunk() throws SQLException {
         String sql = "SELECT * FROM chunk WHERE checksum = ?";
         PreparedStatement preparedStatement = engine.connection.prepareStatement(sql);
@@ -135,5 +153,28 @@ public class DatabaseEngineChunkTest {
         ResultSet resultSet = preparedStatement.executeQuery();
         resultSet.next();
         assertEquals(TEST_SINGLE_CHUNK_ORDINAL, resultSet.getInt("ordinal"));
+    }
+
+    private void orphanageChunk(ChunkEntity chunkEntity) throws SQLException {
+        String sql = "DELETE FROM file_chunk_relation WHERE chunk_uuid = ?";
+        PreparedStatement preparedStatement = engine.connection.prepareStatement(sql);
+        preparedStatement.setString(1, chunkEntity.getUuid());
+        preparedStatement.executeUpdate();
+    }
+
+    private void assertRemoved(ChunkEntity chunkEntity) throws SQLException {
+        String sql = "SELECT * FROM chunk WHERE chunk_uuid = ?";
+        PreparedStatement preparedStatement = engine.connection.prepareStatement(sql);
+        preparedStatement.setString(1, chunkEntity.getUuid());
+        ResultSet resultSet = preparedStatement.executeQuery();
+        assertTrue(resultSet.isClosed());
+    }
+
+    private void assertRemained(ChunkEntity chunkEntity) throws SQLException {
+        String sql = "SELECT * FROM chunk WHERE chunk_uuid = ?";
+        PreparedStatement preparedStatement = engine.connection.prepareStatement(sql);
+        preparedStatement.setString(1, chunkEntity.getUuid());
+        ResultSet resultSet = preparedStatement.executeQuery();
+        assertFalse(resultSet.isClosed());
     }
 }

@@ -132,4 +132,8 @@ public class DatabaseEngine {
     public List<SnapshotEntity> getSnapshotsBySourceAndHostSince(String source, String host, long ctimeThreshold) throws SQLException {
         return snapshotDatabaseEngine.getSnapshotsBySourceAndHostSince(source, host, ctimeThreshold);
     }
+
+    public void removeOrphanedChunks() throws SQLException {
+        chunkDatabaseEngine.removeOrphanedChunks();
+    }
 }
