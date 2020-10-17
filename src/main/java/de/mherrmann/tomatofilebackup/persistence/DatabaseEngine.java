@@ -52,27 +52,14 @@ public class DatabaseEngine {
         connection.setAutoCommit(true);
     }
 
-    public void addFile(String path, long size, long inode, long mtime,
-                        boolean compressed, String snapshotUuid) throws SQLException {
-        String fileUuid = UUID.randomUUID().toString();
-        String sql = "INSERT INTO file(file_uuid,path,size,inode,mtime,compressed) VALUES(?,?,?,?,?,?);";
-        try {
-            connection.setAutoCommit(false);
-            PreparedStatement preparedStatement = connection.prepareStatement(sql);
-            preparedStatement.setString(1, fileUuid);
-            preparedStatement.setString(2, path);
-            preparedStatement.setLong(3, size);
-            preparedStatement.setLong(4, inode);
-            preparedStatement.setLong(5, mtime);
-            preparedStatement.setInt(6, compressed ? 1 : 0);
-            preparedStatement.executeUpdate();
-            addFileSnapshotRelation(fileUuid, snapshotUuid);
-            connection.commit();
-        } catch(SQLException exception){
-            connection.rollback();
-            throw new SQLException("Error: Could not add file. path: " + path, exception);
-        }
-        connection.setAutoCommit(true);
+    public void addRegularFile(String path, long size, long inode, long mtime,
+                               boolean compressed, String snapshotUuid) throws SQLException {
+        addFile(path, size, inode, mtime, compressed, false, "", snapshotUuid);
+    }
+
+    public void addSymlink(String path, long size, long inode, long mtime,
+                               boolean compressed, String linkPath, String snapshotUuid) throws SQLException {
+        addFile(path, size, inode, mtime, compressed, true, linkPath, snapshotUuid);
     }
 
     public void addSnapshot(String sourcePath, String host, long ctime) throws SQLException {
@@ -106,5 +93,30 @@ public class DatabaseEngine {
         preparedStatement.setString(2, fileUuid);
         preparedStatement.setString(3, snapshotUuid);
         preparedStatement.executeUpdate();
+    }
+
+    private void addFile(String path, long size, long inode, long mtime,
+                         boolean compressed, boolean isLink, String linkPath, String snapshotUuid) throws SQLException {
+        String fileUuid = UUID.randomUUID().toString();
+        String sql = "INSERT INTO file(file_uuid,path,size,inode,mtime,compressed,link,link_path) VALUES(?,?,?,?,?,?,?,?);";
+        try {
+            connection.setAutoCommit(false);
+            PreparedStatement preparedStatement = connection.prepareStatement(sql);
+            preparedStatement.setString(1, fileUuid);
+            preparedStatement.setString(2, path);
+            preparedStatement.setLong(3, size);
+            preparedStatement.setLong(4, inode);
+            preparedStatement.setLong(5, mtime);
+            preparedStatement.setInt(6, compressed ? 1 : 0);
+            preparedStatement.setInt(7, isLink ? 1 : 0);
+            preparedStatement.setString(8, linkPath);
+            preparedStatement.executeUpdate();
+            addFileSnapshotRelation(fileUuid, snapshotUuid);
+            connection.commit();
+        } catch(SQLException exception){
+            connection.rollback();
+            throw new SQLException("Error: Could not add file. path: " + path, exception);
+        }
+        connection.setAutoCommit(true);
     }
 }

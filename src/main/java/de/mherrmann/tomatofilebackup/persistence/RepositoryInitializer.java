@@ -52,7 +52,7 @@ public class RepositoryInitializer {
 
     private static void createFileTable(Connection connection) throws SQLException {
         String sql = "CREATE TABLE IF NOT EXISTS file(file_uuid text PRIMARY KEY, path text, size integer, inode integer, " +
-                "mtime integer, compressed integer);";
+                "mtime integer, compressed integer, link integer, link_path text);";
         Statement statement = connection.createStatement();
         statement.execute(sql);
     }
