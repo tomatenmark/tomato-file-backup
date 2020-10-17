@@ -4,6 +4,7 @@ import static org.junit.jupiter.api.Assertions.*;
 
 import de.mherrmann.tomatofilebackup.chunking.Chunk;
 import de.mherrmann.tomatofilebackup.persistence.entities.ChunkEntity;
+import de.mherrmann.tomatofilebackup.persistence.entities.SnapshotEntity;
 import org.junit.jupiter.api.*;
 
 import de.mherrmann.tomatofilebackup.TestUtil;
@@ -56,6 +57,17 @@ public class DatabaseEngineChunkTest {
     }
 
     @Test
+    void shouldAddChunkFileRelation() throws SQLException {
+        Chunk chunk = new Chunk(TEST_OFFSET, TEST_LENGTH);
+        chunk.setChecksum(TEST_CHECKSUM);
+        ChunkEntity chunkEntity = engine.addChunk(chunk, TEST_FILE_UUID, TEST_SINGLE_CHUNK_ORDINAL);
+
+        engine.addChunkFileRelation(TEST_FILE_UUID, chunkEntity.getUuid(), TEST_SINGLE_CHUNK_ORDINAL);
+
+        assertValidChunkFileRelation(chunkEntity.getUuid());
+    }
+
+    @Test
     void shouldSayChunkDoExist() throws SQLException {
         Chunk chunk = new Chunk(TEST_OFFSET, TEST_LENGTH);
         chunk.setChecksum(TEST_CHECKSUM);
@@ -88,7 +100,8 @@ public class DatabaseEngineChunkTest {
 
     @Test
     void shouldGetChunksInOrder() throws SQLException {
-        engine.addRegularFile(TEST_FILE_PATH, TEST_SIZE, TEST_FILE_INODE, TEST_MTIME, false, TEST_SNAPSHOT_UUID);
+        SnapshotEntity snapshotEntity = engine.addSnapshot("test", "test", 1234567890);
+        engine.addRegularFile(TEST_FILE_PATH, TEST_SIZE, TEST_FILE_INODE, TEST_MTIME, false, snapshotEntity);
         Chunk chunk = new Chunk(TEST_OFFSET, TEST_LENGTH);
         Chunk chunk2 = new Chunk(TEST_OFFSET+TEST_LENGTH, TEST_LENGTH);
         chunk.setChecksum(TEST_CHECKSUM);
