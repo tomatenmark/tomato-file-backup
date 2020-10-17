@@ -5,6 +5,7 @@ import de.mherrmann.tomatofilebackup.chunking.ChecksumEngine;
 import de.mherrmann.tomatofilebackup.chunking.Chunk;
 import de.mherrmann.tomatofilebackup.persistence.entities.ChunkEntity;
 import de.mherrmann.tomatofilebackup.persistence.entities.FileEntity;
+import de.mherrmann.tomatofilebackup.persistence.entities.RepositoryEntity;
 import de.mherrmann.tomatofilebackup.persistence.entities.SnapshotEntity;
 
 import java.io.File;
@@ -254,6 +255,18 @@ public class DatabaseEngine {
         preparedStatement.setString(2, host);
         preparedStatement.setLong(3, ctimeThreshold);
         return buildSnapshotEntityList(preparedStatement);
+    }
+
+    public RepositoryEntity getRepository() throws SQLException {
+        String sql = "SELECT * FROM repository";
+        PreparedStatement preparedStatement = connection.prepareStatement(sql);
+        ResultSet resultSet = preparedStatement.executeQuery();
+        resultSet.next();
+        return new RepositoryEntity(
+                resultSet.getString("repository_uuid"),
+                resultSet.getString("path"),
+                resultSet.getString("version")
+        );
     }
 
     private List<SnapshotEntity> buildSnapshotEntityList(PreparedStatement preparedStatement) throws SQLException {
