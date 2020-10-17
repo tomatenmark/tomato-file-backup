@@ -2,7 +2,7 @@ package de.mherrmann.tomatofilebackup.persistence;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-import de.mherrmann.tomatofilebackup.Properties;
+import de.mherrmann.tomatofilebackup.Constants;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 
@@ -25,12 +25,12 @@ public class RepositoryInitializerTest {
     void shouldInitializeRepository() throws IOException, SQLException {
         RepositoryInitializer.initialize(new File(REPO).getAbsolutePath());
 
-        assertTrue(new File(REPO, Properties.DB_FILENAME).exists());
+        assertTrue(new File(REPO, Constants.DB_FILENAME).exists());
         assertValidInitialized();
     }
 
     private void assertValidInitialized() throws SQLException {
-        File dbFile = new File(REPO, Properties.DB_FILENAME);
+        File dbFile = new File(REPO, Constants.DB_FILENAME);
         String url = "jdbc:sqlite:"+dbFile.getAbsolutePath();
         Connection connection = DriverManager.getConnection(url);
         assertTablesExist(connection);
@@ -71,7 +71,7 @@ public class RepositoryInitializerTest {
         Statement statement  = connection.createStatement();
         ResultSet resultSet = statement.executeQuery(sql);
         resultSet.next();
-        assertEquals(Properties.VERSION, resultSet.getString("version"));
+        assertEquals(Constants.VERSION, resultSet.getString("version"));
     }
 
     private ResultSet showTablesResult(Connection connection) throws SQLException {

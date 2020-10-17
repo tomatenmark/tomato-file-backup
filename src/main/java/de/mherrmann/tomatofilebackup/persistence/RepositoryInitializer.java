@@ -1,6 +1,6 @@
 package de.mherrmann.tomatofilebackup.persistence;
 
-import de.mherrmann.tomatofilebackup.Properties;
+import de.mherrmann.tomatofilebackup.Constants;
 
 import java.io.File;
 import java.io.IOException;
@@ -30,7 +30,7 @@ public class RepositoryInitializer {
     }
 
     private static Connection createDb(String repositoryPath) throws SQLException {
-        File dbFile = new File(repositoryPath, Properties.DB_FILENAME);
+        File dbFile = new File(repositoryPath, Constants.DB_FILENAME);
         String url = "jdbc:sqlite:"+dbFile.getAbsolutePath();
         return DriverManager.getConnection(url);
     }
@@ -88,7 +88,7 @@ public class RepositoryInitializer {
         PreparedStatement preparedStatement = connection.prepareStatement(sql);
         preparedStatement.setString(1, uuid);
         preparedStatement.setString(2, repositoryPath);
-        preparedStatement.setString(3, Properties.VERSION);
+        preparedStatement.setString(3, Constants.VERSION);
         preparedStatement.executeUpdate();
     }
 
