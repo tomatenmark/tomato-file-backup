@@ -12,7 +12,7 @@ public class SnapshotDatabaseEngine {
 
     Connection connection;
 
-    public SnapshotDatabaseEngine(Connection connection) throws SQLException {
+    public SnapshotDatabaseEngine(Connection connection) {
         this.connection = connection;
     }
 
