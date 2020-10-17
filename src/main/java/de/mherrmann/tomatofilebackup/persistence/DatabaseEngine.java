@@ -189,6 +189,9 @@ public class DatabaseEngine {
         PreparedStatement preparedStatement = connection.prepareStatement(sql);
         preparedStatement.setString(1, hashId);
         ResultSet resultSet = preparedStatement.executeQuery();
+        if(resultSet.isClosed()){
+            throw new SQLException("Error: There is no snapshot with id " + hashId);
+        }
         resultSet.next();
         return buildSnapshotEntity(resultSet);
     }
@@ -249,7 +252,7 @@ public class DatabaseEngine {
         PreparedStatement preparedStatement = connection.prepareStatement(sql);
         preparedStatement.setString(1, source);
         preparedStatement.setString(2, host);
-        preparedStatement.setLong(2, ctimeThreshold);
+        preparedStatement.setLong(3, ctimeThreshold);
         return buildSnapshotEntityList(preparedStatement);
     }
 
