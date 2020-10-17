@@ -11,9 +11,9 @@ import de.mherrmann.tomatofilebackup.TestUtil;
 import java.io.File;
 import java.io.IOException;
 import java.sql.*;
+import java.util.List;
 import java.util.UUID;
 
-@TestInstance(TestInstance.Lifecycle.PER_CLASS)
 public class DatabaseEngineTest {
 
     private static final String TEST_REPOSITORY_PATH = "./test/";
@@ -22,6 +22,8 @@ public class DatabaseEngineTest {
     private static final long TEST_OFFSET = 456;
     private static final int TEST_LENGTH = 123;
     private static final int TEST_SINGLE_CHUNK_ORDINAL = 42;
+    private static final int TEST_CHUNK1_ORDINAL = 1;
+    private static final int TEST_CHUNK2_ORDINAL = 2;
     private static final String TEST_FILE_PATH = new File("./test/testFile.txt").getAbsolutePath();
     private static final long TEST_SIZE = 123456;
     private static final long TEST_FILE_INODE = 234654;
@@ -36,15 +38,15 @@ public class DatabaseEngineTest {
 
     private DatabaseEngine engine;
 
-    @BeforeAll
-    void setUpAll() throws SQLException, IOException {
+    @BeforeEach
+    void setUp() throws SQLException, IOException {
         TestUtil.createTestDirectory();
         engine = new DatabaseEngine(TEST_REPOSITORY_PATH);
         engine.initializeRepository();
     }
 
-    @AfterAll
-    void tearDownAll() throws SQLException {
+    @AfterEach
+    void tearDown() throws SQLException {
         TestUtil.removeTestFiles();
         engine.destroy();
     }
@@ -78,6 +80,54 @@ public class DatabaseEngineTest {
         engine.addSnapshot(TEST_SOURCE_PATH, TEST_HOST, TEST_CTIME);
 
         assertValidSnapshot();
+    }
+
+    @Test
+    void shouldSayChunkDoExist() throws SQLException {
+        Chunk chunk = new Chunk(TEST_OFFSET, TEST_LENGTH);
+        chunk.setChecksum(TEST_CHECKSUM);
+        engine.addChunk(chunk, TEST_FILE_UUID, TEST_SINGLE_CHUNK_ORDINAL);
+
+        boolean exists = engine.existsChunkByChecksum(TEST_CHECKSUM);
+
+        assertTrue(exists);
+    }
+
+    @Test
+    void shouldSayChunkDoNotExist() throws SQLException {
+        boolean exists = engine.existsChunkByChecksum(TEST_CHECKSUM);
+
+        assertFalse(exists);
+    }
+
+    @Test
+    void shouldGetChunk() throws SQLException {
+        Chunk chunk = new Chunk(TEST_OFFSET, TEST_LENGTH);
+        chunk.setChecksum(TEST_CHECKSUM);
+        engine.addChunk(chunk, TEST_FILE_UUID, TEST_SINGLE_CHUNK_ORDINAL);
+
+        Chunk returnedChunk = engine.getChunkByChecksum(TEST_CHECKSUM);
+
+        assertEquals(chunk.getChecksum(), returnedChunk.getChecksum());
+        assertEquals(chunk.getOffset(), returnedChunk.getOffset());
+        assertEquals(chunk.getLength(), returnedChunk.getLength());
+    }
+
+    @Test
+    void shouldGetChunksInOrder() throws SQLException {
+        engine.addRegularFile(TEST_FILE_PATH, TEST_SIZE, TEST_FILE_INODE, TEST_MTIME, false, TEST_SNAPSHOT_UUID);
+        Chunk chunk = new Chunk(TEST_OFFSET, TEST_LENGTH);
+        Chunk chunk2 = new Chunk(TEST_OFFSET+TEST_LENGTH, TEST_LENGTH);
+        chunk.setChecksum(TEST_CHECKSUM);
+        chunk2.setChecksum(TEST_CHECKSUM+2);
+        engine.addChunk(chunk2, TEST_FILE_UUID, TEST_CHUNK2_ORDINAL);
+        engine.addChunk(chunk, TEST_FILE_UUID, TEST_CHUNK1_ORDINAL);
+
+        List<Chunk> chunks = engine.getChunksByFileUuid(TEST_FILE_UUID);
+
+        assertEquals(2, chunks.size());
+        assertEquals(TEST_CHECKSUM, chunks.get(0).getChecksum());
+        assertEquals(TEST_CHECKSUM+2, chunks.get(1).getChecksum());
     }
 
     private void assertValidChunk() throws SQLException {

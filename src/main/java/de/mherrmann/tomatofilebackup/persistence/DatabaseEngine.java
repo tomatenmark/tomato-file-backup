@@ -1,15 +1,14 @@
 package de.mherrmann.tomatofilebackup.persistence;
 
-import de.mherrmann.tomatofilebackup.Properties;
+import de.mherrmann.tomatofilebackup.Constants;
 import de.mherrmann.tomatofilebackup.chunking.ChecksumEngine;
 import de.mherrmann.tomatofilebackup.chunking.Chunk;
 
 import java.io.File;
 import java.io.IOException;
-import java.sql.Connection;
-import java.sql.DriverManager;
-import java.sql.PreparedStatement;
-import java.sql.SQLException;
+import java.sql.*;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.UUID;
 
 public class DatabaseEngine {
@@ -18,7 +17,7 @@ public class DatabaseEngine {
     private final String repositoryPath;
 
     public DatabaseEngine(String repositoryPath) throws SQLException {
-        File dbFile = new File(repositoryPath, Properties.DB_FILENAME);
+        File dbFile = new File(repositoryPath, Constants.DB_FILENAME);
         String url = "jdbc:sqlite:"+dbFile.getAbsolutePath();
         this.connection = DriverManager.getConnection(url);
         this.repositoryPath = repositoryPath;
@@ -93,6 +92,42 @@ public class DatabaseEngine {
         preparedStatement.setString(2, fileUuid);
         preparedStatement.setString(3, snapshotUuid);
         preparedStatement.executeUpdate();
+    }
+
+    public Chunk getChunkByChecksum(String checksum) throws SQLException {
+        String sql = "SELECT * FROM chunk WHERE checksum = ?";
+        PreparedStatement preparedStatement = connection.prepareStatement(sql);
+        preparedStatement.setString(1, checksum);
+        ResultSet resultSet = preparedStatement.executeQuery();
+        resultSet.next();
+        Chunk chunk = new Chunk(resultSet.getLong("offset"), resultSet.getInt("length"));
+        chunk.setChecksum(checksum);
+        return chunk;
+    }
+
+    public List<Chunk> getChunksByFileUuid(String fileUuid) throws SQLException {
+        List<Chunk> chunks = new ArrayList<>();
+        String sql = "SELECT chunk.* From chunk " +
+                "LEFT JOIN file_chunk_relation USING(chunk_uuid) " +
+                "LEFT JOIN file USING(file_uuid) " +
+                "WHERE file_uuid = ? ORDER BY ordinal";
+        PreparedStatement preparedStatement = connection.prepareStatement(sql);
+        preparedStatement.setString(1, fileUuid);
+        ResultSet resultSet = preparedStatement.executeQuery();
+        while(resultSet.next()){
+            Chunk chunk = new Chunk(resultSet.getLong("offset"), resultSet.getInt("length"));
+            chunk.setChecksum(resultSet.getString("checksum"));
+            chunks.add(chunk);
+        }
+        return chunks;
+    }
+
+    public boolean existsChunkByChecksum(String checksum) throws SQLException {
+        String sql = "SELECT * FROM chunk WHERE checksum = ?";
+        PreparedStatement preparedStatement = connection.prepareStatement(sql);
+        preparedStatement.setString(1, checksum);
+        ResultSet resultSet = preparedStatement.executeQuery();
+        return !resultSet.isClosed();
     }
 
     private void addFile(String path, long size, long inode, long mtime,
