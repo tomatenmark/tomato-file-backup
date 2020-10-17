@@ -1,6 +1,7 @@
 package de.mherrmann.tomatofilebackup.persistence;
 
 import de.mherrmann.tomatofilebackup.TestUtil;
+import de.mherrmann.tomatofilebackup.persistence.entities.ChunkEntity;
 import de.mherrmann.tomatofilebackup.persistence.entities.FileEntity;
 import de.mherrmann.tomatofilebackup.persistence.entities.SnapshotEntity;
 import org.junit.jupiter.api.AfterEach;
@@ -127,6 +128,19 @@ public class DatabaseEngineFileTest {
         assertEquals(TEST_MTIME, file.getMtime());
     }
 
+    @Test
+    void shouldRemoveOrphanedFiles() throws SQLException {
+        SnapshotEntity snapshotEntity = engine.addSnapshot("test", "test", 1234567890);
+        FileEntity fileEntityExpectedToBeRemoved = engine.addRegularFile(TEST_FILE_PATH, TEST_SIZE, TEST_FILE_INODE, TEST_MTIME, false, snapshotEntity);
+        FileEntity fileEntityExpectedToBeRemained = engine.addRegularFile(TEST_FILE_PATH+2, TEST_SIZE, TEST_FILE_INODE+2, TEST_MTIME, false, snapshotEntity);
+        orphanageFile(fileEntityExpectedToBeRemoved);
+
+        engine.removeOrphanedFiles();
+
+        assertRemoved(fileEntityExpectedToBeRemoved);
+        assertRemained(fileEntityExpectedToBeRemained);
+    }
+
     private void assertValidRegularFile(String snapshotUuid) throws SQLException {
         ResultSet resultSet = assertValidFile(TEST_FILE_PATH, TEST_FILE_INODE, TEST_SIZE, snapshotUuid);
         assertFalse(resultSet.getBoolean("link"));
@@ -165,6 +179,29 @@ public class DatabaseEngineFileTest {
         PreparedStatement preparedStatement = engine.connection.prepareStatement(sql);
         preparedStatement.setString(1, fileUuid);
         preparedStatement.setString(2, snapshotUuid);
+        ResultSet resultSet = preparedStatement.executeQuery();
+        assertFalse(resultSet.isClosed());
+    }
+
+    private void orphanageFile(FileEntity fileEntity) throws SQLException {
+        String sql = "DELETE FROM file_snapshot_relation WHERE file_uuid = ?";
+        PreparedStatement preparedStatement = engine.connection.prepareStatement(sql);
+        preparedStatement.setString(1, fileEntity.getUuid());
+        preparedStatement.executeUpdate();
+    }
+
+    private void assertRemoved(FileEntity fileEntity) throws SQLException {
+        String sql = "SELECT * FROM file WHERE file_uuid = ?";
+        PreparedStatement preparedStatement = engine.connection.prepareStatement(sql);
+        preparedStatement.setString(1, fileEntity.getUuid());
+        ResultSet resultSet = preparedStatement.executeQuery();
+        assertTrue(resultSet.isClosed());
+    }
+
+    private void assertRemained(FileEntity fileEntity) throws SQLException {
+        String sql = "SELECT * FROM file WHERE file_uuid = ?";
+        PreparedStatement preparedStatement = engine.connection.prepareStatement(sql);
+        preparedStatement.setString(1, fileEntity.getUuid());
         ResultSet resultSet = preparedStatement.executeQuery();
         assertFalse(resultSet.isClosed());
     }

@@ -136,4 +136,8 @@ public class DatabaseEngine {
     public void removeOrphanedChunks() throws SQLException {
         chunkDatabaseEngine.removeOrphanedChunks();
     }
+
+    public void removeOrphanedFiles() throws SQLException {
+        fileDatabaseEngine.removeOrphanedFiles();
+    }
 }
