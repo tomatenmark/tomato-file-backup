@@ -29,7 +29,6 @@ public class DatabaseEngineChunkTest {
     private static final long TEST_SIZE = 123456;
     private static final long TEST_FILE_INODE = 234654;
     private static final long TEST_MTIME = 1234567890;
-    private static final String TEST_SNAPSHOT_UUID = UUID.randomUUID().toString();
 
     private DatabaseEngine engine;
 
