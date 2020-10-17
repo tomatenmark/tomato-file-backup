@@ -3,6 +3,7 @@ package de.mherrmann.tomatofilebackup.persistence;
 import static org.junit.jupiter.api.Assertions.*;
 
 import de.mherrmann.tomatofilebackup.chunking.Chunk;
+import de.mherrmann.tomatofilebackup.persistence.entities.ChunkEntity;
 import org.junit.jupiter.api.*;
 
 import de.mherrmann.tomatofilebackup.TestUtil;
@@ -78,7 +79,7 @@ public class DatabaseEngineChunkTest {
         chunk.setChecksum(TEST_CHECKSUM);
         engine.addChunk(chunk, TEST_FILE_UUID, TEST_SINGLE_CHUNK_ORDINAL);
 
-        Chunk returnedChunk = engine.getChunkByChecksum(TEST_CHECKSUM);
+        ChunkEntity returnedChunk = engine.getChunkByChecksum(TEST_CHECKSUM);
 
         assertEquals(chunk.getChecksum(), returnedChunk.getChecksum());
         assertEquals(chunk.getOffset(), returnedChunk.getOffset());
@@ -95,7 +96,7 @@ public class DatabaseEngineChunkTest {
         engine.addChunk(chunk2, TEST_FILE_UUID, TEST_CHUNK2_ORDINAL);
         engine.addChunk(chunk, TEST_FILE_UUID, TEST_CHUNK1_ORDINAL);
 
-        List<Chunk> chunks = engine.getChunksByFileUuid(TEST_FILE_UUID);
+        List<ChunkEntity> chunks = engine.getChunksByFileUuid(TEST_FILE_UUID);
 
         assertEquals(2, chunks.size());
         assertEquals(TEST_CHECKSUM, chunks.get(0).getChecksum());

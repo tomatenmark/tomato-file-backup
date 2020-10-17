@@ -3,6 +3,7 @@ package de.mherrmann.tomatofilebackup.persistence;
 import de.mherrmann.tomatofilebackup.Constants;
 import de.mherrmann.tomatofilebackup.chunking.ChecksumEngine;
 import de.mherrmann.tomatofilebackup.chunking.Chunk;
+import de.mherrmann.tomatofilebackup.persistence.entities.ChunkEntity;
 import de.mherrmann.tomatofilebackup.persistence.entities.FileEntity;
 import de.mherrmann.tomatofilebackup.persistence.entities.SnapshotEntity;
 
@@ -96,7 +97,7 @@ public class DatabaseEngine {
         preparedStatement.executeUpdate();
     }
 
-    public Chunk getChunkByChecksum(String checksum) throws SQLException {
+    public ChunkEntity getChunkByChecksum(String checksum) throws SQLException {
         String sql = "SELECT * FROM chunk WHERE checksum = ?";
         PreparedStatement preparedStatement = connection.prepareStatement(sql);
         preparedStatement.setString(1, checksum);
@@ -104,11 +105,11 @@ public class DatabaseEngine {
         resultSet.next();
         Chunk chunk = new Chunk(resultSet.getLong("offset"), resultSet.getInt("length"));
         chunk.setChecksum(checksum);
-        return chunk;
+        return new ChunkEntity(resultSet.getString("chunk_uuid"), chunk);
     }
 
-    public List<Chunk> getChunksByFileUuid(String fileUuid) throws SQLException {
-        List<Chunk> chunks = new ArrayList<>();
+    public List<ChunkEntity> getChunksByFileUuid(String fileUuid) throws SQLException {
+        List<ChunkEntity> chunks = new ArrayList<>();
         String sql = "SELECT chunk.* From chunk " +
                 "LEFT JOIN file_chunk_relation USING(chunk_uuid) " +
                 "LEFT JOIN file USING(file_uuid) " +
@@ -120,7 +121,7 @@ public class DatabaseEngine {
         while(resultSet.next()){
             Chunk chunk = new Chunk(resultSet.getLong("offset"), resultSet.getInt("length"));
             chunk.setChecksum(resultSet.getString("checksum"));
-            chunks.add(chunk);
+            chunks.add(new ChunkEntity(resultSet.getString("chunk_uuid"), chunk));
         }
         return chunks;
     }
@@ -144,6 +145,7 @@ public class DatabaseEngine {
         ResultSet resultSet = preparedStatement.executeQuery();
         while(resultSet.next()){
             FileEntity fileEntity = new FileEntity(
+                    resultSet.getString("file_uuid"),
                     resultSet.getString("path"),
                     resultSet.getLong("size"),
                     resultSet.getLong("inode"),
@@ -237,6 +239,7 @@ public class DatabaseEngine {
 
     private SnapshotEntity buildSnapshotEntity(ResultSet resultSet) throws SQLException {
         return new SnapshotEntity(
+                resultSet.getString("snapshot_uuid"),
                 resultSet.getString("source"),
                 resultSet.getString("host"),
                 resultSet.getLong("ctime")

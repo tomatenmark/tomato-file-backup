@@ -1,6 +1,7 @@
 package de.mherrmann.tomatofilebackup.persistence.entities;
 
 public class FileEntity {
+    private String uuid;
     private String path;
     private long size;
     private long inode;
@@ -9,7 +10,8 @@ public class FileEntity {
     private String linkPath;
     private boolean compressed;
 
-    public FileEntity(String path, long size, long inode, long mtime, boolean link, String linkPath, boolean compressed) {
+    public FileEntity(String uuid, String path, long size, long inode, long mtime, boolean link, String linkPath, boolean compressed) {
+        this.uuid = uuid;
         this.path = path;
         this.size = size;
         this.inode = inode;
@@ -17,61 +19,37 @@ public class FileEntity {
         this.link = link;
         this.linkPath = linkPath;
         this.compressed = compressed;
+    }
+
+    public String getUuid() {
+        return uuid;
     }
 
     public String getPath() {
         return path;
     }
 
-    public void setPath(String path) {
-        this.path = path;
-    }
-
     public long getSize() {
         return size;
-    }
-
-    public void setSize(long size) {
-        this.size = size;
     }
 
     public long getInode() {
         return inode;
     }
 
-    public void setInode(long inode) {
-        this.inode = inode;
-    }
-
     public long getMtime() {
         return mtime;
-    }
-
-    public void setMtime(long mtime) {
-        this.mtime = mtime;
     }
 
     public boolean isLink() {
         return link;
     }
 
-    public void setLink(boolean link) {
-        this.link = link;
-    }
-
     public String getLinkPath() {
         return linkPath;
     }
 
-    public void setLinkPath(String linkPath) {
-        this.linkPath = linkPath;
-    }
-
     public boolean isCompressed() {
         return compressed;
-    }
-
-    public void setCompressed(boolean compressed) {
-        this.compressed = compressed;
     }
 }
