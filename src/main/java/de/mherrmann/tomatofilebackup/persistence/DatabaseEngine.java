@@ -265,6 +265,7 @@ public class DatabaseEngine {
     private SnapshotEntity buildSnapshotEntity(ResultSet resultSet) throws SQLException {
         return new SnapshotEntity(
                 resultSet.getString("snapshot_uuid"),
+                resultSet.getString("hash_id"),
                 resultSet.getString("source"),
                 resultSet.getString("host"),
                 resultSet.getLong("ctime")
