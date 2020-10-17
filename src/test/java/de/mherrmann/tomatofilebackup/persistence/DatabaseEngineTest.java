@@ -4,6 +4,7 @@ import static org.junit.jupiter.api.Assertions.*;
 
 import de.mherrmann.tomatofilebackup.chunking.ChecksumEngine;
 import de.mherrmann.tomatofilebackup.chunking.Chunk;
+import de.mherrmann.tomatofilebackup.persistence.entities.FileEntity;
 import org.junit.jupiter.api.*;
 
 import de.mherrmann.tomatofilebackup.TestUtil;
@@ -128,6 +129,25 @@ public class DatabaseEngineTest {
         assertEquals(2, chunks.size());
         assertEquals(TEST_CHECKSUM, chunks.get(0).getChecksum());
         assertEquals(TEST_CHECKSUM+2, chunks.get(1).getChecksum());
+    }
+
+    @Test
+    void shouldGetFiles() throws SQLException {
+        engine.addSnapshot(TEST_SOURCE_PATH, TEST_HOST, TEST_CTIME);
+        engine.addRegularFile(TEST_FILE_PATH, TEST_SIZE, TEST_FILE_INODE, TEST_MTIME, false, TEST_SNAPSHOT_UUID);
+        engine.addRegularFile(TEST_FILE_PATH+2, TEST_SIZE, TEST_FILE_INODE+2, TEST_MTIME, false, TEST_SNAPSHOT_UUID);
+
+        List<FileEntity> files = engine.getFilesBySnapshotUuid(TEST_SNAPSHOT_UUID);
+
+        assertEquals(2, files.size());
+        assertEquals(TEST_FILE_PATH, files.get(0).getPath());
+        assertEquals(TEST_SIZE, files.get(0).getSize());
+        assertEquals(TEST_FILE_INODE, files.get(0).getInode());
+        assertEquals(TEST_MTIME, files.get(0).getMtime());
+        assertEquals(TEST_FILE_PATH+2, files.get(1).getPath());
+        assertEquals(TEST_SIZE, files.get(1).getSize());
+        assertEquals(TEST_FILE_INODE+2, files.get(1).getInode());
+        assertEquals(TEST_MTIME, files.get(1).getMtime());
     }
 
     private void assertValidChunk() throws SQLException {

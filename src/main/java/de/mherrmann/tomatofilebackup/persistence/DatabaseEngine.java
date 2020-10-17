@@ -3,6 +3,7 @@ package de.mherrmann.tomatofilebackup.persistence;
 import de.mherrmann.tomatofilebackup.Constants;
 import de.mherrmann.tomatofilebackup.chunking.ChecksumEngine;
 import de.mherrmann.tomatofilebackup.chunking.Chunk;
+import de.mherrmann.tomatofilebackup.persistence.entities.FileEntity;
 
 import java.io.File;
 import java.io.IOException;
@@ -110,7 +111,8 @@ public class DatabaseEngine {
         String sql = "SELECT chunk.* From chunk " +
                 "LEFT JOIN file_chunk_relation USING(chunk_uuid) " +
                 "LEFT JOIN file USING(file_uuid) " +
-                "WHERE file_uuid = ? ORDER BY ordinal";
+                "WHERE file_uuid = ? " +
+                "ORDER BY ordinal";
         PreparedStatement preparedStatement = connection.prepareStatement(sql);
         preparedStatement.setString(1, fileUuid);
         ResultSet resultSet = preparedStatement.executeQuery();
@@ -128,6 +130,30 @@ public class DatabaseEngine {
         preparedStatement.setString(1, checksum);
         ResultSet resultSet = preparedStatement.executeQuery();
         return !resultSet.isClosed();
+    }
+
+    public List<FileEntity> getFilesBySnapshotUuid(String snapshotUuid) throws SQLException {
+        List<FileEntity> files = new ArrayList<>();
+        String sql = "SELECT file.* From file " +
+                "LEFT JOIN file_snapshot_relation USING(file_uuid) " +
+                "LEFT JOIN snapshot USING(snapshot_uuid) " +
+                "WHERE snapshot_uuid = ?";
+        PreparedStatement preparedStatement = connection.prepareStatement(sql);
+        preparedStatement.setString(1, snapshotUuid);
+        ResultSet resultSet = preparedStatement.executeQuery();
+        while(resultSet.next()){
+            FileEntity fileEntity = new FileEntity(
+                    resultSet.getString("path"),
+                    resultSet.getLong("size"),
+                    resultSet.getLong("inode"),
+                    resultSet.getLong("mtime"),
+                    resultSet.getBoolean("link"),
+                    resultSet.getString("link_path"),
+                    resultSet.getBoolean("compressed")
+            );
+            files.add(fileEntity);
+        }
+        return files;
     }
 
     private void addFile(String path, long size, long inode, long mtime,
