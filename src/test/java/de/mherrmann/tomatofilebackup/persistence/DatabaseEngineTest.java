@@ -101,8 +101,7 @@ public class DatabaseEngineTest {
         preparedStatement.setString(2, TEST_HOST);
         ResultSet resultSet = preparedStatement.executeQuery();
         resultSet.next();
-        byte[] snapshotUuidBytes = resultSet.getString("snapshot_uuid").getBytes();
-        String hashId = ChecksumEngine.getChecksum(snapshotUuidBytes, 0, snapshotUuidBytes.length);
+        String hashId = ChecksumEngine.getSnapshotChecksum(resultSet.getString("snapshot_uuid"));
         assertEquals(TEST_CTIME, resultSet.getLong("ctime"));
         assertEquals(hashId, resultSet.getString("hash_id"));
     }

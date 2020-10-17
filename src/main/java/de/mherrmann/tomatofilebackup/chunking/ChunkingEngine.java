@@ -145,7 +145,7 @@ public class ChunkingEngine {
     }
 
     private void setChecksumInSubThread(byte[] bytes, int start, int length, Chunk chunk){
-        chunk.setChecksum(ChecksumEngine.getChecksum(bytes, start, length));
+        chunk.setChecksum(ChecksumEngine.getChunkChecksum(bytes, start, length));
         long finishedChecksums = this.processedChecksums.incrementAndGet();
         if(finishedChecksums == chunkCount.get()){
             synchronized (finished){

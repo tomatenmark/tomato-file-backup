@@ -94,14 +94,14 @@ class TransferEngineTest {
             bytes = CompressionEngine.restoreDecompressed(file, chunk.getLength());
         }
         assertEquals(chunk.getLength(), bytes.length);
-        String checksum = ChecksumEngine.getChecksum(bytes, 0, bytes.length);
+        String checksum = ChecksumEngine.getChunkChecksum(bytes, 0, bytes.length);
         assertEquals(chunk.getChecksum(), checksum);
     }
 
     private Chunk prepareChunk() throws IOException {
         Chunk chunk = new Chunk(368123, 468346);
         byte[] bytes = getChunkBytes(chunk);
-        chunk.setChecksum(ChecksumEngine.getChecksum(bytes, 0, bytes.length));
+        chunk.setChecksum(ChecksumEngine.getChunkChecksum(bytes, 0, bytes.length));
         return chunk;
     }
 

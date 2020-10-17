@@ -75,7 +75,7 @@ class ChunkingEngineTest {
             file.seek(chunk.getOffset());
             byte[] bytes = new byte[chunk.getLength()];
             file.read(bytes);
-            String checksum = ChecksumEngine.getChecksum(bytes, 0, bytes.length);
+            String checksum = ChecksumEngine.getChunkChecksum(bytes, 0, bytes.length);
             assertEquals(checksum, chunk.getChecksum());
         }
     }

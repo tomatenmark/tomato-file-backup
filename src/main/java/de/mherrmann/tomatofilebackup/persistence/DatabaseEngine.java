@@ -77,11 +77,10 @@ public class DatabaseEngine {
 
     public void addSnapshot(String sourcePath, String host, long ctime) throws SQLException {
         String snapshotUuid = UUID.randomUUID().toString();
-        byte[] snapshotUuidBytes = snapshotUuid.getBytes();
         String sql = "INSERT INTO snapshot(snapshot_uuid,hash_id,source,host,ctime) VALUES(?,?,?,?,?);";
         PreparedStatement preparedStatement = connection.prepareStatement(sql);
         preparedStatement.setString(1, snapshotUuid);
-        preparedStatement.setString(2, ChecksumEngine.getChecksum(snapshotUuidBytes, 0, snapshotUuidBytes.length));
+        preparedStatement.setString(2, ChecksumEngine.getSnapshotChecksum(snapshotUuid));
         preparedStatement.setString(3, sourcePath);
         preparedStatement.setString(4, host);
         preparedStatement.setLong(5, ctime);
