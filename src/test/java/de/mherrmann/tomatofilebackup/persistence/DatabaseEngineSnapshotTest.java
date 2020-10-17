@@ -131,6 +131,134 @@ public class DatabaseEngineSnapshotTest {
         assertEquals(1, snapshots.size());
     }
 
+    @Test
+    void shouldFailGetSnapshotByHashId() throws SQLException {
+        engine.addSnapshot(TEST_SOURCE_PATH, TEST_HOST, TEST_CTIME);
+
+        SnapshotEntity snapshot = null;
+        try {
+            snapshot = engine.getSnapshotByHashId("invalid");
+        } catch(SQLException ignored){}
+
+
+        assertNull(snapshot);
+    }
+
+    @Test
+    void shouldGetEmptySnapshotsResultSetCausedByEmptyDb() throws SQLException {
+        List<SnapshotEntity> snapshots = engine.getAllSnapshots();
+
+        assertTrue(snapshots.isEmpty());
+    }
+
+    @Test
+    void shouldGetEmptyResultSetCausedByNoSuchSource() throws SQLException {
+        engine.addSnapshot(TEST_SOURCE_PATH, TEST_HOST, TEST_CTIME);
+
+        List<SnapshotEntity> snapshots = engine.getSnapshotsBySource("none");
+
+        assertTrue(snapshots.isEmpty());
+    }
+
+    @Test
+    void shouldGetEmptyResultSetCausedByNoSuchHost() throws SQLException {
+        engine.addSnapshot(TEST_SOURCE_PATH, TEST_HOST, TEST_CTIME);
+
+        List<SnapshotEntity> snapshots = engine.getSnapshotsByHost("none");
+
+        assertTrue(snapshots.isEmpty());
+    }
+
+    @Test
+    void shouldGetEmptyResultSetCausedByNoSuchHostRegardlessOfSource() throws SQLException {
+        engine.addSnapshot(TEST_SOURCE_PATH, TEST_HOST, TEST_CTIME);
+
+        List<SnapshotEntity> snapshots = engine.getSnapshotsBySourceAndHost(TEST_SOURCE_PATH, "none");
+
+        assertTrue(snapshots.isEmpty());
+    }
+
+    @Test
+    void shouldGetEmptyResultSetCausedByNoSuchHostRegardlessOfRecentEnough() throws SQLException {
+        engine.addSnapshot(TEST_SOURCE_PATH, TEST_HOST, TEST_CTIME);
+
+        List<SnapshotEntity> snapshots = engine.getSnapshotsByHostSince("none", TEST_CTIME);
+
+        assertTrue(snapshots.isEmpty());
+    }
+
+    @Test
+    void shouldGetEmptyResultSetCausedByNoSuchHostRegardlessOfAndSourceRecentEnough() throws SQLException {
+        engine.addSnapshot(TEST_SOURCE_PATH, TEST_HOST, TEST_CTIME);
+
+        List<SnapshotEntity> snapshots = engine.getSnapshotsBySourceAndHostSince(TEST_SOURCE_PATH, "none", TEST_CTIME);
+
+        assertTrue(snapshots.isEmpty());
+    }
+
+    @Test
+    void shouldGetEmptyResultSetCausedByNoSuchSourceRegardlessOfHost() throws SQLException {
+        engine.addSnapshot(TEST_SOURCE_PATH, TEST_HOST, TEST_CTIME);
+
+        List<SnapshotEntity> snapshots = engine.getSnapshotsBySourceAndHost("none", TEST_HOST);
+
+        assertTrue(snapshots.isEmpty());
+    }
+
+    @Test
+    void shouldGetEmptyResultSetCausedByNoSuchSourceRegardlessOfRecentEnough() throws SQLException {
+        engine.addSnapshot(TEST_SOURCE_PATH, TEST_HOST, TEST_CTIME);
+
+        List<SnapshotEntity> snapshots = engine.getSnapshotsBySourceSince("none", TEST_CTIME);
+
+        assertTrue(snapshots.isEmpty());
+    }
+
+    @Test
+    void shouldGetEmptyResultSetCausedByNoSuchSourceRegardlessOfHostAndRecentEnough() throws SQLException {
+        engine.addSnapshot(TEST_SOURCE_PATH, TEST_HOST, TEST_CTIME);
+
+        List<SnapshotEntity> snapshots = engine.getSnapshotsBySourceAndHostSince("none", TEST_HOST, TEST_CTIME);
+
+        assertTrue(snapshots.isEmpty());
+    }
+
+    @Test
+    void shouldGetEmptySnapshotsResultSetCausedByToOldSnapshots() throws SQLException {
+        engine.addSnapshot(TEST_SOURCE_PATH, TEST_HOST, TEST_CTIME);
+
+        List<SnapshotEntity> snapshots = engine.getAllSnapshotsSince(TEST_CTIME+1);
+
+        assertTrue(snapshots.isEmpty());
+    }
+
+    @Test
+    void shouldGetEmptySnapshotsResultSetCausedByToOldSnapshotsRegardlessOfSource() throws SQLException {
+        engine.addSnapshot(TEST_SOURCE_PATH, TEST_HOST, TEST_CTIME);
+
+        List<SnapshotEntity> snapshots = engine.getSnapshotsBySourceSince(TEST_SOURCE_PATH, TEST_CTIME+1);
+
+        assertTrue(snapshots.isEmpty());
+    }
+
+    @Test
+    void shouldGetEmptySnapshotsResultSetCausedByToOldSnapshotsRegardlessOfHost() throws SQLException {
+        engine.addSnapshot(TEST_SOURCE_PATH, TEST_HOST, TEST_CTIME);
+
+        List<SnapshotEntity> snapshots = engine.getSnapshotsByHostSince(TEST_HOST, TEST_CTIME+1);
+
+        assertTrue(snapshots.isEmpty());
+    }
+
+    @Test
+    void shouldGetEmptySnapshotsResultSetCausedByToOldSnapshotsRegardlessOfSourceAndHost() throws SQLException {
+        engine.addSnapshot(TEST_SOURCE_PATH, TEST_HOST, TEST_CTIME);
+
+        List<SnapshotEntity> snapshots = engine.getSnapshotsBySourceAndHostSince(TEST_SOURCE_PATH, TEST_HOST, TEST_CTIME+1);
+
+        assertTrue(snapshots.isEmpty());
+    }
+
     private void assertValidSnapshot() throws SQLException {
         String sql = "SELECT * FROM snapshot WHERE source = ? AND host = ?";
         PreparedStatement preparedStatement = engine.connection.prepareStatement(sql);
