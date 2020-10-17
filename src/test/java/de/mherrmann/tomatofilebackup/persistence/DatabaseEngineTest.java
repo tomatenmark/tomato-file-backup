@@ -2,6 +2,7 @@ package de.mherrmann.tomatofilebackup.persistence;
 
 import static org.junit.jupiter.api.Assertions.*;
 
+import de.mherrmann.tomatofilebackup.chunking.ChecksumEngine;
 import de.mherrmann.tomatofilebackup.chunking.Chunk;
 import org.junit.jupiter.api.*;
 
@@ -100,7 +101,10 @@ public class DatabaseEngineTest {
         preparedStatement.setString(2, TEST_HOST);
         ResultSet resultSet = preparedStatement.executeQuery();
         resultSet.next();
+        byte[] snapshotUuidBytes = resultSet.getString("snapshot_uuid").getBytes();
+        String hashId = ChecksumEngine.getChecksum(snapshotUuidBytes, 0, snapshotUuidBytes.length);
         assertEquals(TEST_CTIME, resultSet.getLong("ctime"));
+        assertEquals(hashId, resultSet.getString("hash_id"));
     }
 
     private void assertValidChunkFileRelation(String chunkUuid) throws SQLException {

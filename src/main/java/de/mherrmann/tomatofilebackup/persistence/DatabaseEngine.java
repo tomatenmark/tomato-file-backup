@@ -1,6 +1,7 @@
 package de.mherrmann.tomatofilebackup.persistence;
 
 import de.mherrmann.tomatofilebackup.Properties;
+import de.mherrmann.tomatofilebackup.chunking.ChecksumEngine;
 import de.mherrmann.tomatofilebackup.chunking.Chunk;
 
 import java.io.File;
@@ -76,12 +77,14 @@ public class DatabaseEngine {
 
     public void addSnapshot(String sourcePath, String host, long ctime) throws SQLException {
         String snapshotUuid = UUID.randomUUID().toString();
-        String sql = "INSERT INTO snapshot(snapshot_uuid,source,host,ctime) VALUES(?,?,?,?);";
+        byte[] snapshotUuidBytes = snapshotUuid.getBytes();
+        String sql = "INSERT INTO snapshot(snapshot_uuid,hash_id,source,host,ctime) VALUES(?,?,?,?,?);";
         PreparedStatement preparedStatement = connection.prepareStatement(sql);
         preparedStatement.setString(1, snapshotUuid);
-        preparedStatement.setString(2, sourcePath);
-        preparedStatement.setString(3, host);
-        preparedStatement.setLong(4, ctime);
+        preparedStatement.setString(2, ChecksumEngine.getChecksum(snapshotUuidBytes, 0, snapshotUuidBytes.length));
+        preparedStatement.setString(3, sourcePath);
+        preparedStatement.setString(4, host);
+        preparedStatement.setLong(5, ctime);
         preparedStatement.executeUpdate();
     }
 

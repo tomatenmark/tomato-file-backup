@@ -58,7 +58,8 @@ public class RepositoryInitializer {
     }
 
     private static void createSnapshotTable(Connection connection) throws SQLException {
-        String sql = "CREATE TABLE IF NOT EXISTS snapshot(snapshot_uuid text PRIMARY KEY, source text, host text, ctime integer);";
+        String sql = "CREATE TABLE IF NOT EXISTS snapshot(snapshot_uuid text PRIMARY KEY, hash_id text, " +
+                "source text, host text, ctime integer);";
         Statement statement = connection.createStatement();
         statement.execute(sql);
     }

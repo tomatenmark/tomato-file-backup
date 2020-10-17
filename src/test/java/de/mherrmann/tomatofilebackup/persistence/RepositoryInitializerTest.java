@@ -36,7 +36,7 @@ public class RepositoryInitializerTest {
         assertTablesExist(connection);
         assertColumnsExist(connection, "chunk", "chunk_uuid", "checksum", "offset", "length");
         assertColumnsExist(connection, "file", "file_uuid", "path", "size", "inode", "mtime", "compressed");
-        assertColumnsExist(connection, "snapshot", "snapshot_uuid", "source", "host", "ctime");
+        assertColumnsExist(connection, "snapshot", "snapshot_uuid", "hash_id", "source", "host", "ctime");
         assertColumnsExist(connection, "repository", "repository_uuid", "path", "version");
         assertColumnsExist(connection, "file_chunk_relation", "relation_uuid", "file_uuid", "chunk_uuid", "ordinal");
         assertColumnsExist(connection, "file_snapshot_relation", "relation_uuid", "file_uuid", "snapshot_uuid");
