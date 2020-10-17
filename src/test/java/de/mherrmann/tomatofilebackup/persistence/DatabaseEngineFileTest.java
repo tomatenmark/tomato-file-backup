@@ -23,12 +23,14 @@ public class DatabaseEngineFileTest {
     private static final long TEST_SIZE = 123456;
     private static final long TEST_FILE_INODE = 234654;
     private static final long TEST_SYMLINK_INODE = 456432;
+    private static final long TEST_DIRECTORY_INODE = 579275;
     private static final long TEST_MTIME = 1234567890;
     private static final String TEST_SOURCE_PATH = "/home/max/";
     private static final String TEST_HOST = "pcmax";
     private static final long TEST_CTIME = 1987654321;
     private static final String TEST_SYMLINK_SOURCE = "/somewhere";
     private static final String TEST_SYMLINK_TARGET = "/somewhere/else";
+    private static final String TEST_DIRECTORY_PATH = new File("./test/").getAbsolutePath();
 
     private DatabaseEngine engine;
 
@@ -50,14 +52,21 @@ public class DatabaseEngineFileTest {
         SnapshotEntity snapshotEntity = engine.addSnapshot("test", "test", 1234567890);
         engine.addRegularFile(TEST_FILE_PATH, TEST_SIZE, TEST_FILE_INODE, TEST_MTIME, false, snapshotEntity);
 
-        assertValidFile(TEST_FILE_PATH, TEST_FILE_INODE, snapshotEntity.getUuid());
+        assertValidRegularFile(snapshotEntity.getUuid());
+    }
+
+    @Test
+    void shouldAddDirectory() throws SQLException {
+        SnapshotEntity snapshotEntity = engine.addSnapshot("test", "test", 1234567890);
+        engine.addDirectory(TEST_DIRECTORY_PATH, TEST_DIRECTORY_INODE, TEST_MTIME, snapshotEntity);
+
+        assertValidDirectory(snapshotEntity.getUuid());
     }
 
     @Test
     void shouldAddSymlink() throws SQLException {
         SnapshotEntity snapshotEntity = engine.addSnapshot("test", "test", 1234567890);
-        engine.addSymlink(TEST_SYMLINK_SOURCE, TEST_SIZE, TEST_SYMLINK_INODE, TEST_MTIME, false,
-                TEST_SYMLINK_TARGET, snapshotEntity);
+        engine.addSymlink(TEST_SYMLINK_SOURCE, TEST_SYMLINK_INODE, TEST_MTIME, TEST_SYMLINK_TARGET, snapshotEntity);
 
         assertValidSymlink(snapshotEntity.getUuid());
     }
@@ -118,24 +127,37 @@ public class DatabaseEngineFileTest {
         assertEquals(TEST_MTIME, file.getMtime());
     }
 
-    private ResultSet assertValidFile(String filePath, long inode, String snapshotUuid) throws SQLException {
+    private void assertValidRegularFile(String snapshotUuid) throws SQLException {
+        ResultSet resultSet = assertValidFile(TEST_FILE_PATH, TEST_FILE_INODE, TEST_SIZE, snapshotUuid);
+        assertFalse(resultSet.getBoolean("link"));
+        assertFalse(resultSet.getBoolean("directory"));
+    }
+
+    private void assertValidDirectory(String snapshotUuid) throws SQLException {
+        ResultSet resultSet = assertValidFile(TEST_DIRECTORY_PATH, TEST_DIRECTORY_INODE, 0, snapshotUuid);
+        assertFalse(resultSet.getBoolean("link"));
+        assertTrue(resultSet.getBoolean("directory"));
+    }
+
+    private void assertValidSymlink(String snapshotUuid) throws SQLException {
+        ResultSet resultSet = assertValidFile(TEST_SYMLINK_SOURCE, TEST_SYMLINK_INODE, 0, snapshotUuid);
+        assertTrue(resultSet.getBoolean("link"));
+        assertFalse(resultSet.getBoolean("directory"));
+        assertEquals(TEST_SYMLINK_TARGET, resultSet.getString("link_path"));
+    }
+
+    private ResultSet assertValidFile(String filePath, long inode, long size, String snapshotUuid) throws SQLException {
         String sql = "SELECT * FROM file WHERE inode = ?";
         PreparedStatement preparedStatement = engine.connection.prepareStatement(sql);
         preparedStatement.setLong(1, inode);
         ResultSet resultSet = preparedStatement.executeQuery();
         resultSet.next();
         assertEquals(filePath, resultSet.getString("path"));
-        assertEquals(TEST_SIZE, resultSet.getLong("size"));
+        assertEquals(size, resultSet.getLong("size"));
         assertEquals(TEST_MTIME, resultSet.getLong("mtime"));
         assertEquals(0, resultSet.getInt("compressed"));
         assertValidSnapshotFileRelation(resultSet.getString("file_uuid"), snapshotUuid);
         return resultSet;
-    }
-
-    private void assertValidSymlink(String snapshotUuid) throws SQLException {
-        ResultSet resultSet = assertValidFile(TEST_SYMLINK_SOURCE, TEST_SYMLINK_INODE, snapshotUuid);
-        assertEquals(1, resultSet.getInt("link"));
-        assertEquals(TEST_SYMLINK_TARGET, resultSet.getString("link_path"));
     }
 
     private void assertValidSnapshotFileRelation(String fileUuid, String snapshotUuid) throws SQLException {

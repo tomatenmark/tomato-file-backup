@@ -1,22 +1,25 @@
 package de.mherrmann.tomatofilebackup.persistence.entities;
 
 public class FileEntity {
-    private String uuid;
-    private String path;
-    private long size;
-    private long inode;
-    private long mtime;
-    private boolean link;
-    private String linkPath;
-    private boolean compressed;
+    private final String uuid;
+    private final String path;
+    private final long size;
+    private final long inode;
+    private final long mtime;
+    private final boolean link;
+    private final boolean directory;
+    private final String linkPath;
+    private final boolean compressed;
 
-    public FileEntity(String uuid, String path, long size, long inode, long mtime, boolean link, String linkPath, boolean compressed) {
+    public FileEntity(String uuid, String path, long size, long inode, long mtime,
+                      boolean link, boolean directory, String linkPath, boolean compressed) {
         this.uuid = uuid;
         this.path = path;
         this.size = size;
         this.inode = inode;
         this.mtime = mtime;
         this.link = link;
+        this.directory = directory;
         this.linkPath = linkPath;
         this.compressed = compressed;
     }
@@ -43,6 +46,10 @@ public class FileEntity {
 
     public boolean isLink() {
         return link;
+    }
+
+    public boolean isDirectory() {
+        return directory;
     }
 
     public String getLinkPath() {
