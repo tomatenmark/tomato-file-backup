@@ -51,6 +51,29 @@ public class DatabaseEngine {
         connection.setAutoCommit(true);
     }
 
+    public void addFile(String path, long size, long inode, long mtime,
+                        boolean compressed, String snapshotUuid) throws SQLException {
+        String fileUuid = UUID.randomUUID().toString();
+        String sql = "INSERT INTO file(file_uuid,path,size,inode,mtime,compressed) VALUES(?,?,?,?,?,?);";
+        try {
+            connection.setAutoCommit(false);
+            PreparedStatement preparedStatement = connection.prepareStatement(sql);
+            preparedStatement.setString(1, fileUuid);
+            preparedStatement.setString(2, path);
+            preparedStatement.setLong(3, size);
+            preparedStatement.setLong(4, inode);
+            preparedStatement.setLong(5, mtime);
+            preparedStatement.setInt(6, compressed ? 1 : 0);
+            preparedStatement.executeUpdate();
+            addFileSnapshotRelation(fileUuid, snapshotUuid);
+            connection.commit();
+        } catch(SQLException exception){
+            connection.rollback();
+            throw new SQLException("Error: Could not add file. path: " + path, exception);
+        }
+        connection.setAutoCommit(true);
+    }
+
     public void addChunkFileRelation(String fileUuid, String chunkUuid, int ordinal) throws SQLException {
         String relationUuid = UUID.randomUUID().toString();
         String sql = "INSERT INTO file_chunk_relation(relation_uuid,file_uuid,chunk_uuid,ordinal) VALUES(?,?,?,?);";
@@ -59,6 +82,16 @@ public class DatabaseEngine {
         preparedStatement.setString(2, fileUuid);
         preparedStatement.setString(3, chunkUuid);
         preparedStatement.setInt(4, ordinal);
+        preparedStatement.executeUpdate();
+    }
+
+    public void addFileSnapshotRelation(String fileUuid, String snapshotUuid) throws SQLException {
+        String relationUuid = UUID.randomUUID().toString();
+        String sql = "INSERT INTO file_snapshot_relation(relation_uuid,file_uuid,snapshot_uuid) VALUES(?,?,?);";
+        PreparedStatement preparedStatement = connection.prepareStatement(sql);
+        preparedStatement.setString(1, relationUuid);
+        preparedStatement.setString(2, fileUuid);
+        preparedStatement.setString(3, snapshotUuid);
         preparedStatement.executeUpdate();
     }
 }
