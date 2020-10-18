@@ -18,16 +18,21 @@ public class FileDatabaseEngine {
 
     public FileEntity addRegularFile(String path, long size, long inode, long mtime,
                                boolean compressed, SnapshotEntity snapshotEntity) throws SQLException {
-        return addFile(path, size, inode, mtime, compressed, false, false, "", snapshotEntity);
+        return addFile(path, size, inode, mtime, compressed, false, false, false, "", snapshotEntity);
     }
 
     public FileEntity addDirectory(String path, long inode, long mtime, SnapshotEntity snapshotEntity) throws SQLException {
-        return addFile(path, 0, inode, mtime, false, false, true, "", snapshotEntity);
+        return addFile(path, 0, inode, mtime, false, false, false, true, "", snapshotEntity);
     }
 
-    public FileEntity addSymlink(String path, long inode, long mtime,
+    public FileEntity addSymlink(String path, long inode, long mtime, boolean targetIsDirectory,
                                  String linkPath, SnapshotEntity snapshotEntity) throws SQLException {
-        return addFile(path, 0, inode, mtime, false, true, false, linkPath, snapshotEntity);
+        return addFile(path, 0, inode, mtime, false, true, false, targetIsDirectory, linkPath, snapshotEntity);
+    }
+
+    public FileEntity addJunction(String path, long inode, long mtime,
+                                 String linkPath, SnapshotEntity snapshotEntity) throws SQLException {
+        return addFile(path, 0, inode, mtime, false, false, true, true, linkPath, snapshotEntity);
     }
 
     public void addFileSnapshotRelation(String fileUuid, String snapshotUuid) throws SQLException {
@@ -125,16 +130,17 @@ public class FileDatabaseEngine {
                 resultSet.getLong("inode"),
                 resultSet.getLong("mtime"),
                 resultSet.getBoolean("link"),
+                resultSet.getBoolean("junction"),
                 resultSet.getBoolean("directory"),
                 resultSet.getString("link_path"),
                 resultSet.getBoolean("compressed")
         );
     }
 
-    private FileEntity addFile(String path, long size, long inode, long mtime, boolean compressed, boolean isLink,
+    private FileEntity addFile(String path, long size, long inode, long mtime, boolean compressed, boolean isLink, boolean isJunction,
                                boolean isDirectory, String linkPath, SnapshotEntity snapshotEntity) throws SQLException {
         String fileUuid = UUID.randomUUID().toString();
-        String sql = "INSERT INTO file(file_uuid,path,size,inode,mtime,compressed,link,directory,link_path) VALUES(?,?,?,?,?,?,?,?,?);";
+        String sql = "INSERT INTO file(file_uuid,path,size,inode,mtime,compressed,link,junction,directory,link_path) VALUES(?,?,?,?,?,?,?,?,?,?);";
         try {
             connection.setAutoCommit(false);
             PreparedStatement preparedStatement = connection.prepareStatement(sql);
@@ -145,8 +151,9 @@ public class FileDatabaseEngine {
             preparedStatement.setLong(5, mtime);
             preparedStatement.setBoolean(6, compressed);
             preparedStatement.setBoolean(7, isLink);
-            preparedStatement.setBoolean(8, isDirectory);
-            preparedStatement.setString(9, linkPath);
+            preparedStatement.setBoolean(8, isJunction);
+            preparedStatement.setBoolean(9, isDirectory);
+            preparedStatement.setString(10, linkPath);
             preparedStatement.executeUpdate();
             addFileSnapshotRelation(fileUuid, snapshotEntity.getUuid());
             connection.commit();

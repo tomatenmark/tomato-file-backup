@@ -55,9 +55,14 @@ public class DatabaseEngine {
         return fileDatabaseEngine.addDirectory(path, inode, mtime, snapshotEntity);
     }
 
-    public FileEntity addSymlink(String path, long inode, long mtime,
+    public FileEntity addSymlink(String path, long inode, long mtime, boolean targetIsDirectory,
                                  String linkPath, SnapshotEntity snapshotEntity) throws SQLException {
-        return fileDatabaseEngine.addSymlink(path, inode, mtime, linkPath, snapshotEntity);
+        return fileDatabaseEngine.addSymlink(path, inode, mtime, targetIsDirectory, linkPath, snapshotEntity);
+    }
+
+    public FileEntity addJunction(String path, long inode, long mtime,
+                                 String linkPath, SnapshotEntity snapshotEntity) throws SQLException {
+        return fileDatabaseEngine.addJunction(path, inode, mtime, linkPath, snapshotEntity);
     }
 
     public SnapshotEntity addSnapshot(String sourcePath, String host, long ctime) throws SQLException {

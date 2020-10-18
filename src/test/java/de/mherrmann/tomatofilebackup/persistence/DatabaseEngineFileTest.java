@@ -23,6 +23,7 @@ public class DatabaseEngineFileTest {
     static final long TEST_SIZE = 123456;
     static final long TEST_FILE_INODE = 234654;
     private static final long TEST_SYMLINK_INODE = 456432;
+    private static final long TEST_JUNCTION_INODE = 835636;
     private static final long TEST_DIRECTORY_INODE = 579275;
     static final long TEST_MTIME = 1234567890;
     private static final String TEST_SOURCE_PATH = "/home/max/";
@@ -30,6 +31,8 @@ public class DatabaseEngineFileTest {
     private static final long TEST_CTIME = 1987654321;
     private static final String TEST_SYMLINK_SOURCE = "/somewhere";
     private static final String TEST_SYMLINK_TARGET = "/somewhere/else";
+    private static final String TEST_JUNCTION_SOURCE = "/j-somewhere";
+    private static final String TEST_JUNCTION_TARGET = "/j-somewhere/else";
     private static final String TEST_DIRECTORY_PATH = new File("./test/").getAbsolutePath();
 
     private DatabaseEngine engine;
@@ -66,9 +69,25 @@ public class DatabaseEngineFileTest {
     @Test
     void shouldAddSymlink() throws SQLException {
         SnapshotEntity snapshotEntity = engine.addSnapshot("test", "test", 1234567890);
-        engine.addSymlink(TEST_SYMLINK_SOURCE, TEST_SYMLINK_INODE, TEST_MTIME, TEST_SYMLINK_TARGET, snapshotEntity);
+        engine.addSymlink(TEST_SYMLINK_SOURCE, TEST_SYMLINK_INODE, TEST_MTIME, false, TEST_SYMLINK_TARGET, snapshotEntity);
 
-        assertValidSymlink(snapshotEntity.getUuid());
+        assertValidSymlink(snapshotEntity.getUuid(), false);
+    }
+
+    @Test
+    void shouldAddSymlinkToDirectory() throws SQLException {
+        SnapshotEntity snapshotEntity = engine.addSnapshot("test", "test", 1234567890);
+        engine.addSymlink(TEST_SYMLINK_SOURCE, TEST_SYMLINK_INODE, TEST_MTIME, true, TEST_SYMLINK_TARGET, snapshotEntity);
+
+        assertValidSymlink(snapshotEntity.getUuid(), true);
+    }
+
+    @Test
+    void shouldAddJunction() throws SQLException {
+        SnapshotEntity snapshotEntity = engine.addSnapshot("test", "test", 1234567890);
+        engine.addJunction(TEST_JUNCTION_SOURCE, TEST_JUNCTION_INODE, TEST_MTIME, TEST_JUNCTION_TARGET, snapshotEntity);
+
+        assertValidJunction(snapshotEntity.getUuid());
     }
 
     @Test
@@ -150,20 +169,31 @@ public class DatabaseEngineFileTest {
     private void assertValidRegularFile(String snapshotUuid) throws SQLException {
         ResultSet resultSet = assertValidFile(TEST_FILE_PATH, TEST_FILE_INODE, TEST_SIZE, snapshotUuid);
         assertFalse(resultSet.getBoolean("link"));
+        assertFalse(resultSet.getBoolean("junction"));
         assertFalse(resultSet.getBoolean("directory"));
     }
 
     private void assertValidDirectory(String snapshotUuid) throws SQLException {
         ResultSet resultSet = assertValidFile(TEST_DIRECTORY_PATH, TEST_DIRECTORY_INODE, 0, snapshotUuid);
         assertFalse(resultSet.getBoolean("link"));
+        assertFalse(resultSet.getBoolean("junction"));
         assertTrue(resultSet.getBoolean("directory"));
     }
 
-    private void assertValidSymlink(String snapshotUuid) throws SQLException {
+    private void assertValidSymlink(String snapshotUuid, boolean directory) throws SQLException {
         ResultSet resultSet = assertValidFile(TEST_SYMLINK_SOURCE, TEST_SYMLINK_INODE, 0, snapshotUuid);
         assertTrue(resultSet.getBoolean("link"));
-        assertFalse(resultSet.getBoolean("directory"));
+        assertFalse(resultSet.getBoolean("junction"));
+        assertEquals(directory, resultSet.getBoolean("directory"));
         assertEquals(TEST_SYMLINK_TARGET, resultSet.getString("link_path"));
+    }
+
+    private void assertValidJunction(String snapshotUuid) throws SQLException {
+        ResultSet resultSet = assertValidFile(TEST_JUNCTION_SOURCE, TEST_JUNCTION_INODE, 0, snapshotUuid);
+        assertFalse(resultSet.getBoolean("link"));
+        assertTrue(resultSet.getBoolean("junction"));
+        assertTrue(resultSet.getBoolean("directory"));
+        assertEquals(TEST_JUNCTION_TARGET, resultSet.getString("link_path"));
     }
 
     private ResultSet assertValidFile(String filePath, long inode, long size, String snapshotUuid) throws SQLException {
