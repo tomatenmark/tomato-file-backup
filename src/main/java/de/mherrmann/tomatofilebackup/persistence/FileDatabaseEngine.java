@@ -92,7 +92,6 @@ public class FileDatabaseEngine {
     }
 
     public void removeOrphanedFiles() throws SQLException {
-        connection.setAutoCommit(false);
         try {
             removeChunkRelationsFromOrphanedChunks();
             String sql = "DELETE FROM file WHERE file_uuid IN (" +
@@ -102,13 +101,9 @@ public class FileDatabaseEngine {
                     ")";
             Statement statement = connection.createStatement();
             statement.executeUpdate(sql);
-            connection.commit();
         } catch(SQLException exception){
-            connection.rollback();
-            connection.setAutoCommit(true);
             throw new SQLException("Could not remove orphaned files.", exception);
         }
-        connection.setAutoCommit(true);
     }
 
     private void removeChunkRelationsFromOrphanedChunks() throws SQLException {

@@ -1,10 +1,14 @@
 package de.mherrmann.tomatofilebackup.persistence;
 
 import de.mherrmann.tomatofilebackup.chunking.ChecksumEngine;
+import de.mherrmann.tomatofilebackup.filetransfer.TransferEngine;
 import de.mherrmann.tomatofilebackup.persistence.entities.SnapshotEntity;
 
+import java.io.File;
+import java.io.IOException;
 import java.sql.*;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.UUID;
 
@@ -102,32 +106,16 @@ public class SnapshotDatabaseEngine {
         return buildSnapshotEntityList(preparedStatement);
     }
 
-    public void removeSnapshotByHashId(String hashId) throws SQLException {
+    public void removeSnapshotByHashId(String hashId, FileDatabaseEngine fileDatabaseEngine,
+                                       ChunkDatabaseEngine chunkDatabaseEngine) throws SQLException {
         connection.setAutoCommit(false);
-        try {
-            removeFileRelationsFromSnapshotByHashId(hashId);
-            String sql = "DELETE FROM snapshot WHERE hash_id = ?";
-            PreparedStatement preparedStatement = connection.prepareStatement(sql);
-            preparedStatement.setString(1, hashId);
-            preparedStatement.executeUpdate();
-            connection.commit();
-        } catch(SQLException exception){
-            connection.rollback();
-            connection.setAutoCommit(true);
-            throw new SQLException("Could not remove orphaned files.", exception);
-        }
-        connection.setAutoCommit(true);
-    }
-
-    private void removeFileRelationsFromSnapshotByHashId(String hashId) throws SQLException {
-        String sql = "DELETE FROM file_snapshot_relation WHERE snapshot_uuid IN (" +
-                "SELECT file_snapshot_relation.snapshot_uuid FROM file_snapshot_relation " +
+        String subQuery = "SELECT file_snapshot_relation.snapshot_uuid FROM file_snapshot_relation " +
                 "LEFT JOIN snapshot USING (snapshot_uuid) " +
-                "WHERE hash_id = ?" +
-                ")";
+                "WHERE hash_id = ?";
+        String sql = "DELETE FROM snapshot WHERE hash_id = ?";
         PreparedStatement preparedStatement = connection.prepareStatement(sql);
         preparedStatement.setString(1, hashId);
-        preparedStatement.executeUpdate();
+        removeSnapshots(preparedStatement, fileDatabaseEngine, chunkDatabaseEngine, subQuery, hashId);
     }
 
     private List<SnapshotEntity> buildSnapshotEntityList(PreparedStatement preparedStatement) throws SQLException {
@@ -147,5 +135,33 @@ public class SnapshotDatabaseEngine {
                 resultSet.getString("host"),
                 resultSet.getLong("ctime")
         );
+    }
+
+    private List<String> removeSnapshots(PreparedStatement preparedStatement, FileDatabaseEngine fileDatabaseEngine,
+                                 ChunkDatabaseEngine chunkDatabaseEngine, String subQuery, String... subQueryValues) throws SQLException {
+        List<String> checksums;
+        try {
+            removeFileRelationsFromSnapshotMatchingSubQuery(subQuery, subQueryValues);
+            preparedStatement.executeUpdate();
+            fileDatabaseEngine.removeOrphanedFiles();
+            checksums = chunkDatabaseEngine.removeOrphanedChunks();
+            connection.commit();
+        } catch(SQLException exception){
+            connection.rollback();
+            connection.setAutoCommit(true);
+            throw new SQLException("Could not remove snapshot due to sql error.", exception);
+        }
+        connection.setAutoCommit(true);
+        return checksums;
+    }
+
+    private void removeFileRelationsFromSnapshotMatchingSubQuery(String subQuery, String[] subQueryValues) throws SQLException {
+        String sql = "DELETE FROM file_snapshot_relation WHERE snapshot_uuid IN (" + subQuery + ")";
+        PreparedStatement preparedStatement = connection.prepareStatement(sql);
+        int i = 1;
+        for(String value : subQueryValues){
+            preparedStatement.setString(i++, value);
+        }
+        preparedStatement.executeUpdate();
     }
 }

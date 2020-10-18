@@ -84,13 +84,25 @@ public class ChunkDatabaseEngine {
         return !resultSet.isClosed();
     }
 
-    public void removeOrphanedChunks() throws SQLException {
-        String sql = "DELETE FROM chunk WHERE chunk_uuid IN (" +
+    public List<String> removeOrphanedChunks() throws SQLException {
+        List<String> checksums = new ArrayList<>();
+        String getSql = "SELECT checksum FROM chunk WHERE chunk_uuid IN (" +
+                "SELECT chunk.chunk_uuid FROM chunk " +
+                "LEFT JOIN file_chunk_relation USING (chunk_uuid) " +
+                "WHERE file_uuid IS NULL" +
+                ")";
+        Statement getStatement = connection.createStatement();
+        ResultSet resultSet = getStatement.executeQuery(getSql);
+        while(resultSet.next()){
+            checksums.add(resultSet.getString("checksum"));
+        }
+        String removeSql = "DELETE FROM chunk WHERE chunk_uuid IN (" +
                   "SELECT chunk.chunk_uuid FROM chunk " +
                   "LEFT JOIN file_chunk_relation USING (chunk_uuid) " +
                   "WHERE file_uuid IS NULL" +
                 ")";
-        Statement statement = connection.createStatement();
-        statement.executeUpdate(sql);
+        Statement removeStatement = connection.createStatement();
+        removeStatement.executeUpdate(removeSql);
+        return checksums;
     }
 }

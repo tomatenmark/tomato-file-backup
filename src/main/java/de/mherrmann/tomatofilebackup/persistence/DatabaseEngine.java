@@ -146,6 +146,6 @@ public class DatabaseEngine {
     }
 
     public void removeSnapshotByHashId(String hashId) throws SQLException {
-        snapshotDatabaseEngine.removeSnapshotByHashId(hashId);
+        snapshotDatabaseEngine.removeSnapshotByHashId(hashId, fileDatabaseEngine, chunkDatabaseEngine);
     }
 }

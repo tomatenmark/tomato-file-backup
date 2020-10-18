@@ -66,13 +66,21 @@ public class TestUtil {
     @SuppressWarnings("ResultOfMethodCallIgnored")
     public static void removeTestFiles() {
         File directory = new File("./test");
+        deleteDirectory(directory);
+        new File("./test.bin").delete();
+        new File("./test.bin.restored").delete();
+    }
+
+    private static void deleteDirectory(File directory){
         if(directory.exists()){
             for (File file : Objects.requireNonNull(directory.listFiles())) {
-                file.delete();
+                if(file.isDirectory()){
+                    deleteDirectory(file);
+                } else {
+                    file.delete();
+                }
             }
             directory.delete();
         }
-        new File("./test.bin").delete();
-        new File("./test.bin.restored").delete();
     }
 }
