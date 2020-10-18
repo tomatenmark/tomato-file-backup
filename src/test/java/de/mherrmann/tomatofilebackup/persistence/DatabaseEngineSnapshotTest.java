@@ -3,7 +3,6 @@ package de.mherrmann.tomatofilebackup.persistence;
 import de.mherrmann.tomatofilebackup.TestUtil;
 import de.mherrmann.tomatofilebackup.chunking.ChecksumEngine;
 import de.mherrmann.tomatofilebackup.chunking.Chunk;
-import de.mherrmann.tomatofilebackup.filetransfer.TransferEngine;
 import de.mherrmann.tomatofilebackup.persistence.entities.ChunkEntity;
 import de.mherrmann.tomatofilebackup.persistence.entities.FileEntity;
 import de.mherrmann.tomatofilebackup.persistence.entities.SnapshotEntity;
@@ -11,13 +10,10 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-import java.io.File;
 import java.io.IOException;
-import java.nio.file.Files;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.ArrayList;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -25,7 +21,6 @@ import static org.junit.jupiter.api.Assertions.*;
 public class DatabaseEngineSnapshotTest {
 
     private static final String TEST_REPOSITORY_PATH = "./test/";
-    private static final File TEST_CHUNKS_DIRECTORY = new File(TEST_REPOSITORY_PATH, "chunks");
     private static final String TEST_SOURCE_PATH = "/home/max/";
     private static final String TEST_HOST = "pcmax";
     private static final long TEST_CTIME = 1987654321;
@@ -436,8 +431,6 @@ public class DatabaseEngineSnapshotTest {
         FileEntity fileEntityToBeRemained2 = engine.addRegularFile(DatabaseEngineFileTest.TEST_FILE_PATH+4, DatabaseEngineFileTest.TEST_SIZE,
                 DatabaseEngineFileTest.TEST_FILE_INODE+4, DatabaseEngineFileTest.TEST_MTIME,
                 false, snapshotEntityExpectedToBeRemained);
-        Files.createDirectory(TEST_CHUNKS_DIRECTORY.toPath());
-        File testFile = TestUtil.buildRandomTestFile(DatabaseEngineChunkTest.TEST_OFFSET+DatabaseEngineChunkTest.TEST_LENGTH+2);
         Chunk chunk = new Chunk(0, 10);
         Chunk chunk2 = new Chunk(10, (int)DatabaseEngineChunkTest.TEST_OFFSET-10);
         Chunk chunk3 = new Chunk(DatabaseEngineChunkTest.TEST_OFFSET, DatabaseEngineChunkTest.TEST_LENGTH);
