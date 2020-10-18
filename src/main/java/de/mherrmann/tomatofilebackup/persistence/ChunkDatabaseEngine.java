@@ -15,18 +15,17 @@ public class ChunkDatabaseEngine {
         this.connection = connection;
     }
 
-    public ChunkEntity addChunk(Chunk chunk, String fileUuid, int ordinal) throws SQLException {
+    public ChunkEntity addChunk(Chunk chunk, String fileUuid) throws SQLException {
         String chunkUuid = UUID.randomUUID().toString();
-        String sql = "INSERT INTO chunk(chunk_uuid,checksum,offset,length) VALUES(?,?,?,?);";
+        String sql = "INSERT INTO chunk(chunk_uuid,checksum,length) VALUES(?,?,?);";
         try {
             connection.setAutoCommit(false);
             PreparedStatement preparedStatement = connection.prepareStatement(sql);
             preparedStatement.setString(1, chunkUuid);
             preparedStatement.setString(2, chunk.getChecksum());
-            preparedStatement.setLong(3, chunk.getOffset());
-            preparedStatement.setInt(4, chunk.getLength());
+            preparedStatement.setInt(3, chunk.getLength());
             preparedStatement.executeUpdate();
-            addChunkFileRelation(fileUuid, chunkUuid, ordinal);
+            addChunkFileRelation(fileUuid, chunkUuid, chunk.getOffset());
             connection.commit();
         } catch(SQLException exception){
             connection.rollback();
@@ -36,19 +35,21 @@ public class ChunkDatabaseEngine {
         return getChunkByChecksum(chunk.getChecksum());
     }
 
-    public void addChunkFileRelation(String fileUuid, String chunkUuid, int ordinal) throws SQLException {
+    public void addChunkFileRelation(String fileUuid, String chunkUuid, long offset) throws SQLException {
         String relationUuid = UUID.randomUUID().toString();
-        String sql = "INSERT INTO file_chunk_relation(relation_uuid,file_uuid,chunk_uuid,ordinal) VALUES(?,?,?,?);";
+        String sql = "INSERT INTO file_chunk_relation(relation_uuid,file_uuid,chunk_uuid,offset) VALUES(?,?,?,?);";
         PreparedStatement preparedStatement = connection.prepareStatement(sql);
         preparedStatement.setString(1, relationUuid);
         preparedStatement.setString(2, fileUuid);
         preparedStatement.setString(3, chunkUuid);
-        preparedStatement.setInt(4, ordinal);
+        preparedStatement.setLong(4, offset);
         preparedStatement.executeUpdate();
     }
 
     public ChunkEntity getChunkByChecksum(String checksum) throws SQLException {
-        String sql = "SELECT * FROM chunk WHERE checksum = ?";
+        String sql = "SELECT chunk.*, offset FROM chunk " +
+                "LEFT JOIN file_chunk_relation USING (chunk_uuid)" +
+                "WHERE checksum = ?";
         PreparedStatement preparedStatement = connection.prepareStatement(sql);
         preparedStatement.setString(1, checksum);
         ResultSet resultSet = preparedStatement.executeQuery();
@@ -60,11 +61,11 @@ public class ChunkDatabaseEngine {
 
     public List<ChunkEntity> getChunksByFileUuid(String fileUuid) throws SQLException {
         List<ChunkEntity> chunks = new ArrayList<>();
-        String sql = "SELECT chunk.* From chunk " +
+        String sql = "SELECT chunk.*, offset From chunk " +
                 "LEFT JOIN file_chunk_relation USING(chunk_uuid) " +
                 "LEFT JOIN file USING(file_uuid) " +
                 "WHERE file_uuid = ? " +
-                "ORDER BY ordinal";
+                "ORDER BY offset";
         PreparedStatement preparedStatement = connection.prepareStatement(sql);
         preparedStatement.setString(1, fileUuid);
         ResultSet resultSet = preparedStatement.executeQuery();

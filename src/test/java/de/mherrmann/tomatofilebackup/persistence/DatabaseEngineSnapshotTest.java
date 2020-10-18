@@ -439,10 +439,10 @@ public class DatabaseEngineSnapshotTest {
         chunk2.setChecksum(DatabaseEngineChunkTest.TEST_CHECKSUM+2);
         chunk3.setChecksum(DatabaseEngineChunkTest.TEST_CHECKSUM+3);
         chunk4.setChecksum(DatabaseEngineChunkTest.TEST_CHECKSUM+4);
-        ChunkEntity chunkEntityToBeRemoved1 = engine.addChunk(chunk2, fileEntityToBeRemoved1.getUuid(), DatabaseEngineChunkTest.TEST_CHUNK2_ORDINAL);
-        ChunkEntity chunkEntityToBeRemoved2 = engine.addChunk(chunk, fileEntityToBeRemoved2.getUuid(), DatabaseEngineChunkTest.TEST_CHUNK1_ORDINAL);
-        ChunkEntity chunkEntityToBeRemained1 = engine.addChunk(chunk4, fileEntityToBeRemained1.getUuid(), DatabaseEngineChunkTest.TEST_CHUNK2_ORDINAL);
-        ChunkEntity chunkEntityToBeRemained2 = engine.addChunk(chunk3, fileEntityToBeRemained2.getUuid(), DatabaseEngineChunkTest.TEST_CHUNK1_ORDINAL);
+        ChunkEntity chunkEntityToBeRemoved1 = engine.addChunk(chunk2, fileEntityToBeRemoved1.getUuid());
+        ChunkEntity chunkEntityToBeRemoved2 = engine.addChunk(chunk, fileEntityToBeRemoved2.getUuid());
+        ChunkEntity chunkEntityToBeRemained1 = engine.addChunk(chunk4, fileEntityToBeRemained1.getUuid());
+        ChunkEntity chunkEntityToBeRemained2 = engine.addChunk(chunk3, fileEntityToBeRemained2.getUuid());
         return new TestObjects(snapshotEntityExpectedToBeRemoved, snapshotEntityExpectedToBeRemained,
                 fileEntityToBeRemoved1, fileEntityToBeRemoved2, chunkEntityToBeRemoved1, chunkEntityToBeRemoved2,
                 fileEntityToBeRemained1, fileEntityToBeRemained2, chunkEntityToBeRemained1, chunkEntityToBeRemained2);

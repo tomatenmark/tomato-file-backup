@@ -45,7 +45,7 @@ public class RepositoryInitializer {
     }
 
     private static void createChunkTable(Connection connection) throws SQLException {
-        String sql = "CREATE TABLE IF NOT EXISTS chunk(chunk_uuid text PRIMARY KEY, checksum text, offset integer, length integer);";
+        String sql = "CREATE TABLE IF NOT EXISTS chunk(chunk_uuid text PRIMARY KEY, checksum text, length integer);";
         Statement statement = connection.createStatement();
         statement.execute(sql);
     }
@@ -71,7 +71,7 @@ public class RepositoryInitializer {
     }
 
     private static void createFileChunkRelationTable(Connection connection) throws SQLException {
-        String sql = "CREATE TABLE IF NOT EXISTS file_chunk_relation(relation_uuid text PRIMARY KEY, file_uuid text, chunk_uuid text, ordinal integer);";
+        String sql = "CREATE TABLE IF NOT EXISTS file_chunk_relation(relation_uuid text PRIMARY KEY, file_uuid text, chunk_uuid text, offset integer);";
         Statement statement = connection.createStatement();
         statement.execute(sql);
     }

@@ -34,11 +34,11 @@ public class RepositoryInitializerTest {
         String url = "jdbc:sqlite:"+dbFile.getAbsolutePath();
         Connection connection = DriverManager.getConnection(url);
         assertTablesExist(connection);
-        assertColumnsExist(connection, "chunk", "chunk_uuid", "checksum", "offset", "length");
+        assertColumnsExist(connection, "chunk", "chunk_uuid", "checksum", "length");
         assertColumnsExist(connection, "file", "file_uuid", "path", "size", "inode", "mtime", "compressed", "link", "directory", "link_path");
         assertColumnsExist(connection, "snapshot", "snapshot_uuid", "hash_id", "source", "host", "ctime");
         assertColumnsExist(connection, "repository", "repository_uuid", "path", "version");
-        assertColumnsExist(connection, "file_chunk_relation", "relation_uuid", "file_uuid", "chunk_uuid", "ordinal");
+        assertColumnsExist(connection, "file_chunk_relation", "relation_uuid", "file_uuid", "chunk_uuid", "offset");
         assertColumnsExist(connection, "file_snapshot_relation", "relation_uuid", "file_uuid", "snapshot_uuid");
         assertValidVersion(connection);
     }

@@ -50,7 +50,7 @@ public class DatabaseEngineChunkTest {
         Chunk chunk = new Chunk(TEST_OFFSET, TEST_LENGTH);
         chunk.setChecksum(TEST_CHECKSUM);
 
-        engine.addChunk(chunk, TEST_FILE_UUID, TEST_SINGLE_CHUNK_ORDINAL);
+        engine.addChunk(chunk, TEST_FILE_UUID);
 
         assertValidChunk();
     }
@@ -59,9 +59,9 @@ public class DatabaseEngineChunkTest {
     void shouldAddChunkFileRelation() throws SQLException {
         Chunk chunk = new Chunk(TEST_OFFSET, TEST_LENGTH);
         chunk.setChecksum(TEST_CHECKSUM);
-        ChunkEntity chunkEntity = engine.addChunk(chunk, TEST_FILE_UUID, TEST_SINGLE_CHUNK_ORDINAL);
+        ChunkEntity chunkEntity = engine.addChunk(chunk, TEST_FILE_UUID);
 
-        engine.addChunkFileRelation(TEST_FILE_UUID, chunkEntity.getUuid(), TEST_SINGLE_CHUNK_ORDINAL);
+        engine.addChunkFileRelation(TEST_FILE_UUID, chunkEntity.getUuid(), chunkEntity.getOffset());
 
         assertValidChunkFileRelation(chunkEntity.getUuid());
     }
@@ -70,7 +70,7 @@ public class DatabaseEngineChunkTest {
     void shouldSayChunkDoExist() throws SQLException {
         Chunk chunk = new Chunk(TEST_OFFSET, TEST_LENGTH);
         chunk.setChecksum(TEST_CHECKSUM);
-        engine.addChunk(chunk, TEST_FILE_UUID, TEST_SINGLE_CHUNK_ORDINAL);
+        engine.addChunk(chunk, TEST_FILE_UUID);
 
         boolean exists = engine.existsChunkByChecksum(TEST_CHECKSUM);
 
@@ -88,7 +88,7 @@ public class DatabaseEngineChunkTest {
     void shouldGetChunk() throws SQLException {
         Chunk chunk = new Chunk(TEST_OFFSET, TEST_LENGTH);
         chunk.setChecksum(TEST_CHECKSUM);
-        engine.addChunk(chunk, TEST_FILE_UUID, TEST_SINGLE_CHUNK_ORDINAL);
+        engine.addChunk(chunk, TEST_FILE_UUID);
 
         ChunkEntity returnedChunk = engine.getChunkByChecksum(TEST_CHECKSUM);
 
@@ -105,8 +105,8 @@ public class DatabaseEngineChunkTest {
         Chunk chunk2 = new Chunk(TEST_OFFSET+TEST_LENGTH, TEST_LENGTH);
         chunk.setChecksum(TEST_CHECKSUM);
         chunk2.setChecksum(TEST_CHECKSUM+2);
-        engine.addChunk(chunk2, TEST_FILE_UUID, TEST_CHUNK2_ORDINAL);
-        engine.addChunk(chunk, TEST_FILE_UUID, TEST_CHUNK1_ORDINAL);
+        engine.addChunk(chunk2, TEST_FILE_UUID);
+        engine.addChunk(chunk, TEST_FILE_UUID);
 
         List<ChunkEntity> chunks = engine.getChunksByFileUuid(TEST_FILE_UUID);
 
@@ -116,7 +116,9 @@ public class DatabaseEngineChunkTest {
     }
 
     private void assertValidChunk() throws SQLException {
-        String sql = "SELECT * FROM chunk WHERE checksum = ?";
+        String sql = "SELECT chunk.*, offset FROM chunk " +
+                "LEFT JOIN file_chunk_relation USING (chunk_uuid)" +
+                "WHERE checksum = ?";
         PreparedStatement preparedStatement = engine.connection.prepareStatement(sql);
         preparedStatement.setString(1, TEST_CHECKSUM);
         ResultSet resultSet = preparedStatement.executeQuery();
@@ -133,6 +135,6 @@ public class DatabaseEngineChunkTest {
         preparedStatement.setString(2, chunkUuid);
         ResultSet resultSet = preparedStatement.executeQuery();
         resultSet.next();
-        assertEquals(TEST_SINGLE_CHUNK_ORDINAL, resultSet.getInt("ordinal"));
+        assertEquals(TEST_OFFSET, resultSet.getInt("offset"));
     }
 }

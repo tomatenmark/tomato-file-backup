@@ -21,11 +21,12 @@ import java.util.List;
 class TransferEngineTest {
 
     private File sourceFile;
-    private final File chunksDirectory = new File("./test");
+    private final File chunksDirectory = new File("./test/chunks");
 
     @BeforeEach
     void setUp() throws Exception {
         TestUtil.createTestDirectory();
+        Files.createDirectory(new File(chunksDirectory.getAbsolutePath()).toPath());
         sourceFile = TestUtil.buildRandomTestFile(5*1024*1024);
     }
 
@@ -59,6 +60,32 @@ class TransferEngineTest {
     }
 
     @Test
+    void shouldRestoreFileFromUncompressedChunks() throws Exception {
+        TransferEngine transferEngine = new TransferEngine();
+        ChunkingEngine chunkingEngine = new ChunkingEngine();
+        List<Chunk> chunks = chunkingEngine.getChunks(sourceFile);
+        transferEngine.storeChunks(sourceFile, chunksDirectory, chunks, false);
+        File testFile = new File(sourceFile.getAbsolutePath()+".restored");
+
+        transferEngine.restoreFile(testFile, chunksDirectory, chunks, false);
+
+        assertArrayEquals(Files.readAllBytes(sourceFile.toPath()), Files.readAllBytes(testFile.toPath()));
+    }
+
+    @Test
+    void shouldRestoreFileFromCompressedChunks() throws Exception {
+        TransferEngine transferEngine = new TransferEngine();
+        ChunkingEngine chunkingEngine = new ChunkingEngine();
+        List<Chunk> chunks = chunkingEngine.getChunks(sourceFile);
+        transferEngine.storeChunks(sourceFile, chunksDirectory, chunks, true);
+        File testFile = new File(sourceFile.getAbsolutePath()+".restored");
+
+        transferEngine.restoreFile(testFile, chunksDirectory, chunks, true);
+
+        assertArrayEquals(Files.readAllBytes(sourceFile.toPath()), Files.readAllBytes(testFile.toPath()));
+    }
+
+    @Test
     void shouldRemoveChunksByChecksums() throws Exception {
         Chunk chunkToBeRemained = prepareChunk();
         Chunk chunkToBeRemoved = prepareChunk();
@@ -89,38 +116,12 @@ class TransferEngineTest {
         engine.storeChunks(sourceFile, chunksDirectory, chunks, true);
         DatabaseEngine databaseEngine = new DatabaseEngine(chunksDirectory.getParent());
         databaseEngine.initializeRepository();
-        databaseEngine.addChunk(chunkToBeRemained, "fileUuid", 42);
+        databaseEngine.addChunk(chunkToBeRemained, "fileUuid");
 
         engine.removeOrphanedChunkFiles(chunksDirectory, databaseEngine);
 
         assertTrue(new File(chunksDirectory, chunkToBeRemained.getChecksum()).exists());
         assertFalse(new File(chunksDirectory, chunkToBeRemoved.getChecksum()).exists());
-    }
-
-    @Test
-    void shouldRestoreFileFromUncompressedChunks() throws Exception {
-        TransferEngine transferEngine = new TransferEngine();
-        ChunkingEngine chunkingEngine = new ChunkingEngine();
-        List<Chunk> chunks = chunkingEngine.getChunks(sourceFile);
-        transferEngine.storeChunks(sourceFile, chunksDirectory, chunks, false);
-        File testFile = new File(sourceFile.getAbsolutePath()+".restored");
-
-        transferEngine.restoreFile(testFile, chunksDirectory, chunks, false);
-
-        assertArrayEquals(Files.readAllBytes(sourceFile.toPath()), Files.readAllBytes(testFile.toPath()));
-    }
-
-    @Test
-    void shouldRestoreFileFromCompressedChunks() throws Exception {
-        TransferEngine transferEngine = new TransferEngine();
-        ChunkingEngine chunkingEngine = new ChunkingEngine();
-        List<Chunk> chunks = chunkingEngine.getChunks(sourceFile);
-        transferEngine.storeChunks(sourceFile, chunksDirectory, chunks, true);
-        File testFile = new File(sourceFile.getAbsolutePath()+".restored");
-
-        transferEngine.restoreFile(testFile, chunksDirectory, chunks, true);
-
-        assertArrayEquals(Files.readAllBytes(sourceFile.toPath()), Files.readAllBytes(testFile.toPath()));
     }
 
     private void assertValidStored(Chunk chunk, boolean compressed) throws IOException {

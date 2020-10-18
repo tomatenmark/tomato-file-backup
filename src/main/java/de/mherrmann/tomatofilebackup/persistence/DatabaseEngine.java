@@ -42,8 +42,8 @@ public class DatabaseEngine {
         return repositoryDatabaseEngine.getRepository();
     }
 
-    public ChunkEntity addChunk(Chunk chunk, String fileUuid, int ordinal) throws SQLException {
-        return chunkDatabaseEngine.addChunk(chunk, fileUuid, ordinal);
+    public ChunkEntity addChunk(Chunk chunk, String fileUuid) throws SQLException {
+        return chunkDatabaseEngine.addChunk(chunk, fileUuid);
     }
 
     public FileEntity addRegularFile(String path, long size, long inode, long mtime,
@@ -64,8 +64,8 @@ public class DatabaseEngine {
         return snapshotDatabaseEngine.addSnapshot(sourcePath, host, ctime);
     }
 
-    public void addChunkFileRelation(String fileUuid, String chunkUuid, int ordinal) throws SQLException {
-        chunkDatabaseEngine.addChunkFileRelation(fileUuid, chunkUuid, ordinal);
+    public void addChunkFileRelation(String fileUuid, String chunkUuid, long offset) throws SQLException {
+        chunkDatabaseEngine.addChunkFileRelation(fileUuid, chunkUuid, offset);
     }
 
     public void addFileSnapshotRelation(String fileUuid, String snapshotUuid) throws SQLException {
