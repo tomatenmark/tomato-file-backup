@@ -143,9 +143,9 @@ public class FileDatabaseEngine {
             preparedStatement.setLong(3, size);
             preparedStatement.setLong(4, inode);
             preparedStatement.setLong(5, mtime);
-            preparedStatement.setInt(6, compressed ? 1 : 0);
-            preparedStatement.setInt(7, isLink ? 1 : 0);
-            preparedStatement.setInt(8, isDirectory ? 1 : 0);
+            preparedStatement.setBoolean(6, compressed);
+            preparedStatement.setBoolean(7, isLink);
+            preparedStatement.setBoolean(8, isDirectory);
             preparedStatement.setString(9, linkPath);
             preparedStatement.executeUpdate();
             addFileSnapshotRelation(fileUuid, snapshotEntity.getUuid());
