@@ -78,7 +78,7 @@ public class SnapshotDatabaseEngine {
     }
 
     public List<SnapshotEntity> getSnapshotsByHostSince(String host, long ctimeThreshold) throws SQLException {
-        String sql = "SELECT * FROM snapshot WHERE host = ? AND ctime >= ?";
+        String sql = "SELECT * FROM snapshot WHERE host = ? AND ctime >= ? ORDER BY ctime DESC";
         PreparedStatement preparedStatement = connection.prepareStatement(sql);
         preparedStatement.setString(1, host);
         preparedStatement.setLong(2, ctimeThreshold);
@@ -100,6 +100,34 @@ public class SnapshotDatabaseEngine {
         preparedStatement.setString(2, host);
         preparedStatement.setLong(3, ctimeThreshold);
         return buildSnapshotEntityList(preparedStatement);
+    }
+
+    public void removeSnapshotByHashId(String hashId) throws SQLException {
+        connection.setAutoCommit(false);
+        try {
+            removeFileRelationsFromSnapshotByHashId(hashId);
+            String sql = "DELETE FROM snapshot WHERE hash_id = ?";
+            PreparedStatement preparedStatement = connection.prepareStatement(sql);
+            preparedStatement.setString(1, hashId);
+            preparedStatement.executeUpdate();
+            connection.commit();
+        } catch(SQLException exception){
+            connection.rollback();
+            connection.setAutoCommit(true);
+            throw new SQLException("Could not remove orphaned files.", exception);
+        }
+        connection.setAutoCommit(true);
+    }
+
+    private void removeFileRelationsFromSnapshotByHashId(String hashId) throws SQLException {
+        String sql = "DELETE FROM file_snapshot_relation WHERE snapshot_uuid IN (" +
+                "SELECT file_snapshot_relation.snapshot_uuid FROM file_snapshot_relation " +
+                "LEFT JOIN snapshot USING (snapshot_uuid) " +
+                "WHERE hash_id = ?" +
+                ")";
+        PreparedStatement preparedStatement = connection.prepareStatement(sql);
+        preparedStatement.setString(1, hashId);
+        preparedStatement.executeUpdate();
     }
 
     private List<SnapshotEntity> buildSnapshotEntityList(PreparedStatement preparedStatement) throws SQLException {

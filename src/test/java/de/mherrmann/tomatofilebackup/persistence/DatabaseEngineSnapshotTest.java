@@ -7,13 +7,11 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-import java.io.File;
 import java.io.IOException;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.List;
-import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -259,6 +257,17 @@ public class DatabaseEngineSnapshotTest {
         assertTrue(snapshots.isEmpty());
     }
 
+    @Test
+    void shouldRemoveSnapshotByHashId() throws SQLException {
+        SnapshotEntity snapshotEntityExpectedToBeRemoved = engine.addSnapshot(TEST_SOURCE_PATH, TEST_HOST, TEST_CTIME);
+        SnapshotEntity snapshotEntityExpectedToBeRemained = engine.addSnapshot(TEST_SOURCE_PATH, TEST_HOST, TEST_CTIME+1);
+
+        engine.removeSnapshotByHashId(snapshotEntityExpectedToBeRemoved.getHashId());
+
+        assertRemoved(snapshotEntityExpectedToBeRemoved);
+        assertRemained(snapshotEntityExpectedToBeRemained);
+    }
+
     private void assertValidSnapshot() throws SQLException {
         String sql = "SELECT * FROM snapshot WHERE source = ? AND host = ?";
         PreparedStatement preparedStatement = engine.connection.prepareStatement(sql);
@@ -269,5 +278,21 @@ public class DatabaseEngineSnapshotTest {
         String hashId = ChecksumEngine.getSnapshotChecksum(resultSet.getString("snapshot_uuid"));
         assertEquals(TEST_CTIME, resultSet.getLong("ctime"));
         assertEquals(hashId, resultSet.getString("hash_id"));
+    }
+
+    private void assertRemoved(SnapshotEntity snapshotEntity) throws SQLException {
+        String sql = "SELECT * FROM snapshot WHERE snapshot_uuid = ?";
+        PreparedStatement preparedStatement = engine.connection.prepareStatement(sql);
+        preparedStatement.setString(1, snapshotEntity.getUuid());
+        ResultSet resultSet = preparedStatement.executeQuery();
+        assertTrue(resultSet.isClosed());
+    }
+
+    private void assertRemained(SnapshotEntity snapshotEntity) throws SQLException {
+        String sql = "SELECT * FROM snapshot WHERE snapshot_uuid = ?";
+        PreparedStatement preparedStatement = engine.connection.prepareStatement(sql);
+        preparedStatement.setString(1, snapshotEntity.getUuid());
+        ResultSet resultSet = preparedStatement.executeQuery();
+        assertFalse(resultSet.isClosed());
     }
 }
