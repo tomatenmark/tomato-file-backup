@@ -88,13 +88,17 @@ public class DatabaseEngine {
         return fileDatabaseEngine.getFileByInode(inode, snapshotEntity);
     }
 
-    public List<FileEntity> getFilesBySnapshotUuid(String snapshotUuid) throws SQLException {
-        return fileDatabaseEngine.getFilesBySnapshotUuid(snapshotUuid);
-    }
-
     public FileEntity getFileByNameAndSizeAndMtime(String name, Long size,
                                                    Long mtime, SnapshotEntity snapshotEntity) throws SQLException {
         return fileDatabaseEngine.getFileByNameAndSizeAndMtime(name, size, mtime, snapshotEntity);
+    }
+
+    public List<FileEntity> getFilesBySnapshotUuidOrderByInode(String snapshotUuid) throws SQLException {
+        return fileDatabaseEngine.getFilesBySnapshotUuidOrderByInode(snapshotUuid);
+    }
+
+    public List<FileEntity> getFilesBySnapshotUuidOrderByPath(String snapshotUuid) throws SQLException {
+        return fileDatabaseEngine.getFilesBySnapshotUuidOrderByPath(snapshotUuid);
     }
 
     public SnapshotEntity getSnapshotByHashId(String hashId) throws SQLException {

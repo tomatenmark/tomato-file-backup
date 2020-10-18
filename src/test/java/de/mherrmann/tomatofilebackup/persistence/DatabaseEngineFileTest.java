@@ -1,7 +1,6 @@
 package de.mherrmann.tomatofilebackup.persistence;
 
 import de.mherrmann.tomatofilebackup.TestUtil;
-import de.mherrmann.tomatofilebackup.persistence.entities.ChunkEntity;
 import de.mherrmann.tomatofilebackup.persistence.entities.FileEntity;
 import de.mherrmann.tomatofilebackup.persistence.entities.SnapshotEntity;
 import org.junit.jupiter.api.AfterEach;
@@ -84,13 +83,33 @@ public class DatabaseEngineFileTest {
     }
 
     @Test
-    void shouldGetFiles() throws SQLException {
+    void shouldGetFilesBySnapshotUuidOrderByInode() throws SQLException {
         SnapshotEntity snapshotEntity = engine.addSnapshot("test", "test", 1234567890);
         engine.addSnapshot(TEST_SOURCE_PATH, TEST_HOST, TEST_CTIME);
-        engine.addRegularFile(TEST_FILE_PATH, TEST_SIZE, TEST_FILE_INODE, TEST_MTIME, false, snapshotEntity);
         engine.addRegularFile(TEST_FILE_PATH+2, TEST_SIZE, TEST_FILE_INODE+2, TEST_MTIME, false, snapshotEntity);
+        engine.addRegularFile(TEST_FILE_PATH, TEST_SIZE, TEST_FILE_INODE, TEST_MTIME, false, snapshotEntity);
 
-        List<FileEntity> files = engine.getFilesBySnapshotUuid(snapshotEntity.getUuid());
+        List<FileEntity> files = engine.getFilesBySnapshotUuidOrderByInode(snapshotEntity.getUuid());
+
+        assertEquals(2, files.size());
+        assertEquals(TEST_FILE_PATH, files.get(0).getPath());
+        assertEquals(TEST_SIZE, files.get(0).getSize());
+        assertEquals(TEST_FILE_INODE, files.get(0).getInode());
+        assertEquals(TEST_MTIME, files.get(0).getMtime());
+        assertEquals(TEST_FILE_PATH+2, files.get(1).getPath());
+        assertEquals(TEST_SIZE, files.get(1).getSize());
+        assertEquals(TEST_FILE_INODE+2, files.get(1).getInode());
+        assertEquals(TEST_MTIME, files.get(1).getMtime());
+    }
+
+    @Test
+    void shouldGetFilesBySnapshotUuidOrderByPath() throws SQLException {
+        SnapshotEntity snapshotEntity = engine.addSnapshot("test", "test", 1234567890);
+        engine.addSnapshot(TEST_SOURCE_PATH, TEST_HOST, TEST_CTIME);
+        engine.addRegularFile(TEST_FILE_PATH+2, TEST_SIZE, TEST_FILE_INODE+2, TEST_MTIME, false, snapshotEntity);
+        engine.addRegularFile(TEST_FILE_PATH, TEST_SIZE, TEST_FILE_INODE, TEST_MTIME, false, snapshotEntity);
+
+        List<FileEntity> files = engine.getFilesBySnapshotUuidOrderByPath(snapshotEntity.getUuid());
 
         assertEquals(2, files.size());
         assertEquals(TEST_FILE_PATH, files.get(0).getPath());

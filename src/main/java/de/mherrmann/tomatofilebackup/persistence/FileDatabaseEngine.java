@@ -54,22 +54,6 @@ public class FileDatabaseEngine {
         return buildFileEntity(resultSet);
     }
 
-    public List<FileEntity> getFilesBySnapshotUuid(String snapshotUuid) throws SQLException {
-        List<FileEntity> files = new ArrayList<>();
-        String sql = "SELECT file.* From file " +
-                "LEFT JOIN file_snapshot_relation USING(file_uuid) " +
-                "LEFT JOIN snapshot USING(snapshot_uuid) " +
-                "WHERE snapshot_uuid = ?";
-        PreparedStatement preparedStatement = connection.prepareStatement(sql);
-        preparedStatement.setString(1, snapshotUuid);
-        ResultSet resultSet = preparedStatement.executeQuery();
-        while (resultSet.next()) {
-            FileEntity fileEntity = buildFileEntity(resultSet);
-            files.add(fileEntity);
-        }
-        return files;
-    }
-
     public FileEntity getFileByNameAndSizeAndMtime(String name, Long size,
                                                    Long mtime, SnapshotEntity snapshotEntity) throws SQLException {
         String sql = "SELECT file.* FROM file " +
@@ -85,6 +69,26 @@ public class FileDatabaseEngine {
         ResultSet resultSet = preparedStatement.executeQuery();
         resultSet.next();
         return buildFileEntity(resultSet);
+    }
+
+    public List<FileEntity> getFilesBySnapshotUuidOrderByInode(String snapshotUuid) throws SQLException {
+        String sql = "SELECT file.* From file " +
+                "LEFT JOIN file_snapshot_relation USING(file_uuid) " +
+                "LEFT JOIN snapshot USING(snapshot_uuid) " +
+                "WHERE snapshot_uuid = ? ORDER BY inode";
+        PreparedStatement preparedStatement = connection.prepareStatement(sql);
+        preparedStatement.setString(1, snapshotUuid);
+        return getFilesBySnapshotUuid(preparedStatement);
+    }
+
+    public List<FileEntity> getFilesBySnapshotUuidOrderByPath(String snapshotUuid) throws SQLException {
+        String sql = "SELECT file.* From file " +
+                "LEFT JOIN file_snapshot_relation USING(file_uuid) " +
+                "LEFT JOIN snapshot USING(snapshot_uuid) " +
+                "WHERE snapshot_uuid = ? ORDER BY path";
+        PreparedStatement preparedStatement = connection.prepareStatement(sql);
+        preparedStatement.setString(1, snapshotUuid);
+        return getFilesBySnapshotUuid(preparedStatement);
     }
 
     public void removeOrphanedFiles() throws SQLException {
@@ -158,5 +162,15 @@ public class FileDatabaseEngine {
         }
         connection.setAutoCommit(true);
         return getFileByInode(inode, snapshotEntity);
+    }
+
+    private List<FileEntity> getFilesBySnapshotUuid(PreparedStatement preparedStatement) throws SQLException {
+        List<FileEntity> files = new ArrayList<>();
+        ResultSet resultSet = preparedStatement.executeQuery();
+        while (resultSet.next()) {
+            FileEntity fileEntity = buildFileEntity(resultSet);
+            files.add(fileEntity);
+        }
+        return files;
     }
 }
