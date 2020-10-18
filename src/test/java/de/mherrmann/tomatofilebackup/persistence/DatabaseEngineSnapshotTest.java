@@ -56,77 +56,97 @@ public class DatabaseEngineSnapshotTest {
     @Test
     void shouldGetAllSnapshots() throws SQLException {
         engine.addSnapshot(TEST_SOURCE_PATH, TEST_HOST, TEST_CTIME);
+        engine.addSnapshot(TEST_SOURCE_PATH, TEST_HOST, TEST_CTIME+1);
 
         List<SnapshotEntity> snapshots = engine.getAllSnapshots();
 
-        assertEquals(1, snapshots.size());
-        assertEquals(TEST_CTIME, snapshots.get(0).getCtime());
+        assertEquals(2, snapshots.size());
+        assertEquals(TEST_CTIME+1, snapshots.get(0).getCtime());
+        assertEquals(TEST_CTIME, snapshots.get(1).getCtime());
     }
 
     @Test
     void shouldGetAllSnapshotsSince() throws SQLException {
         engine.addSnapshot(TEST_SOURCE_PATH, TEST_HOST, TEST_CTIME);
+        engine.addSnapshot(TEST_SOURCE_PATH, TEST_HOST, TEST_CTIME+1);
 
         List<SnapshotEntity> snapshots = engine.getAllSnapshotsSince(TEST_CTIME);
 
-        assertEquals(1, snapshots.size());
-        assertEquals(TEST_CTIME, snapshots.get(0).getCtime());
+        assertEquals(2, snapshots.size());
+        assertEquals(TEST_CTIME+1, snapshots.get(0).getCtime());
+        assertEquals(TEST_CTIME, snapshots.get(1).getCtime());
     }
 
     @Test
     void shouldGetSnapshotsBySource() throws SQLException {
         engine.addSnapshot(TEST_SOURCE_PATH, TEST_HOST, TEST_CTIME);
+        engine.addSnapshot(TEST_SOURCE_PATH, TEST_HOST, TEST_CTIME+1);
 
         List<SnapshotEntity> snapshots = engine.getSnapshotsBySource(TEST_SOURCE_PATH);
 
-        assertEquals(1, snapshots.size());
-        assertEquals(TEST_CTIME, snapshots.get(0).getCtime());
+        assertEquals(2, snapshots.size());
+        assertEquals(TEST_CTIME+1, snapshots.get(0).getCtime());
+        assertEquals(TEST_CTIME, snapshots.get(1).getCtime());
     }
 
     @Test
     void shouldGetSnapshotsBySourceSince() throws SQLException {
         engine.addSnapshot(TEST_SOURCE_PATH, TEST_HOST, TEST_CTIME);
+        engine.addSnapshot(TEST_SOURCE_PATH, TEST_HOST, TEST_CTIME+1);
 
         List<SnapshotEntity> snapshots = engine.getSnapshotsBySourceSince(TEST_SOURCE_PATH, TEST_CTIME);
 
-        assertEquals(1, snapshots.size());
-        assertEquals(TEST_CTIME, snapshots.get(0).getCtime());
+        assertEquals(2, snapshots.size());
+        assertEquals(TEST_CTIME+1, snapshots.get(0).getCtime());
+        assertEquals(TEST_CTIME, snapshots.get(1).getCtime());
     }
 
     @Test
     void shouldGetSnapshotsByHost() throws SQLException {
         engine.addSnapshot(TEST_SOURCE_PATH, TEST_HOST, TEST_CTIME);
+        engine.addSnapshot(TEST_SOURCE_PATH, TEST_HOST, TEST_CTIME+1);
 
         List<SnapshotEntity> snapshots = engine.getSnapshotsByHost(TEST_HOST);
 
-        assertEquals(1, snapshots.size());
+        assertEquals(2, snapshots.size());
+        assertEquals(TEST_CTIME+1, snapshots.get(0).getCtime());
+        assertEquals(TEST_CTIME, snapshots.get(1).getCtime());
     }
 
     @Test
     void shouldGetSnapshotsByHostSince() throws SQLException {
         engine.addSnapshot(TEST_SOURCE_PATH, TEST_HOST, TEST_CTIME);
+        engine.addSnapshot(TEST_SOURCE_PATH, TEST_HOST, TEST_CTIME+1);
 
         List<SnapshotEntity> snapshots = engine.getSnapshotsByHostSince(TEST_HOST, TEST_CTIME);
 
-        assertEquals(1, snapshots.size());
+        assertEquals(2, snapshots.size());
+        assertEquals(TEST_CTIME+1, snapshots.get(0).getCtime());
+        assertEquals(TEST_CTIME, snapshots.get(1).getCtime());
     }
 
     @Test
     void shouldGetSnapshotsBySourceAndHost() throws SQLException {
         engine.addSnapshot(TEST_SOURCE_PATH, TEST_HOST, TEST_CTIME);
+        engine.addSnapshot(TEST_SOURCE_PATH, TEST_HOST, TEST_CTIME+1);
 
         List<SnapshotEntity> snapshots = engine.getSnapshotsBySourceAndHost(TEST_SOURCE_PATH, TEST_HOST);
 
-        assertEquals(1, snapshots.size());
+        assertEquals(2, snapshots.size());
+        assertEquals(TEST_CTIME+1, snapshots.get(0).getCtime());
+        assertEquals(TEST_CTIME, snapshots.get(1).getCtime());
     }
 
     @Test
     void shouldGetSnapshotsBySourceAndHostSince() throws SQLException {
         engine.addSnapshot(TEST_SOURCE_PATH, TEST_HOST, TEST_CTIME);
+        engine.addSnapshot(TEST_SOURCE_PATH, TEST_HOST, TEST_CTIME+1);
 
         List<SnapshotEntity> snapshots = engine.getSnapshotsBySourceAndHostSince(TEST_SOURCE_PATH, TEST_HOST, TEST_CTIME);
 
-        assertEquals(1, snapshots.size());
+        assertEquals(2, snapshots.size());
+        assertEquals(TEST_CTIME+1, snapshots.get(0).getCtime());
+        assertEquals(TEST_CTIME, snapshots.get(1).getCtime());
     }
 
     @Test

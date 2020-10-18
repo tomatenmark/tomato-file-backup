@@ -43,27 +43,27 @@ public class SnapshotDatabaseEngine {
     }
 
     public List<SnapshotEntity> getAllSnapshots() throws SQLException {
-        String sql = "SELECT * FROM snapshot";
+        String sql = "SELECT * FROM snapshot ORDER BY ctime DESC";
         PreparedStatement preparedStatement = connection.prepareStatement(sql);
         return buildSnapshotEntityList(preparedStatement);
     }
 
     public List<SnapshotEntity> getAllSnapshotsSince(long ctimeThreshold) throws SQLException {
-        String sql = "SELECT * FROM snapshot WHERE ctime >= ?";
+        String sql = "SELECT * FROM snapshot WHERE ctime >= ? ORDER BY ctime DESC";
         PreparedStatement preparedStatement = connection.prepareStatement(sql);
         preparedStatement.setLong(1, ctimeThreshold);
         return buildSnapshotEntityList(preparedStatement);
     }
 
     public List<SnapshotEntity> getSnapshotsBySource(String source) throws SQLException {
-        String sql = "SELECT * FROM snapshot WHERE source = ?";
+        String sql = "SELECT * FROM snapshot WHERE source = ? ORDER BY ctime DESC";
         PreparedStatement preparedStatement = connection.prepareStatement(sql);
         preparedStatement.setString(1, source);
         return buildSnapshotEntityList(preparedStatement);
     }
 
     public List<SnapshotEntity> getSnapshotsBySourceSince(String source, long ctimeThreshold) throws SQLException {
-        String sql = "SELECT * FROM snapshot WHERE source = ? AND ctime >= ?";
+        String sql = "SELECT * FROM snapshot WHERE source = ? AND ctime >= ? ORDER BY ctime DESC";
         PreparedStatement preparedStatement = connection.prepareStatement(sql);
         preparedStatement.setString(1, source);
         preparedStatement.setLong(2, ctimeThreshold);
@@ -71,7 +71,7 @@ public class SnapshotDatabaseEngine {
     }
 
     public List<SnapshotEntity> getSnapshotsByHost(String host) throws SQLException {
-        String sql = "SELECT * FROM snapshot WHERE host = ?";
+        String sql = "SELECT * FROM snapshot WHERE host = ? ORDER BY ctime DESC";
         PreparedStatement preparedStatement = connection.prepareStatement(sql);
         preparedStatement.setString(1, host);
         return buildSnapshotEntityList(preparedStatement);
@@ -86,7 +86,7 @@ public class SnapshotDatabaseEngine {
     }
 
     public List<SnapshotEntity> getSnapshotsBySourceAndHost(String source, String host) throws SQLException {
-        String sql = "SELECT * FROM snapshot WHERE source = ? AND host = ?";
+        String sql = "SELECT * FROM snapshot WHERE source = ? AND host = ? ORDER BY ctime DESC";
         PreparedStatement preparedStatement = connection.prepareStatement(sql);
         preparedStatement.setString(1, source);
         preparedStatement.setString(2, host);
@@ -94,7 +94,7 @@ public class SnapshotDatabaseEngine {
     }
 
     public List<SnapshotEntity> getSnapshotsBySourceAndHostSince(String source, String host, long ctimeThreshold) throws SQLException {
-        String sql = "SELECT * FROM snapshot WHERE source = ? AND host = ? AND ctime >= ?";
+        String sql = "SELECT * FROM snapshot WHERE source = ? AND host = ? AND ctime >= ? ORDER BY ctime DESC";
         PreparedStatement preparedStatement = connection.prepareStatement(sql);
         preparedStatement.setString(1, source);
         preparedStatement.setString(2, host);
