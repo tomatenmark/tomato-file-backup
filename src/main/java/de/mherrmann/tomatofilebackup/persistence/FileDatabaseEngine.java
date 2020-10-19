@@ -8,34 +8,34 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
-public class FileDatabaseEngine {
+class FileDatabaseEngine {
 
-    Connection connection;
+    private final Connection connection;
 
-    public FileDatabaseEngine(Connection connection) {
+    FileDatabaseEngine(Connection connection) {
         this.connection = connection;
     }
 
-    public FileEntity addRegularFile(String path, long size, long inode, long mtime,
+    FileEntity addRegularFile(String path, long size, long inode, long mtime,
                                boolean compressed, SnapshotEntity snapshotEntity) throws SQLException {
         return addFile(path, size, inode, mtime, compressed, false, false, false, "", snapshotEntity);
     }
 
-    public FileEntity addDirectory(String path, long inode, long mtime, SnapshotEntity snapshotEntity) throws SQLException {
+    FileEntity addDirectory(String path, long inode, long mtime, SnapshotEntity snapshotEntity) throws SQLException {
         return addFile(path, 0, inode, mtime, false, false, false, true, "", snapshotEntity);
     }
 
-    public FileEntity addSymlink(String path, long inode, long mtime, boolean targetIsDirectory,
+    FileEntity addSymlink(String path, long inode, long mtime, boolean targetIsDirectory,
                                  String linkPath, SnapshotEntity snapshotEntity) throws SQLException {
         return addFile(path, 0, inode, mtime, false, true, false, targetIsDirectory, linkPath, snapshotEntity);
     }
 
-    public FileEntity addJunction(String path, long inode, long mtime,
+    FileEntity addJunction(String path, long inode, long mtime,
                                  String linkPath, SnapshotEntity snapshotEntity) throws SQLException {
         return addFile(path, 0, inode, mtime, false, false, true, true, linkPath, snapshotEntity);
     }
 
-    public void addFileSnapshotRelation(String fileUuid, String snapshotUuid) throws SQLException {
+    void addFileSnapshotRelation(String fileUuid, String snapshotUuid) throws SQLException {
         String relationUuid = UUID.randomUUID().toString();
         String sql = "INSERT INTO file_snapshot_relation(relation_uuid,file_uuid,snapshot_uuid) VALUES(?,?,?);";
         PreparedStatement preparedStatement = connection.prepareStatement(sql);
@@ -45,7 +45,7 @@ public class FileDatabaseEngine {
         preparedStatement.executeUpdate();
     }
 
-    public FileEntity getFileByInode(Long inode, SnapshotEntity snapshotEntity) throws SQLException {
+    FileEntity getFileByInode(Long inode, SnapshotEntity snapshotEntity) throws SQLException {
         String sql = "SELECT file.* FROM file " +
                 "LEFT JOIN file_snapshot_relation USING (file_uuid) " +
                 "LEFT JOIN snapshot USING (snapshot_uuid)" +
@@ -59,7 +59,7 @@ public class FileDatabaseEngine {
         return buildFileEntity(resultSet);
     }
 
-    public FileEntity getFileByNameAndSizeAndMtime(String name, Long size,
+    FileEntity getFileByNameAndSizeAndMtime(String name, Long size,
                                                    Long mtime, SnapshotEntity snapshotEntity) throws SQLException {
         String sql = "SELECT file.* FROM file " +
                 "LEFT JOIN file_snapshot_relation USING (file_uuid) " +
@@ -76,7 +76,7 @@ public class FileDatabaseEngine {
         return buildFileEntity(resultSet);
     }
 
-    public List<FileEntity> getFilesBySnapshotUuidOrderByInode(String snapshotUuid) throws SQLException {
+    List<FileEntity> getFilesBySnapshotUuidOrderByInode(String snapshotUuid) throws SQLException {
         String sql = "SELECT file.* From file " +
                 "LEFT JOIN file_snapshot_relation USING(file_uuid) " +
                 "LEFT JOIN snapshot USING(snapshot_uuid) " +
@@ -86,7 +86,7 @@ public class FileDatabaseEngine {
         return getFilesBySnapshotUuid(preparedStatement);
     }
 
-    public List<FileEntity> getFilesBySnapshotUuidOrderByPath(String snapshotUuid) throws SQLException {
+    List<FileEntity> getFilesBySnapshotUuidOrderByPath(String snapshotUuid) throws SQLException {
         String sql = "SELECT file.* From file " +
                 "LEFT JOIN file_snapshot_relation USING(file_uuid) " +
                 "LEFT JOIN snapshot USING(snapshot_uuid) " +
@@ -96,7 +96,7 @@ public class FileDatabaseEngine {
         return getFilesBySnapshotUuid(preparedStatement);
     }
 
-    public void removeOrphanedFiles() throws SQLException {
+    void removeOrphanedFiles() throws SQLException {
         try {
             String sql = "DELETE FROM file WHERE file_uuid IN (" +
                     "SELECT file.file_uuid FROM file " +

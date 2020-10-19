@@ -143,14 +143,6 @@ public class DatabaseEngine {
         return snapshotDatabaseEngine.getSnapshotsBySourceAndHostSince(source, host, ctimeThreshold);
     }
 
-    public void removeOrphanedChunks() throws SQLException {
-        chunkDatabaseEngine.removeOrphanedChunks();
-    }
-
-    public void removeOrphanedFiles() throws SQLException {
-        fileDatabaseEngine.removeOrphanedFiles();
-    }
-
     public void removeSnapshotByHashId(String hashId) throws SQLException {
         snapshotDatabaseEngine.removeSnapshotByHashId(hashId, fileDatabaseEngine, chunkDatabaseEngine);
     }

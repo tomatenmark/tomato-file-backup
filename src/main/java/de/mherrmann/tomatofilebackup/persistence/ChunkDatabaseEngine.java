@@ -7,15 +7,15 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
-public class ChunkDatabaseEngine {
+class ChunkDatabaseEngine {
 
-    Connection connection;
+    private final Connection connection;
 
-    public ChunkDatabaseEngine(Connection connection) {
+    ChunkDatabaseEngine(Connection connection) {
         this.connection = connection;
     }
 
-    public ChunkEntity addChunk(Chunk chunk, String fileUuid) throws SQLException {
+    ChunkEntity addChunk(Chunk chunk, String fileUuid) throws SQLException {
         String chunkUuid = UUID.randomUUID().toString();
         String sql = "INSERT INTO chunk(chunk_uuid,checksum,length) VALUES(?,?,?);";
         try {
@@ -35,7 +35,7 @@ public class ChunkDatabaseEngine {
         return getChunkByChecksum(chunk.getChecksum());
     }
 
-    public void addChunkFileRelation(String fileUuid, String chunkUuid, long offset) throws SQLException {
+    void addChunkFileRelation(String fileUuid, String chunkUuid, long offset) throws SQLException {
         String relationUuid = UUID.randomUUID().toString();
         String sql = "INSERT INTO file_chunk_relation(relation_uuid,file_uuid,chunk_uuid,offset) VALUES(?,?,?,?);";
         PreparedStatement preparedStatement = connection.prepareStatement(sql);
@@ -46,7 +46,7 @@ public class ChunkDatabaseEngine {
         preparedStatement.executeUpdate();
     }
 
-    public ChunkEntity getChunkByChecksum(String checksum) throws SQLException {
+    ChunkEntity getChunkByChecksum(String checksum) throws SQLException {
         String sql = "SELECT chunk.*, offset FROM chunk " +
                 "LEFT JOIN file_chunk_relation USING (chunk_uuid)" +
                 "WHERE checksum = ?";
@@ -59,7 +59,7 @@ public class ChunkDatabaseEngine {
         return new ChunkEntity(resultSet.getString("chunk_uuid"), chunk);
     }
 
-    public List<ChunkEntity> getChunksByFileUuid(String fileUuid) throws SQLException {
+    List<ChunkEntity> getChunksByFileUuid(String fileUuid) throws SQLException {
         List<ChunkEntity> chunks = new ArrayList<>();
         String sql = "SELECT chunk.*, offset From chunk " +
                 "LEFT JOIN file_chunk_relation USING(chunk_uuid) " +
@@ -77,7 +77,7 @@ public class ChunkDatabaseEngine {
         return chunks;
     }
 
-    public boolean existsChunkByChecksum(String checksum) throws SQLException {
+    boolean existsChunkByChecksum(String checksum) throws SQLException {
         String sql = "SELECT * FROM chunk WHERE checksum = ?";
         PreparedStatement preparedStatement = connection.prepareStatement(sql);
         preparedStatement.setString(1, checksum);
@@ -85,7 +85,7 @@ public class ChunkDatabaseEngine {
         return !resultSet.isClosed();
     }
 
-    public List<String> removeOrphanedChunks() throws SQLException {
+    List<String> removeOrphanedChunks() throws SQLException {
         List<String> checksums = new ArrayList<>();
         String getSql = "SELECT checksum FROM chunk WHERE chunk_uuid IN (" +
                 "SELECT chunk.chunk_uuid FROM chunk " +

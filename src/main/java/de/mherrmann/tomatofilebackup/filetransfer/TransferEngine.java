@@ -1,7 +1,6 @@
 package de.mherrmann.tomatofilebackup.filetransfer;
 
 import de.mherrmann.tomatofilebackup.chunking.Chunk;
-import de.mherrmann.tomatofilebackup.persistence.ChunkDatabaseEngine;
 import de.mherrmann.tomatofilebackup.persistence.DatabaseEngine;
 
 import java.io.*;
