@@ -97,13 +97,18 @@ class ChunkDatabaseEngine {
         while(resultSet.next()){
             checksums.add(resultSet.getString("checksum"));
         }
-        String removeSql = "DELETE FROM chunk WHERE chunk_uuid IN (" +
-                  "SELECT chunk.chunk_uuid FROM chunk " +
-                  "LEFT JOIN file_chunk_relation USING (chunk_uuid) " +
-                  "WHERE file_uuid IS NULL" +
-                ")";
-        Statement removeStatement = connection.createStatement();
-        removeStatement.executeUpdate(removeSql);
+        try {
+            String removeSql = "DELETE FROM chunk WHERE chunk_uuid IN (" +
+                    "SELECT chunk.chunk_uuid FROM chunk " +
+                    "LEFT JOIN file_chunk_relation USING (chunk_uuid) " +
+                    "WHERE file_uuid IS NULL" +
+                    ")";
+            Statement removeStatement = connection.createStatement();
+            removeStatement.executeUpdate(removeSql);
+        } catch(SQLException exception){
+            throw new SQLException("Could not remove orphaned chunks.", exception);
+        }
+
         return checksums;
     }
 }
