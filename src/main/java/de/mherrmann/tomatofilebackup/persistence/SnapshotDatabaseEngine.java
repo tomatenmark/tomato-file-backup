@@ -5,6 +5,7 @@ import de.mherrmann.tomatofilebackup.persistence.entities.SnapshotEntity;
 
 import java.sql.*;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.UUID;
 
@@ -120,6 +121,18 @@ class SnapshotDatabaseEngine {
         return removeSnapshots(preparedStatement, fileDatabaseEngine, chunkDatabaseEngine);
     }
 
+    List<String> removeSnapshotsByUuids(String[] uuids, FileDatabaseEngine fileDatabaseEngine,
+                                          ChunkDatabaseEngine chunkDatabaseEngine) throws SQLException {
+        if(uuids.length == 0){
+            return Collections.emptyList();
+        }
+        connection.setAutoCommit(false);
+        String sql = "DELETE FROM snapshot WHERE snapshot_uuid IN (" + getPlaceholders(uuids.length) + ")";
+        PreparedStatement preparedStatement = connection.prepareStatement(sql);
+        addUuidsToStatement(uuids, preparedStatement);
+        return removeSnapshots(preparedStatement, fileDatabaseEngine, chunkDatabaseEngine);
+    }
+
     private List<SnapshotEntity> buildSnapshotEntityList(PreparedStatement preparedStatement) throws SQLException {
         List<SnapshotEntity> snapshots = new ArrayList<>();
         ResultSet resultSet = preparedStatement.executeQuery();
@@ -154,5 +167,23 @@ class SnapshotDatabaseEngine {
         }
         connection.setAutoCommit(true);
         return checksums;
+    }
+
+    private void addUuidsToStatement(String[] uuids, PreparedStatement preparedStatement) throws SQLException {
+        int i = 0;
+        for(String uuid : uuids){
+            preparedStatement.setString(++i, uuid);
+        }
+    }
+
+    private String getPlaceholders(int n){
+        StringBuilder placeholderBuilder = new StringBuilder();
+        for(int i = 1; i <= n; i++){
+            placeholderBuilder.append("?");
+            if(i != n){
+                placeholderBuilder.append(",");
+            }
+        }
+        return placeholderBuilder.toString();
     }
 }

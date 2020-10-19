@@ -151,6 +151,10 @@ public class DatabaseEngine {
         return snapshotDatabaseEngine.removeSnapshotsOlderThan(threshold, fileDatabaseEngine, chunkDatabaseEngine);
     }
 
+    public List<String> removeSnapshotsByUuids(String... uuids) throws SQLException {
+        return snapshotDatabaseEngine.removeSnapshotsByUuids(uuids, fileDatabaseEngine, chunkDatabaseEngine);
+    }
+
     private void turnOnConstraints() throws SQLException {
         String sql = "PRAGMA foreign_keys = ON";
         Statement statement = connection.createStatement();
