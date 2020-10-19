@@ -143,8 +143,12 @@ public class DatabaseEngine {
         return snapshotDatabaseEngine.getSnapshotsBySourceAndHostSince(source, host, ctimeThreshold);
     }
 
-    public void removeSnapshotByHashId(String hashId) throws SQLException {
-        snapshotDatabaseEngine.removeSnapshotByHashId(hashId, fileDatabaseEngine, chunkDatabaseEngine);
+    public List<String> removeSnapshotByHashId(String hashId) throws SQLException {
+        return snapshotDatabaseEngine.removeSnapshotByHashId(hashId, fileDatabaseEngine, chunkDatabaseEngine);
+    }
+
+    public List<String> removeSnapshotsOlderThan(long threshold) throws SQLException {
+        return snapshotDatabaseEngine.removeSnapshotsOlderThan(threshold, fileDatabaseEngine, chunkDatabaseEngine);
     }
 
     private void turnOnConstraints() throws SQLException {

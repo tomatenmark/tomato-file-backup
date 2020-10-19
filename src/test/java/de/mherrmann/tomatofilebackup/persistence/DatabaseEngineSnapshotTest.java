@@ -296,6 +296,22 @@ public class DatabaseEngineSnapshotTest {
                 testObjects.chunkEntityToBeRemained1, testObjects.chunkEntityToBeRemained2);
     }
 
+    @Test
+    void shouldRemoveSnapshotsOlderThan() throws Exception {
+        TestObjects testObjects = prepareRemoveTest();
+
+        engine.removeSnapshotsOlderThan(testObjects.snapshotEntityExpectedToBeRemoved.getCtime()+1);
+
+        assertRemoved(
+                testObjects.snapshotEntityExpectedToBeRemoved,
+                testObjects.fileEntityToBeRemoved1, testObjects.fileEntityToBeRemoved2,
+                testObjects.chunkEntityToBeRemoved1, testObjects.chunkEntityToBeRemoved2);
+        assertRemained(
+                testObjects.snapshotEntityExpectedToBeRemained,
+                testObjects.fileEntityToBeRemained1, testObjects.fileEntityToBeRemained2,
+                testObjects.chunkEntityToBeRemained1, testObjects.chunkEntityToBeRemained2);
+    }
+
     private void assertValidSnapshot() throws SQLException {
         String sql = "SELECT * FROM snapshot WHERE source = ? AND host = ?";
         PreparedStatement preparedStatement = engine.connection.prepareStatement(sql);

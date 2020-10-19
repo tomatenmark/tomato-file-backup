@@ -102,13 +102,22 @@ class SnapshotDatabaseEngine {
         return buildSnapshotEntityList(preparedStatement);
     }
 
-    void removeSnapshotByHashId(String hashId, FileDatabaseEngine fileDatabaseEngine,
+    List<String> removeSnapshotByHashId(String hashId, FileDatabaseEngine fileDatabaseEngine,
                                        ChunkDatabaseEngine chunkDatabaseEngine) throws SQLException {
         connection.setAutoCommit(false);
         String sql = "DELETE FROM snapshot WHERE hash_id = ?";
         PreparedStatement preparedStatement = connection.prepareStatement(sql);
         preparedStatement.setString(1, hashId);
-        removeSnapshots(preparedStatement, fileDatabaseEngine, chunkDatabaseEngine);
+        return removeSnapshots(preparedStatement, fileDatabaseEngine, chunkDatabaseEngine);
+    }
+
+    List<String> removeSnapshotsOlderThan(long threshold, FileDatabaseEngine fileDatabaseEngine,
+                                ChunkDatabaseEngine chunkDatabaseEngine) throws SQLException {
+        connection.setAutoCommit(false);
+        String sql = "DELETE FROM snapshot WHERE ctime < ?";
+        PreparedStatement preparedStatement = connection.prepareStatement(sql);
+        preparedStatement.setLong(1, threshold);
+        return removeSnapshots(preparedStatement, fileDatabaseEngine, chunkDatabaseEngine);
     }
 
     private List<SnapshotEntity> buildSnapshotEntityList(PreparedStatement preparedStatement) throws SQLException {
