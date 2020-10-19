@@ -45,39 +45,71 @@ public class RepositoryInitializer {
     }
 
     private static void createChunkTable(Connection connection) throws SQLException {
-        String sql = "CREATE TABLE IF NOT EXISTS chunk(chunk_uuid text PRIMARY KEY, checksum text, length integer);";
+        String sql = "CREATE TABLE IF NOT EXISTS chunk(" +
+                  "chunk_uuid text PRIMARY KEY," +
+                  "checksum text," +
+                  "length integer" +
+                ");";
         Statement statement = connection.createStatement();
         statement.execute(sql);
     }
 
     private static void createFileTable(Connection connection) throws SQLException {
-        String sql = "CREATE TABLE IF NOT EXISTS file(file_uuid text PRIMARY KEY, path text, size integer, inode integer, " +
-                "mtime integer, compressed integer, link integer, junction integer, directory integer, link_path text);";
+        String sql = "CREATE TABLE IF NOT EXISTS file(" +
+                  "file_uuid text PRIMARY KEY," +
+                  "path text," +
+                  "size integer," +
+                  "inode integer, " +
+                  "mtime integer," +
+                  "compressed integer," +
+                  "link integer," +
+                  "junction integer," +
+                  "directory integer," +
+                  "link_path text" +
+                ");";
         Statement statement = connection.createStatement();
         statement.execute(sql);
     }
 
     private static void createSnapshotTable(Connection connection) throws SQLException {
-        String sql = "CREATE TABLE IF NOT EXISTS snapshot(snapshot_uuid text PRIMARY KEY, hash_id text, " +
-                "source text, host text, ctime integer);";
+        String sql = "CREATE TABLE IF NOT EXISTS snapshot(" +
+                  "snapshot_uuid text PRIMARY KEY," +
+                  "hash_id text," +
+                  "source text," +
+                  "host text," +
+                  "ctime integer" +
+                ");";
         Statement statement = connection.createStatement();
         statement.execute(sql);
     }
 
     private static void createRepositoryTable(Connection connection) throws SQLException {
-        String sql = "CREATE TABLE IF NOT EXISTS repository(repository_uuid text PRIMARY KEY, path text, version text);";
+        String sql = "CREATE TABLE IF NOT EXISTS repository(" +
+                  "repository_uuid text PRIMARY KEY," +
+                  "path text," +
+                  "version text" +
+                ");";
         Statement statement = connection.createStatement();
         statement.execute(sql);
     }
 
     private static void createFileChunkRelationTable(Connection connection) throws SQLException {
-        String sql = "CREATE TABLE IF NOT EXISTS file_chunk_relation(relation_uuid text PRIMARY KEY, file_uuid text, chunk_uuid text, offset integer);";
+        String sql = "CREATE TABLE IF NOT EXISTS file_chunk_relation(" +
+                  "relation_uuid text PRIMARY KEY," +
+                  "file_uuid text REFERENCES file(file_uuid) ON DELETE CASCADE," +
+                  "chunk_uuid text REFERENCES chunk(chunk_uuid) ON DELETE CASCADE," +
+                  "offset integer" +
+                ");";
         Statement statement = connection.createStatement();
         statement.execute(sql);
     }
 
     private static void createFileSnapshotRelationTable(Connection connection) throws SQLException {
-        String sql = "CREATE TABLE IF NOT EXISTS file_snapshot_relation(relation_uuid text PRIMARY KEY, file_uuid text, snapshot_uuid text);";
+        String sql = "CREATE TABLE IF NOT EXISTS file_snapshot_relation(" +
+                  "relation_uuid text PRIMARY KEY," +
+                  "file_uuid text REFERENCES file(file_uuid) ON DELETE CASCADE," +
+                  "snapshot_uuid text REFERENCES snapshot(snapshot_uuid) ON DELETE CASCADE" +
+                ");";
         Statement statement = connection.createStatement();
         statement.execute(sql);
     }

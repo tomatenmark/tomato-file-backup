@@ -36,8 +36,8 @@ public class DatabaseEngineSnapshotTest {
 
     @AfterEach
     void tearDown() throws SQLException {
-        TestUtil.removeTestFiles();
         engine.destroy();
+        TestUtil.removeTestFiles();
     }
 
     @Test

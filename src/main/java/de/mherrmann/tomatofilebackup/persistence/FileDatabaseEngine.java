@@ -98,7 +98,6 @@ public class FileDatabaseEngine {
 
     public void removeOrphanedFiles() throws SQLException {
         try {
-            removeChunkRelationsFromOrphanedChunks();
             String sql = "DELETE FROM file WHERE file_uuid IN (" +
                     "SELECT file.file_uuid FROM file " +
                     "LEFT JOIN file_snapshot_relation USING (file_uuid) " +
@@ -109,17 +108,6 @@ public class FileDatabaseEngine {
         } catch(SQLException exception){
             throw new SQLException("Could not remove orphaned files.", exception);
         }
-    }
-
-    private void removeChunkRelationsFromOrphanedChunks() throws SQLException {
-        String sql = "DELETE FROM file_chunk_relation WHERE file_uuid IN (" +
-                "SELECT file_chunk_relation.file_uuid FROM file_chunk_relation " +
-                "LEFT JOIN file USING (file_uuid) " +
-                "LEFT JOIN file_snapshot_relation USING (file_uuid) " +
-                "WHERE snapshot_uuid IS NULL" +
-                ")";
-        Statement statement = connection.createStatement();
-        statement.executeUpdate(sql);
     }
 
     private FileEntity buildFileEntity(ResultSet resultSet) throws SQLException {

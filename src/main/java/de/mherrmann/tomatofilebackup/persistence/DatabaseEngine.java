@@ -28,6 +28,7 @@ public class DatabaseEngine {
         this.fileDatabaseEngine = new FileDatabaseEngine(connection);
         this.snapshotDatabaseEngine = new SnapshotDatabaseEngine(connection);
         this.repositoryDatabaseEngine = new RepositoryDatabaseEngine(repositoryPath, connection);
+        turnOnConstraints();
     }
 
     public void destroy() throws SQLException {
@@ -152,5 +153,11 @@ public class DatabaseEngine {
 
     public void removeSnapshotByHashId(String hashId) throws SQLException {
         snapshotDatabaseEngine.removeSnapshotByHashId(hashId, fileDatabaseEngine, chunkDatabaseEngine);
+    }
+
+    private void turnOnConstraints() throws SQLException {
+        String sql = "PRAGMA foreign_keys = ON";
+        Statement statement = connection.createStatement();
+        statement.executeUpdate(sql);
     }
 }

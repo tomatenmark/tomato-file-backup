@@ -42,6 +42,7 @@ public class DatabaseEngineFileTest {
         TestUtil.createTestDirectory();
         engine = new DatabaseEngine(TEST_REPOSITORY_PATH);
         engine.initializeRepository();
+        TestUtil.turnOfConstraints(engine.connection);
     }
 
     @AfterEach

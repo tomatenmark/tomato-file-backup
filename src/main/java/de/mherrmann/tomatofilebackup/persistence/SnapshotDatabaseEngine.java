@@ -1,14 +1,10 @@
 package de.mherrmann.tomatofilebackup.persistence;
 
 import de.mherrmann.tomatofilebackup.chunking.ChecksumEngine;
-import de.mherrmann.tomatofilebackup.filetransfer.TransferEngine;
 import de.mherrmann.tomatofilebackup.persistence.entities.SnapshotEntity;
 
-import java.io.File;
-import java.io.IOException;
 import java.sql.*;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 import java.util.UUID;
 
@@ -109,13 +105,10 @@ public class SnapshotDatabaseEngine {
     public void removeSnapshotByHashId(String hashId, FileDatabaseEngine fileDatabaseEngine,
                                        ChunkDatabaseEngine chunkDatabaseEngine) throws SQLException {
         connection.setAutoCommit(false);
-        String subQuery = "SELECT file_snapshot_relation.snapshot_uuid FROM file_snapshot_relation " +
-                "LEFT JOIN snapshot USING (snapshot_uuid) " +
-                "WHERE hash_id = ?";
         String sql = "DELETE FROM snapshot WHERE hash_id = ?";
         PreparedStatement preparedStatement = connection.prepareStatement(sql);
         preparedStatement.setString(1, hashId);
-        removeSnapshots(preparedStatement, fileDatabaseEngine, chunkDatabaseEngine, subQuery, hashId);
+        removeSnapshots(preparedStatement, fileDatabaseEngine, chunkDatabaseEngine);
     }
 
     private List<SnapshotEntity> buildSnapshotEntityList(PreparedStatement preparedStatement) throws SQLException {
@@ -138,10 +131,9 @@ public class SnapshotDatabaseEngine {
     }
 
     private List<String> removeSnapshots(PreparedStatement preparedStatement, FileDatabaseEngine fileDatabaseEngine,
-                                 ChunkDatabaseEngine chunkDatabaseEngine, String subQuery, String... subQueryValues) throws SQLException {
+                                 ChunkDatabaseEngine chunkDatabaseEngine) throws SQLException {
         List<String> checksums;
         try {
-            removeFileRelationsFromSnapshotMatchingSubQuery(subQuery, subQueryValues);
             preparedStatement.executeUpdate();
             fileDatabaseEngine.removeOrphanedFiles();
             checksums = chunkDatabaseEngine.removeOrphanedChunks();
@@ -153,15 +145,5 @@ public class SnapshotDatabaseEngine {
         }
         connection.setAutoCommit(true);
         return checksums;
-    }
-
-    private void removeFileRelationsFromSnapshotMatchingSubQuery(String subQuery, String[] subQueryValues) throws SQLException {
-        String sql = "DELETE FROM file_snapshot_relation WHERE snapshot_uuid IN (" + subQuery + ")";
-        PreparedStatement preparedStatement = connection.prepareStatement(sql);
-        int i = 1;
-        for(String value : subQueryValues){
-            preparedStatement.setString(i++, value);
-        }
-        preparedStatement.executeUpdate();
     }
 }
