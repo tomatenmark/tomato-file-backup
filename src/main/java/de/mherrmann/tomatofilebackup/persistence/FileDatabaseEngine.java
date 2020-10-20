@@ -45,6 +45,7 @@ class FileDatabaseEngine {
         preparedStatement.executeUpdate();
     }
 
+    //TODO: modify to getFileBySizeAndMtimeAndInode
     FileEntity getFileByInode(Long inode, SnapshotEntity snapshotEntity) throws SQLException {
         String sql = "SELECT file.* FROM file " +
                 "LEFT JOIN file_snapshot_relation USING (file_uuid) " +
@@ -59,6 +60,7 @@ class FileDatabaseEngine {
         return buildFileEntity(resultSet);
     }
 
+    //TODO: rename to getFileBySizeAndMtimeAndName
     FileEntity getFileByNameAndSizeAndMtime(String name, Long size,
                                                    Long mtime, SnapshotEntity snapshotEntity) throws SQLException {
         String sql = "SELECT file.* FROM file " +

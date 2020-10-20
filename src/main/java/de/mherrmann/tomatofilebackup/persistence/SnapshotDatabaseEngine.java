@@ -133,6 +133,8 @@ class SnapshotDatabaseEngine {
         return removeSnapshots(preparedStatement, fileDatabaseEngine, chunkDatabaseEngine);
     }
 
+    //TODO: add removeSnapshotsButKeepNRecent(int i, FileDatabaseEngine fileDatabaseEngine, ChunkDatabaseEngine chunkDatabaseEngine)
+
     private List<SnapshotEntity> buildSnapshotEntityList(PreparedStatement preparedStatement) throws SQLException {
         List<SnapshotEntity> snapshots = new ArrayList<>();
         ResultSet resultSet = preparedStatement.executeQuery();

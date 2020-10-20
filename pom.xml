@@ -8,6 +8,14 @@
     <artifactId>tomato-file-backup</artifactId>
     <version>1.0_alpha1</version>
 
+    <repositories>
+        <repository>
+            <id>central</id>
+            <name>bintray</name>
+            <url>https://jcenter.bintray.com</url>
+        </repository>
+    </repositories>
+
     <dependencies>
         <!-- https://mvnrepository.com/artifact/org.junit.jupiter/junit-jupiter-api -->
         <dependency>
@@ -30,6 +38,15 @@
             <artifactId>sqlite-jdbc</artifactId>
             <version>3.32.3.2</version>
         </dependency>
+
+        <!-- https://github.com/SerCeMan/jnr-fuse -->
+        <dependency>
+            <groupId>com.github.serceman</groupId>
+            <artifactId>jnr-fuse</artifactId>
+            <version>0.5.4</version>
+        </dependency>
+
+
 
     </dependencies>
 
