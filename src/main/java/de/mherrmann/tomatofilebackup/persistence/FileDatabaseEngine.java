@@ -86,7 +86,6 @@ class FileDatabaseEngine {
         preparedStatement.setString(4, snapshotEntity.getSource());
         preparedStatement.setString(5, snapshotEntity.getHost());
         ResultSet resultSet = preparedStatement.executeQuery();
-        resultSet.next();
         if(!resultSet.next()) {
             return Optional.empty();
         }

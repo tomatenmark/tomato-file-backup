@@ -13,6 +13,7 @@ import java.io.File;
 import java.io.IOException;
 import java.sql.*;
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
 public class DatabaseEngineChunkTest {
@@ -22,9 +23,6 @@ public class DatabaseEngineChunkTest {
     static final String TEST_FILE_UUID = UUID.randomUUID().toString();
     static final long TEST_OFFSET = 456;
     static final int TEST_LENGTH = 123;
-    private static final int TEST_SINGLE_CHUNK_ORDINAL = 42;
-    static final int TEST_CHUNK1_ORDINAL = 1;
-    static final int TEST_CHUNK2_ORDINAL = 2;
     private static final String TEST_FILE_PATH = new File("./test/testFile.txt").getAbsolutePath();
     private static final long TEST_SIZE = 123456;
     private static final long TEST_FILE_INODE = 234654;
@@ -68,41 +66,35 @@ public class DatabaseEngineChunkTest {
     }
 
     @Test
-    void shouldSayChunkDoExist() throws SQLException {
+    void shouldNotBePresentByChecksum() throws SQLException {
         Chunk chunk = new Chunk(TEST_OFFSET, TEST_LENGTH);
         chunk.setChecksum(TEST_CHECKSUM);
         engine.addChunk(chunk, TEST_FILE_UUID);
 
-        boolean exists = engine.existsChunkByChecksum(TEST_CHECKSUM);
+        Optional<ChunkEntity> returnedChunk = engine.getChunkByChecksum("invalid");
 
-        assertTrue(exists);
+        assertFalse(returnedChunk.isPresent());
     }
 
     @Test
-    void shouldSayChunkDoNotExist() throws SQLException {
-        boolean exists = engine.existsChunkByChecksum(TEST_CHECKSUM);
-
-        assertFalse(exists);
-    }
-
-    @Test
-    void shouldGetChunk() throws SQLException {
+    void shouldGetChunkByChecksum() throws SQLException {
         Chunk chunk = new Chunk(TEST_OFFSET, TEST_LENGTH);
         chunk.setChecksum(TEST_CHECKSUM);
         engine.addChunk(chunk, TEST_FILE_UUID);
 
-        ChunkEntity returnedChunk = engine.getChunkByChecksum(TEST_CHECKSUM);
+        Optional<ChunkEntity> returnedChunk = engine.getChunkByChecksum(TEST_CHECKSUM);
 
-        assertEquals(chunk.getChecksum(), returnedChunk.getChecksum());
-        assertEquals(chunk.getOffset(), returnedChunk.getOffset());
-        assertEquals(chunk.getLength(), returnedChunk.getLength());
+        assertTrue(returnedChunk.isPresent());
+        assertEquals(chunk.getChecksum(), returnedChunk.get().getChecksum());
+        assertEquals(chunk.getOffset(), returnedChunk.get().getOffset());
+        assertEquals(chunk.getLength(), returnedChunk.get().getLength());
     }
 
     @Test
     void shouldGetChunksInOrder() throws SQLException {
         SnapshotEntity snapshotEntity = engine.addSnapshot("test", "test", 1234567890);
-        engine.addRegularFile(TEST_FILE_PATH, TEST_SIZE, TEST_FILE_INODE, DatabaseEngineFileTest.TEST_MTIME, DatabaseEngineFileTest.TEST_MTIME,
-                DatabaseEngineFileTest.TEST_MTIME,false, "user", "owner", "rwxrwxrwx", snapshotEntity);
+        engine.addRegularFile(TEST_FILE_PATH, TEST_SIZE, TEST_FILE_INODE, TEST_MTIME, TEST_MTIME,
+                TEST_MTIME,false, "user", "owner", "rwxrwxrwx", snapshotEntity);
         Chunk chunk = new Chunk(TEST_OFFSET, TEST_LENGTH);
         Chunk chunk2 = new Chunk(TEST_OFFSET+TEST_LENGTH, TEST_LENGTH);
         chunk.setChecksum(TEST_CHECKSUM);

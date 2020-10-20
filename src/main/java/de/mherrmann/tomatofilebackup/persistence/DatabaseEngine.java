@@ -82,7 +82,7 @@ public class DatabaseEngine {
         fileDatabaseEngine.addFileSnapshotRelation(fileUuid, snapshotUuid, path);
     }
 
-    public ChunkEntity getChunkByChecksum(String checksum) throws SQLException {
+    public Optional<ChunkEntity> getChunkByChecksum(String checksum) throws SQLException {
         return chunkDatabaseEngine.getChunkByChecksum(checksum);
     }
 
@@ -90,15 +90,11 @@ public class DatabaseEngine {
         return chunkDatabaseEngine.getChunksByFileUuid(fileUuid);
     }
 
-    public boolean existsChunkByChecksum(String checksum) throws SQLException {
-        return chunkDatabaseEngine.existsChunkByChecksum(checksum);
-    }
-
     public Optional<FileEntity> getFileBySizeAndMtimeAndInode(long size, long mtime, long inode, SnapshotEntity snapshotEntity) throws SQLException {
         return fileDatabaseEngine.getFileBySizeAndMtimeAndInode(size, mtime, inode, snapshotEntity);
     }
 
-    public Optional<FileEntity> getFileByNameAndSizeAndMtime(long size, long mtime, String name, SnapshotEntity snapshotEntity) throws SQLException {
+    public Optional<FileEntity> getFileBySizeAndMtimeAndName(long size, long mtime, String name, SnapshotEntity snapshotEntity) throws SQLException {
         return fileDatabaseEngine.getFileBySizeAndMtimeAndName(size, mtime, name, snapshotEntity);
     }
 

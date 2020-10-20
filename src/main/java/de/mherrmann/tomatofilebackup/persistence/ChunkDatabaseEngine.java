@@ -5,6 +5,7 @@ import de.mherrmann.tomatofilebackup.persistence.entities.ChunkEntity;
 import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
 class ChunkDatabaseEngine {
@@ -15,6 +16,7 @@ class ChunkDatabaseEngine {
         this.connection = connection;
     }
 
+    @SuppressWarnings("OptionalGetWithoutIsPresent")
     ChunkEntity addChunk(Chunk chunk, String fileUuid) throws SQLException {
         String chunkUuid = UUID.randomUUID().toString();
         String sql = "INSERT INTO chunk(chunk_uuid,checksum,length) VALUES(?,?,?);";
@@ -32,7 +34,7 @@ class ChunkDatabaseEngine {
             throw new SQLException("Error: Could not add chunk. checksum: " + chunk.getChecksum(), exception);
         }
         connection.setAutoCommit(true);
-        return getChunkByChecksum(chunk.getChecksum());
+        return getChunkByChecksum(chunk.getChecksum()).get();
     }
 
     void addChunkFileRelation(String fileUuid, String chunkUuid, long offset) throws SQLException {
@@ -46,17 +48,19 @@ class ChunkDatabaseEngine {
         preparedStatement.executeUpdate();
     }
 
-    ChunkEntity getChunkByChecksum(String checksum) throws SQLException {
+    Optional<ChunkEntity> getChunkByChecksum(String checksum) throws SQLException {
         String sql = "SELECT chunk.*, offset FROM chunk " +
                 "LEFT JOIN file_chunk_relation USING (chunk_uuid)" +
                 "WHERE checksum = ?";
         PreparedStatement preparedStatement = connection.prepareStatement(sql);
         preparedStatement.setString(1, checksum);
         ResultSet resultSet = preparedStatement.executeQuery();
-        resultSet.next();
+        if(!resultSet.next()){
+            return Optional.empty();
+        }
         Chunk chunk = new Chunk(resultSet.getLong("offset"), resultSet.getInt("length"));
         chunk.setChecksum(checksum);
-        return new ChunkEntity(resultSet.getString("chunk_uuid"), chunk);
+        return Optional.of(new ChunkEntity(resultSet.getString("chunk_uuid"), chunk));
     }
 
     List<ChunkEntity> getChunksByFileUuid(String fileUuid) throws SQLException {
@@ -75,14 +79,6 @@ class ChunkDatabaseEngine {
             chunks.add(new ChunkEntity(resultSet.getString("chunk_uuid"), chunk));
         }
         return chunks;
-    }
-
-    boolean existsChunkByChecksum(String checksum) throws SQLException {
-        String sql = "SELECT * FROM chunk WHERE checksum = ?";
-        PreparedStatement preparedStatement = connection.prepareStatement(sql);
-        preparedStatement.setString(1, checksum);
-        ResultSet resultSet = preparedStatement.executeQuery();
-        return !resultSet.isClosed();
     }
 
     List<String> removeOrphanedChunks() throws SQLException {

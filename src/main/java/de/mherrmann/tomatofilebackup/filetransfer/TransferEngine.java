@@ -68,7 +68,7 @@ public class TransferEngine {
     public void removeOrphanedChunkFiles(File chunksDirectory, DatabaseEngine databaseEngine) throws IOException, IllegalStateException {
         try {
             for(File chunkFile : Objects.requireNonNull(chunksDirectory.listFiles())){
-                if(!databaseEngine.existsChunkByChecksum(chunkFile.getName())){
+                if(databaseEngine.getChunkByChecksum(chunkFile.getName()).isEmpty()){
                     Files.delete(chunkFile.toPath());
                 }
             }

@@ -168,18 +168,40 @@ public class DatabaseEngineFileTest {
     }
 
     @Test
-    void shouldGetFileByNameAndSizeAndMtime() throws SQLException {
+    void shouldGetFileBySizeAndMtimeAndName() throws SQLException {
         SnapshotEntity snapshotEntity = engine.addSnapshot("test", "test", 1234567890);
         engine.addRegularFile(TEST_FILE_PATH, TEST_SIZE, TEST_FILE_INODE, DatabaseEngineFileTest.TEST_MTIME, DatabaseEngineFileTest.TEST_MTIME,
                 DatabaseEngineFileTest.TEST_MTIME,false, "user", "owner", "rwxrwxrwx", snapshotEntity);
-        String name = TEST_FILE_PATH.replaceAll("^.*/(.*?)$", "$1");
+        String name = new File(TEST_FILE_PATH).getName();
 
-        Optional<FileEntity> file = engine.getFileByNameAndSizeAndMtime(TEST_SIZE, TEST_MTIME, name, snapshotEntity);
+        Optional<FileEntity> file = engine.getFileBySizeAndMtimeAndName(TEST_SIZE, TEST_MTIME, name, snapshotEntity);
 
         assertTrue(file.isPresent());
         assertEquals(TEST_FILE_PATH, file.get().getPath());
         assertEquals(TEST_SIZE, file.get().getSize());
         assertEquals(TEST_MTIME, file.get().getMtime());
+    }
+
+    @Test
+    void shouldNotBePresentBySizeAndMtimeAndName() throws SQLException {
+        SnapshotEntity snapshotEntity = engine.addSnapshot("test", "test", 1234567890);
+        engine.addRegularFile(TEST_FILE_PATH, TEST_SIZE, TEST_FILE_INODE, DatabaseEngineFileTest.TEST_MTIME, DatabaseEngineFileTest.TEST_MTIME,
+                DatabaseEngineFileTest.TEST_MTIME,false, "user", "owner", "rwxrwxrwx", snapshotEntity);
+
+        Optional<FileEntity> file = engine.getFileBySizeAndMtimeAndName(TEST_SIZE, TEST_MTIME, "invalid", snapshotEntity);
+
+        assertFalse(file.isPresent());
+    }
+
+    @Test
+    void shouldNotBePresentBySizeAndMtimeAndInode() throws SQLException {
+        SnapshotEntity snapshotEntity = engine.addSnapshot("test", "test", 1234567890);
+        engine.addRegularFile(TEST_FILE_PATH, TEST_SIZE, TEST_FILE_INODE, DatabaseEngineFileTest.TEST_MTIME, DatabaseEngineFileTest.TEST_MTIME,
+                DatabaseEngineFileTest.TEST_MTIME,false, "user", "owner", "rwxrwxrwx", snapshotEntity);
+
+        Optional<FileEntity> file = engine.getFileBySizeAndMtimeAndInode(TEST_SIZE, TEST_MTIME, -1, snapshotEntity);
+
+        assertFalse(file.isPresent());
     }
 
     private void assertValidRegularFile(String snapshotUuid) throws SQLException {
