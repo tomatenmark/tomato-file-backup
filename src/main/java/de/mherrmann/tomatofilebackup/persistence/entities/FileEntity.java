@@ -5,25 +5,35 @@ public class FileEntity {
     private final String path;
     private final long size;
     private final long inode;
+    private final long ctime;
     private final long mtime;
+    private final long atime;
+    private final boolean compressed;
     private final boolean link;
+    private final String linkPath;
     private final boolean junction;
     private final boolean directory;
-    private final String linkPath;
-    private final boolean compressed;
+    private final String ownerUser;
+    private final String ownerGroup;
+    private final String mod;
 
-    public FileEntity(String uuid, String path, long size, long inode, long mtime,
-                      boolean link, boolean junction, boolean directory, String linkPath, boolean compressed) {
+    public FileEntity(String uuid, String path, long size, long inode, long ctime, long mtime, long atime, boolean compressed,
+                      boolean link, String linkPath, boolean junction, boolean directory, String ownerUser, String ownerGroup, String mod) {
         this.uuid = uuid;
         this.path = path;
         this.size = size;
         this.inode = inode;
+        this.ctime = mtime;
         this.mtime = mtime;
+        this.atime = mtime;
+        this.compressed = compressed;
         this.link = link;
+        this.linkPath = linkPath;
         this.junction = junction;
         this.directory = directory;
-        this.linkPath = linkPath;
-        this.compressed = compressed;
+        this.ownerUser = ownerUser;
+        this.ownerGroup = ownerGroup;
+        this.mod = mod;
     }
 
     public String getUuid() {
@@ -42,12 +52,28 @@ public class FileEntity {
         return inode;
     }
 
+    public long getCtime() {
+        return ctime;
+    }
+
     public long getMtime() {
         return mtime;
     }
 
+    public long getAtime() {
+        return atime;
+    }
+
+    public boolean isCompressed() {
+        return compressed;
+    }
+
     public boolean isLink() {
         return link;
+    }
+
+    public String getLinkPath() {
+        return linkPath;
     }
 
     public boolean isJunction() {
@@ -58,11 +84,15 @@ public class FileEntity {
         return directory;
     }
 
-    public String getLinkPath() {
-        return linkPath;
+    public String getOwnerUser() {
+        return ownerUser;
     }
 
-    public boolean isCompressed() {
-        return compressed;
+    public String getOwnerGroup() {
+        return ownerGroup;
+    }
+
+    public String getMod() {
+        return mod;
     }
 }

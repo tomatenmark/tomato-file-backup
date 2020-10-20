@@ -468,17 +468,17 @@ public class DatabaseEngineSnapshotTest {
         SnapshotEntity snapshotEntityExpectedToBeRemoved = engine.addSnapshot(TEST_SOURCE_PATH, TEST_HOST, TEST_CTIME);
         SnapshotEntity snapshotEntityExpectedToBeRemained = engine.addSnapshot(TEST_SOURCE_PATH, TEST_HOST, TEST_CTIME+1);
         FileEntity fileEntityToBeRemoved1 = engine.addRegularFile(DatabaseEngineFileTest.TEST_FILE_PATH, DatabaseEngineFileTest.TEST_SIZE,
-                DatabaseEngineFileTest.TEST_FILE_INODE, DatabaseEngineFileTest.TEST_MTIME,
-                false, snapshotEntityExpectedToBeRemoved);
+                DatabaseEngineFileTest.TEST_FILE_INODE, DatabaseEngineFileTest.TEST_MTIME, DatabaseEngineFileTest.TEST_MTIME,
+                DatabaseEngineFileTest.TEST_MTIME, false, "user", "owner", "rwxrwxrwx", snapshotEntityExpectedToBeRemoved);
         FileEntity fileEntityToBeRemoved2 = engine.addRegularFile(DatabaseEngineFileTest.TEST_FILE_PATH+2, DatabaseEngineFileTest.TEST_SIZE,
-                DatabaseEngineFileTest.TEST_FILE_INODE+2, DatabaseEngineFileTest.TEST_MTIME,
-                false, snapshotEntityExpectedToBeRemoved);
+                DatabaseEngineFileTest.TEST_FILE_INODE+2, DatabaseEngineFileTest.TEST_MTIME, DatabaseEngineFileTest.TEST_MTIME,
+                DatabaseEngineFileTest.TEST_MTIME,false, "user", "owner", "rwxrwxrwx", snapshotEntityExpectedToBeRemoved);
         FileEntity fileEntityToBeRemained1 = engine.addRegularFile(DatabaseEngineFileTest.TEST_FILE_PATH+3, DatabaseEngineFileTest.TEST_SIZE,
-                DatabaseEngineFileTest.TEST_FILE_INODE+3, DatabaseEngineFileTest.TEST_MTIME,
-                false, snapshotEntityExpectedToBeRemained);
+                DatabaseEngineFileTest.TEST_FILE_INODE+3, DatabaseEngineFileTest.TEST_MTIME, DatabaseEngineFileTest.TEST_MTIME,
+                DatabaseEngineFileTest.TEST_MTIME,false, "user", "owner", "rwxrwxrwx", snapshotEntityExpectedToBeRemained);
         FileEntity fileEntityToBeRemained2 = engine.addRegularFile(DatabaseEngineFileTest.TEST_FILE_PATH+4, DatabaseEngineFileTest.TEST_SIZE,
-                DatabaseEngineFileTest.TEST_FILE_INODE+4, DatabaseEngineFileTest.TEST_MTIME,
-                false, snapshotEntityExpectedToBeRemained);
+                DatabaseEngineFileTest.TEST_FILE_INODE+4, DatabaseEngineFileTest.TEST_MTIME, DatabaseEngineFileTest.TEST_MTIME,
+                DatabaseEngineFileTest.TEST_MTIME,false, "user", "owner", "rwxrwxrwx", snapshotEntityExpectedToBeRemained);
         Chunk chunk = new Chunk(0, 10);
         Chunk chunk2 = new Chunk(10, (int)DatabaseEngineChunkTest.TEST_OFFSET-10);
         Chunk chunk3 = new Chunk(DatabaseEngineChunkTest.TEST_OFFSET, DatabaseEngineChunkTest.TEST_LENGTH);

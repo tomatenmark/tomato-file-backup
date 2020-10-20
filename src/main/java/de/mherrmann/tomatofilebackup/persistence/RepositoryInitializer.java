@@ -54,23 +54,23 @@ public class RepositoryInitializer {
         statement.execute(sql);
     }
 
-    //TODO: not the path, but the name
-    //TODO: add ctime and atime
-    //TODO: add owner, group and permissions (mod string (example: rwxr-xr--))
-            // * unix:    owner,group,permission string (example: rwxr-xr--)
-            // * windows: unsupported (restored item will inherit parents acl properties)
     private static void createFileTable(Connection connection) throws SQLException {
         String sql = "CREATE TABLE IF NOT EXISTS file(" +
                   "file_uuid text PRIMARY KEY," +
-                  "path text," +
+                  "name text," +
                   "size integer," +
                   "inode integer, " +
+                  "ctime integer," +
                   "mtime integer," +
+                  "atime integer," +
                   "compressed integer," +
                   "link integer," +
+                  "link_path text, " +
                   "junction integer," +
                   "directory integer," +
-                  "link_path text" +
+                  "owner_user text," +
+                  "owner_group text," +
+                  "mod text" +
                 ");";
         Statement statement = connection.createStatement();
         statement.execute(sql);
@@ -109,12 +109,12 @@ public class RepositoryInitializer {
         statement.execute(sql);
     }
 
-    //TODO: add path (like offset in file_chunk_relation)
     private static void createFileSnapshotRelationTable(Connection connection) throws SQLException {
         String sql = "CREATE TABLE IF NOT EXISTS file_snapshot_relation(" +
                   "relation_uuid text PRIMARY KEY," +
                   "file_uuid text REFERENCES file(file_uuid) ON DELETE CASCADE," +
-                  "snapshot_uuid text REFERENCES snapshot(snapshot_uuid) ON DELETE CASCADE" +
+                  "snapshot_uuid text REFERENCES snapshot(snapshot_uuid) ON DELETE CASCADE, " +
+                  "path text" +
                 ");";
         Statement statement = connection.createStatement();
         statement.execute(sql);

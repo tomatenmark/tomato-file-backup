@@ -35,11 +35,12 @@ public class RepositoryInitializerTest {
         Connection connection = DriverManager.getConnection(url);
         assertTablesExist(connection);
         assertColumnsExist(connection, "chunk", "chunk_uuid", "checksum", "length");
-        assertColumnsExist(connection, "file", "file_uuid", "path", "size", "inode", "mtime", "compressed", "link", "junction", "directory", "link_path");
+        assertColumnsExist(connection, "file", "file_uuid", "name", "size", "inode", "ctime", "mtime", "atime",
+                "compressed", "link", "link_path", "junction", "directory", "owner_user", "owner_group", "mod");
         assertColumnsExist(connection, "snapshot", "snapshot_uuid", "hash_id", "source", "host", "ctime");
         assertColumnsExist(connection, "repository", "repository_uuid", "path", "version");
         assertColumnsExist(connection, "file_chunk_relation", "relation_uuid", "file_uuid", "chunk_uuid", "offset");
-        assertColumnsExist(connection, "file_snapshot_relation", "relation_uuid", "file_uuid", "snapshot_uuid");
+        assertColumnsExist(connection, "file_snapshot_relation", "relation_uuid", "file_uuid", "snapshot_uuid", "path");
         assertValidVersion(connection);
     }
 

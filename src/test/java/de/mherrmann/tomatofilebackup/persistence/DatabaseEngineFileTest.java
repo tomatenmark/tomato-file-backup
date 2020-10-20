@@ -13,6 +13,7 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.List;
+import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -54,7 +55,8 @@ public class DatabaseEngineFileTest {
     @Test
     void shouldAddRegularFile() throws SQLException {
         SnapshotEntity snapshotEntity = engine.addSnapshot("test", "test", 1234567890);
-        engine.addRegularFile(TEST_FILE_PATH, TEST_SIZE, TEST_FILE_INODE, TEST_MTIME, false, snapshotEntity);
+        engine.addRegularFile(TEST_FILE_PATH, TEST_SIZE, TEST_FILE_INODE, DatabaseEngineFileTest.TEST_MTIME, DatabaseEngineFileTest.TEST_MTIME,
+                DatabaseEngineFileTest.TEST_MTIME,false, "user", "owner", "rwxrwxrwx", snapshotEntity);
 
         assertValidRegularFile(snapshotEntity.getUuid());
     }
@@ -62,7 +64,8 @@ public class DatabaseEngineFileTest {
     @Test
     void shouldAddDirectory() throws SQLException {
         SnapshotEntity snapshotEntity = engine.addSnapshot("test", "test", 1234567890);
-        engine.addDirectory(TEST_DIRECTORY_PATH, TEST_DIRECTORY_INODE, TEST_MTIME, snapshotEntity);
+        engine.addDirectory(TEST_DIRECTORY_PATH, TEST_DIRECTORY_INODE, DatabaseEngineFileTest.TEST_MTIME, DatabaseEngineFileTest.TEST_MTIME,
+                DatabaseEngineFileTest.TEST_MTIME,"user", "owner", "rwxrwxrwx", snapshotEntity);
 
         assertValidDirectory(snapshotEntity.getUuid());
     }
@@ -70,7 +73,8 @@ public class DatabaseEngineFileTest {
     @Test
     void shouldAddSymlink() throws SQLException {
         SnapshotEntity snapshotEntity = engine.addSnapshot("test", "test", 1234567890);
-        engine.addSymlink(TEST_SYMLINK_SOURCE, TEST_SYMLINK_INODE, TEST_MTIME, false, TEST_SYMLINK_TARGET, snapshotEntity);
+        engine.addSymlink(TEST_SYMLINK_SOURCE, TEST_SYMLINK_INODE, TEST_MTIME, TEST_MTIME, TEST_MTIME, false,
+                TEST_SYMLINK_TARGET, "user", "owner", "rwxrwxrwx", snapshotEntity);
 
         assertValidSymlink(snapshotEntity.getUuid(), false);
     }
@@ -78,7 +82,8 @@ public class DatabaseEngineFileTest {
     @Test
     void shouldAddSymlinkToDirectory() throws SQLException {
         SnapshotEntity snapshotEntity = engine.addSnapshot("test", "test", 1234567890);
-        engine.addSymlink(TEST_SYMLINK_SOURCE, TEST_SYMLINK_INODE, TEST_MTIME, true, TEST_SYMLINK_TARGET, snapshotEntity);
+        engine.addSymlink(TEST_SYMLINK_SOURCE, TEST_SYMLINK_INODE, TEST_MTIME, TEST_MTIME, TEST_MTIME, true,
+                TEST_SYMLINK_TARGET, "user", "owner", "rwxrwxrwx", snapshotEntity);
 
         assertValidSymlink(snapshotEntity.getUuid(), true);
     }
@@ -86,7 +91,8 @@ public class DatabaseEngineFileTest {
     @Test
     void shouldAddJunction() throws SQLException {
         SnapshotEntity snapshotEntity = engine.addSnapshot("test", "test", 1234567890);
-        engine.addJunction(TEST_JUNCTION_SOURCE, TEST_JUNCTION_INODE, TEST_MTIME, TEST_JUNCTION_TARGET, snapshotEntity);
+        engine.addJunction(TEST_JUNCTION_SOURCE, TEST_JUNCTION_INODE, TEST_MTIME, TEST_MTIME, TEST_MTIME, TEST_JUNCTION_TARGET,
+                "user", "owner", "rwxrwxrwx", snapshotEntity);
 
         assertValidJunction(snapshotEntity.getUuid());
     }
@@ -95,9 +101,10 @@ public class DatabaseEngineFileTest {
     void shouldAddFileSnapshotRelation() throws SQLException {
         SnapshotEntity snapshotEntity = engine.addSnapshot("test", "test", 1234567890);
         FileEntity fileEntity = engine.addRegularFile(TEST_FILE_PATH, TEST_SIZE, TEST_FILE_INODE,
-                TEST_MTIME, false, snapshotEntity);
+                DatabaseEngineFileTest.TEST_MTIME, DatabaseEngineFileTest.TEST_MTIME,
+                DatabaseEngineFileTest.TEST_MTIME,false, "user", "owner", "rwxrwxrwx", snapshotEntity);
 
-        engine.addFileSnapshotRelation(fileEntity.getUuid(), snapshotEntity.getUuid());
+        engine.addFileSnapshotRelation(fileEntity.getUuid(), snapshotEntity.getUuid(), TEST_FILE_PATH);
 
         assertValidSnapshotFileRelation(fileEntity.getUuid(), snapshotEntity.getUuid());
     }
@@ -106,8 +113,10 @@ public class DatabaseEngineFileTest {
     void shouldGetFilesBySnapshotUuidOrderByInode() throws SQLException {
         SnapshotEntity snapshotEntity = engine.addSnapshot("test", "test", 1234567890);
         engine.addSnapshot(TEST_SOURCE_PATH, TEST_HOST, TEST_CTIME);
-        engine.addRegularFile(TEST_FILE_PATH+2, TEST_SIZE, TEST_FILE_INODE+2, TEST_MTIME, false, snapshotEntity);
-        engine.addRegularFile(TEST_FILE_PATH, TEST_SIZE, TEST_FILE_INODE, TEST_MTIME, false, snapshotEntity);
+        engine.addRegularFile(TEST_FILE_PATH+2, TEST_SIZE, TEST_FILE_INODE+2, DatabaseEngineFileTest.TEST_MTIME, DatabaseEngineFileTest.TEST_MTIME,
+                DatabaseEngineFileTest.TEST_MTIME,false, "user", "owner", "rwxrwxrwx", snapshotEntity);
+        engine.addRegularFile(TEST_FILE_PATH, TEST_SIZE, TEST_FILE_INODE, DatabaseEngineFileTest.TEST_MTIME, DatabaseEngineFileTest.TEST_MTIME,
+                DatabaseEngineFileTest.TEST_MTIME,false, "user", "owner", "rwxrwxrwx", snapshotEntity);
 
         List<FileEntity> files = engine.getFilesBySnapshotUuidOrderByInode(snapshotEntity.getUuid());
 
@@ -126,8 +135,10 @@ public class DatabaseEngineFileTest {
     void shouldGetFilesBySnapshotUuidOrderByPath() throws SQLException {
         SnapshotEntity snapshotEntity = engine.addSnapshot("test", "test", 1234567890);
         engine.addSnapshot(TEST_SOURCE_PATH, TEST_HOST, TEST_CTIME);
-        engine.addRegularFile(TEST_FILE_PATH+2, TEST_SIZE, TEST_FILE_INODE+2, TEST_MTIME, false, snapshotEntity);
-        engine.addRegularFile(TEST_FILE_PATH, TEST_SIZE, TEST_FILE_INODE, TEST_MTIME, false, snapshotEntity);
+        engine.addRegularFile(TEST_FILE_PATH+2, TEST_SIZE, TEST_FILE_INODE+2, DatabaseEngineFileTest.TEST_MTIME, DatabaseEngineFileTest.TEST_MTIME,
+                DatabaseEngineFileTest.TEST_MTIME,false, "user", "owner", "rwxrwxrwx", snapshotEntity);
+        engine.addRegularFile(TEST_FILE_PATH, TEST_SIZE, TEST_FILE_INODE, DatabaseEngineFileTest.TEST_MTIME, DatabaseEngineFileTest.TEST_MTIME,
+                DatabaseEngineFileTest.TEST_MTIME,false, "user", "owner", "rwxrwxrwx", snapshotEntity);
 
         List<FileEntity> files = engine.getFilesBySnapshotUuidOrderByPath(snapshotEntity.getUuid());
 
@@ -143,28 +154,32 @@ public class DatabaseEngineFileTest {
     }
 
     @Test
-    void shouldGetFileByInode() throws SQLException {
+    void shouldGetFileBySizeAndMtimeAndInode() throws SQLException {
         SnapshotEntity snapshotEntity = engine.addSnapshot("test", "test", 1234567890);
-        engine.addRegularFile(TEST_FILE_PATH, TEST_SIZE, TEST_FILE_INODE, TEST_MTIME, false, snapshotEntity);
+        engine.addRegularFile(TEST_FILE_PATH, TEST_SIZE, TEST_FILE_INODE, DatabaseEngineFileTest.TEST_MTIME, DatabaseEngineFileTest.TEST_MTIME,
+                DatabaseEngineFileTest.TEST_MTIME,false, "user", "owner", "rwxrwxrwx", snapshotEntity);
 
-        FileEntity file = engine.getFileByInode(TEST_FILE_INODE, snapshotEntity);
+        Optional<FileEntity> file = engine.getFileBySizeAndMtimeAndInode(TEST_SIZE, DatabaseEngineFileTest.TEST_MTIME, TEST_FILE_INODE, snapshotEntity);
 
-        assertEquals(TEST_FILE_PATH, file.getPath());
-        assertEquals(TEST_SIZE, file.getSize());
-        assertEquals(TEST_MTIME, file.getMtime());
+        assertTrue(file.isPresent());
+        assertEquals(TEST_FILE_PATH, file.get().getPath());
+        assertEquals(TEST_SIZE, file.get().getSize());
+        assertEquals(TEST_MTIME, file.get().getMtime());
     }
 
     @Test
     void shouldGetFileByNameAndSizeAndMtime() throws SQLException {
         SnapshotEntity snapshotEntity = engine.addSnapshot("test", "test", 1234567890);
-        engine.addRegularFile(TEST_FILE_PATH, TEST_SIZE, TEST_FILE_INODE, TEST_MTIME, false, snapshotEntity);
-        String name = TEST_FILE_PATH.replaceAll("/(.*?)$", "$1");
+        engine.addRegularFile(TEST_FILE_PATH, TEST_SIZE, TEST_FILE_INODE, DatabaseEngineFileTest.TEST_MTIME, DatabaseEngineFileTest.TEST_MTIME,
+                DatabaseEngineFileTest.TEST_MTIME,false, "user", "owner", "rwxrwxrwx", snapshotEntity);
+        String name = TEST_FILE_PATH.replaceAll("^.*/(.*?)$", "$1");
 
-        FileEntity file = engine.getFileByNameAndSizeAndMtime(name, TEST_SIZE, TEST_MTIME, snapshotEntity);
+        Optional<FileEntity> file = engine.getFileByNameAndSizeAndMtime(TEST_SIZE, TEST_MTIME, name, snapshotEntity);
 
-        assertEquals(TEST_FILE_PATH, file.getPath());
-        assertEquals(TEST_SIZE, file.getSize());
-        assertEquals(TEST_MTIME, file.getMtime());
+        assertTrue(file.isPresent());
+        assertEquals(TEST_FILE_PATH, file.get().getPath());
+        assertEquals(TEST_SIZE, file.get().getSize());
+        assertEquals(TEST_MTIME, file.get().getMtime());
     }
 
     private void assertValidRegularFile(String snapshotUuid) throws SQLException {
@@ -191,7 +206,7 @@ public class DatabaseEngineFileTest {
 
     private void assertValidJunction(String snapshotUuid) throws SQLException {
         ResultSet resultSet = assertValidFile(TEST_JUNCTION_SOURCE, TEST_JUNCTION_INODE, 0, snapshotUuid);
-        assertFalse(resultSet.getBoolean("link"));
+        assertTrue(resultSet.getBoolean("link"));
         assertTrue(resultSet.getBoolean("junction"));
         assertTrue(resultSet.getBoolean("directory"));
         assertEquals(TEST_JUNCTION_TARGET, resultSet.getString("link_path"));
@@ -203,7 +218,7 @@ public class DatabaseEngineFileTest {
         preparedStatement.setLong(1, inode);
         ResultSet resultSet = preparedStatement.executeQuery();
         resultSet.next();
-        assertEquals(filePath, resultSet.getString("path"));
+        assertEquals(new File(filePath).getName(), resultSet.getString("name"));
         assertEquals(size, resultSet.getLong("size"));
         assertEquals(TEST_MTIME, resultSet.getLong("mtime"));
         assertEquals(0, resultSet.getInt("compressed"));

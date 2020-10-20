@@ -11,6 +11,7 @@ import java.io.File;
 import java.io.IOException;
 import java.sql.*;
 import java.util.List;
+import java.util.Optional;
 
 public class DatabaseEngine {
 
@@ -47,23 +48,26 @@ public class DatabaseEngine {
         return chunkDatabaseEngine.addChunk(chunk, fileUuid);
     }
 
-    public FileEntity addRegularFile(String path, long size, long inode, long mtime,
-                               boolean compressed, SnapshotEntity snapshotEntity) throws SQLException {
-        return fileDatabaseEngine.addRegularFile(path, size, inode, mtime, compressed, snapshotEntity);
+    public FileEntity addRegularFile(String path, long size, long inode, long ctime, long mtime, long atime,
+                                     boolean compressed, String ownerUser, String ownerGroup, String mod,
+                                     SnapshotEntity snapshotEntity) throws SQLException {
+        return fileDatabaseEngine.addRegularFile(path, size, inode, ctime, mtime, atime, compressed, ownerUser, ownerGroup, mod, snapshotEntity);
     }
 
-    public FileEntity addDirectory(String path, long inode, long mtime, SnapshotEntity snapshotEntity) throws SQLException {
-        return fileDatabaseEngine.addDirectory(path, inode, mtime, snapshotEntity);
+    public FileEntity addDirectory(String path, long inode, long ctime, long mtime, long atime,
+                                   String ownerUser, String ownerGroup, String mod, SnapshotEntity snapshotEntity) throws SQLException {
+        return fileDatabaseEngine.addDirectory(path, inode, ctime, mtime, atime, ownerUser, ownerGroup, mod, snapshotEntity);
     }
 
-    public FileEntity addSymlink(String path, long inode, long mtime, boolean targetIsDirectory,
-                                 String linkPath, SnapshotEntity snapshotEntity) throws SQLException {
-        return fileDatabaseEngine.addSymlink(path, inode, mtime, targetIsDirectory, linkPath, snapshotEntity);
+    public FileEntity addSymlink(String path, long inode, long ctime, long mtime, long atime, boolean targetIsDirectory,
+                                 String linkPath, String ownerUser, String ownerGroup, String mod,
+                                 SnapshotEntity snapshotEntity) throws SQLException {
+        return fileDatabaseEngine.addSymlink(path, inode, ctime, mtime, atime, targetIsDirectory, linkPath, ownerUser, ownerGroup, mod, snapshotEntity);
     }
 
-    public FileEntity addJunction(String path, long inode, long mtime,
-                                 String linkPath, SnapshotEntity snapshotEntity) throws SQLException {
-        return fileDatabaseEngine.addJunction(path, inode, mtime, linkPath, snapshotEntity);
+    public FileEntity addJunction(String path, long inode, long ctime, long mtime, long atime, String linkPath, String ownerUser,
+                                  String ownerGroup, String mod, SnapshotEntity snapshotEntity) throws SQLException {
+        return fileDatabaseEngine.addJunction(path, inode, ctime, mtime, atime, linkPath, ownerUser, ownerGroup, mod, snapshotEntity);
     }
 
     public SnapshotEntity addSnapshot(String sourcePath, String host, long ctime) throws SQLException {
@@ -74,8 +78,8 @@ public class DatabaseEngine {
         chunkDatabaseEngine.addChunkFileRelation(fileUuid, chunkUuid, offset);
     }
 
-    public void addFileSnapshotRelation(String fileUuid, String snapshotUuid) throws SQLException {
-        fileDatabaseEngine.addFileSnapshotRelation(fileUuid, snapshotUuid);
+    public void addFileSnapshotRelation(String fileUuid, String snapshotUuid, String path) throws SQLException {
+        fileDatabaseEngine.addFileSnapshotRelation(fileUuid, snapshotUuid, path);
     }
 
     public ChunkEntity getChunkByChecksum(String checksum) throws SQLException {
@@ -90,13 +94,12 @@ public class DatabaseEngine {
         return chunkDatabaseEngine.existsChunkByChecksum(checksum);
     }
 
-    public FileEntity getFileByInode(Long inode, SnapshotEntity snapshotEntity) throws SQLException {
-        return fileDatabaseEngine.getFileByInode(inode, snapshotEntity);
+    public Optional<FileEntity> getFileBySizeAndMtimeAndInode(long size, long mtime, long inode, SnapshotEntity snapshotEntity) throws SQLException {
+        return fileDatabaseEngine.getFileBySizeAndMtimeAndInode(size, mtime, inode, snapshotEntity);
     }
 
-    public FileEntity getFileByNameAndSizeAndMtime(String name, Long size,
-                                                   Long mtime, SnapshotEntity snapshotEntity) throws SQLException {
-        return fileDatabaseEngine.getFileByNameAndSizeAndMtime(name, size, mtime, snapshotEntity);
+    public Optional<FileEntity> getFileByNameAndSizeAndMtime(long size, long mtime, String name, SnapshotEntity snapshotEntity) throws SQLException {
+        return fileDatabaseEngine.getFileBySizeAndMtimeAndName(size, mtime, name, snapshotEntity);
     }
 
     public List<FileEntity> getFilesBySnapshotUuidOrderByInode(String snapshotUuid) throws SQLException {
