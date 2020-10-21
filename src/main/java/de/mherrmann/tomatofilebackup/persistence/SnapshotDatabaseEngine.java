@@ -112,6 +112,15 @@ class SnapshotDatabaseEngine {
         return removeSnapshots(preparedStatement, fileDatabaseEngine, chunkDatabaseEngine);
     }
 
+    List<String> removeSnapshotsButKeepLastRecent(int n, FileDatabaseEngine fileDatabaseEngine,
+                                                  ChunkDatabaseEngine chunkDatabaseEngine) throws SQLException {
+        connection.setAutoCommit(false);
+        String sql = "DELETE FROM snapshot WHERE snapshot_uuid NOT IN (SELECT snapshot_uuid FROM snapshot ORDER BY ctime DESC LIMIT ?)";
+        PreparedStatement preparedStatement = connection.prepareStatement(sql);
+        preparedStatement.setInt(1, n);
+        return removeSnapshots(preparedStatement, fileDatabaseEngine, chunkDatabaseEngine);
+    }
+
     List<String> removeSnapshotsOlderThan(long threshold, FileDatabaseEngine fileDatabaseEngine,
                                 ChunkDatabaseEngine chunkDatabaseEngine) throws SQLException {
         connection.setAutoCommit(false);
@@ -132,8 +141,6 @@ class SnapshotDatabaseEngine {
         addUuidsToStatement(uuids, preparedStatement);
         return removeSnapshots(preparedStatement, fileDatabaseEngine, chunkDatabaseEngine);
     }
-
-    //TODO: add removeSnapshotsButKeepNRecent(int i, FileDatabaseEngine fileDatabaseEngine, ChunkDatabaseEngine chunkDatabaseEngine)
 
     private List<SnapshotEntity> buildSnapshotEntityList(PreparedStatement preparedStatement) throws SQLException {
         List<SnapshotEntity> snapshots = new ArrayList<>();

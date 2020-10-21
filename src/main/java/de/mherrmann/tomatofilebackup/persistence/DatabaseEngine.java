@@ -146,6 +146,10 @@ public class DatabaseEngine {
         return snapshotDatabaseEngine.removeSnapshotByHashId(hashId, fileDatabaseEngine, chunkDatabaseEngine);
     }
 
+    public List<String> removeSnapshotsButKeepLastRecent(int n) throws SQLException {
+        return snapshotDatabaseEngine.removeSnapshotsButKeepLastRecent(n, fileDatabaseEngine, chunkDatabaseEngine);
+    }
+
     public List<String> removeSnapshotsOlderThan(long threshold) throws SQLException {
         return snapshotDatabaseEngine.removeSnapshotsOlderThan(threshold, fileDatabaseEngine, chunkDatabaseEngine);
     }

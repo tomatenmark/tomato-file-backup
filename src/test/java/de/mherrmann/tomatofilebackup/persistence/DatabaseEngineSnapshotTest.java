@@ -297,6 +297,22 @@ public class DatabaseEngineSnapshotTest {
     }
 
     @Test
+    void removeSnapshotsButKeepLastRecent() throws Exception {
+        TestObjects testObjects = prepareRemoveTest();
+
+        engine.removeSnapshotsButKeepLastRecent(1);
+
+        assertRemoved(
+                testObjects.snapshotEntityExpectedToBeRemoved,
+                testObjects.fileEntityToBeRemoved1, testObjects.fileEntityToBeRemoved2,
+                testObjects.chunkEntityToBeRemoved1, testObjects.chunkEntityToBeRemoved2);
+        assertRemained(
+                testObjects.snapshotEntityExpectedToBeRemained,
+                testObjects.fileEntityToBeRemained1, testObjects.fileEntityToBeRemained2,
+                testObjects.chunkEntityToBeRemained1, testObjects.chunkEntityToBeRemained2);
+    }
+
+    @Test
     void shouldRemoveSnapshotsOlderThan() throws Exception {
         TestObjects testObjects = prepareRemoveTest();
 
