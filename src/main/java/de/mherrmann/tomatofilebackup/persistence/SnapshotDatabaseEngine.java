@@ -4,10 +4,7 @@ import de.mherrmann.tomatofilebackup.chunking.ChecksumEngine;
 import de.mherrmann.tomatofilebackup.persistence.entities.SnapshotEntity;
 
 import java.sql.*;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.UUID;
+import java.util.*;
 
 class SnapshotDatabaseEngine {
 
@@ -17,6 +14,7 @@ class SnapshotDatabaseEngine {
         this.connection = connection;
     }
 
+    @SuppressWarnings("OptionalGetWithoutIsPresent")
     SnapshotEntity addSnapshot(String sourcePath, String host, long ctime) throws SQLException {
         String snapshotUuid = UUID.randomUUID().toString();
         String hashId = ChecksumEngine.getSnapshotChecksum(snapshotUuid);
@@ -28,19 +26,18 @@ class SnapshotDatabaseEngine {
         preparedStatement.setString(4, host);
         preparedStatement.setLong(5, ctime);
         preparedStatement.executeUpdate();
-        return getSnapshotByHashId(hashId);
+        return getSnapshotByHashId(hashId).get();
     }
 
-    SnapshotEntity getSnapshotByHashId(String hashId) throws SQLException {
+    Optional<SnapshotEntity> getSnapshotByHashId(String hashId) throws SQLException {
         String sql = "SELECT * FROM snapshot WHERE hash_id = ?";
         PreparedStatement preparedStatement = connection.prepareStatement(sql);
         preparedStatement.setString(1, hashId);
         ResultSet resultSet = preparedStatement.executeQuery();
-        if(resultSet.isClosed()){
-            throw new SQLException("Error: There is no snapshot with id " + hashId);
+        if(!resultSet.next()){
+            return Optional.empty();
         }
-        resultSet.next();
-        return buildSnapshotEntity(resultSet);
+        return Optional.of(buildSnapshotEntity(resultSet));
     }
 
     List<SnapshotEntity> getAllSnapshots() throws SQLException {

@@ -106,7 +106,7 @@ public class DatabaseEngine {
         return fileDatabaseEngine.getFilesBySnapshotUuidOrderByPath(snapshotUuid);
     }
 
-    public SnapshotEntity getSnapshotByHashId(String hashId) throws SQLException {
+    public Optional<SnapshotEntity> getSnapshotByHashId(String hashId) throws SQLException {
         return snapshotDatabaseEngine.getSnapshotByHashId(hashId);
     }
 

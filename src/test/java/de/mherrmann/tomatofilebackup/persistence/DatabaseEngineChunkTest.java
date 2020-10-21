@@ -94,7 +94,7 @@ public class DatabaseEngineChunkTest {
     void shouldGetChunksInOrder() throws SQLException {
         SnapshotEntity snapshotEntity = engine.addSnapshot("test", "test", 1234567890);
         engine.addRegularFile(TEST_FILE_PATH, TEST_SIZE, TEST_FILE_INODE, TEST_MTIME, TEST_MTIME,
-                TEST_MTIME,false, "user", "owner", "rwxrwxrwx", snapshotEntity);
+                TEST_MTIME,false, "user", "owner", DatabaseEngineFileTest.TEST_MOD, snapshotEntity);
         Chunk chunk = new Chunk(TEST_OFFSET, TEST_LENGTH);
         Chunk chunk2 = new Chunk(TEST_OFFSET+TEST_LENGTH, TEST_LENGTH);
         chunk.setChecksum(TEST_CHECKSUM);
