@@ -11,7 +11,7 @@ class ChecksumEngineTest {
     void shouldGetChecksumFromFixedMessage(){
         byte[] bytes = "HASH".getBytes();
 
-        String checksum = ChecksumEngine.getChecksum(bytes, 0, bytes.length);
+        String checksum = ChecksumEngine.getChunkChecksum(bytes, 0, bytes.length);
 
         assertEquals("4341BCFB28F64BED93ACA9A378AE7D8C", checksum);
     }
@@ -20,7 +20,7 @@ class ChecksumEngineTest {
     void shouldGetChecksumFromReproducibleRandomBytes(){
         byte[] bytes = TestUtil.buildReproducibleRandomTestBytes();
 
-        String checksum = ChecksumEngine.getChecksum(bytes, 0, bytes.length);
+        String checksum = ChecksumEngine.getChunkChecksum(bytes, 0, bytes.length);
 
         assertEquals("BD09C7FCA1866E2CA6FB601FB9E9626F", checksum);
     }

@@ -2,6 +2,9 @@ package de.mherrmann.tomatofilebackup;
 
 import java.io.File;
 import java.io.FileOutputStream;
+import java.sql.Connection;
+import java.sql.SQLException;
+import java.sql.Statement;
 import java.util.Arrays;
 import java.util.Objects;
 import java.util.Random;
@@ -66,12 +69,27 @@ public class TestUtil {
     @SuppressWarnings("ResultOfMethodCallIgnored")
     public static void removeTestFiles() {
         File directory = new File("./test");
+        deleteDirectory(directory);
+        new File("./test.bin").delete();
+        new File("./test.bin.restored").delete();
+    }
+
+    public static void turnOfConstraints(Connection connection) throws SQLException {
+        String sql = "PRAGMA foreign_keys = OFF";
+        Statement statement = connection.createStatement();
+        statement.executeUpdate(sql);
+    }
+
+    private static void deleteDirectory(File directory){
         if(directory.exists()){
             for (File file : Objects.requireNonNull(directory.listFiles())) {
-                file.delete();
+                if(file.isDirectory()){
+                    deleteDirectory(file);
+                } else {
+                    file.delete();
+                }
             }
             directory.delete();
         }
-        new File("./test.bin").delete();
     }
 }

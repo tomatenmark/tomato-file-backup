@@ -54,8 +54,6 @@ class ChunkingEngineTest {
     private void assertValidChunking(List<Chunk> chunks, RandomAccessFile file) throws Exception {
         assertEquals(file.length(), getTotalLength(chunks));
         assertTrue(getMaxChunkSize(chunks) <= ChunkingEngine.MAX_CHUNK_SIZE);
-        assertTrue(getAvgChunkSize(chunks, file) >= ChunkingEngine.AVG_CHUNK_SIZE - ChunkingEngine.AVG_CHUNK_SIZE/5);
-        assertTrue(getAvgChunkSize(chunks, file) <= ChunkingEngine.AVG_CHUNK_SIZE + ChunkingEngine.AVG_CHUNK_SIZE/5);
         assertContinuous(chunks);
         assertValidChecksums(chunks, file);
     }
@@ -75,7 +73,7 @@ class ChunkingEngineTest {
             file.seek(chunk.getOffset());
             byte[] bytes = new byte[chunk.getLength()];
             file.read(bytes);
-            String checksum = ChecksumEngine.getChecksum(bytes, 0, bytes.length);
+            String checksum = ChecksumEngine.getChunkChecksum(bytes, 0, bytes.length);
             assertEquals(checksum, chunk.getChecksum());
         }
     }
@@ -88,10 +86,6 @@ class ChunkingEngineTest {
             }
         }
         return max;
-    }
-
-    private long getAvgChunkSize(List<Chunk> chunks, RandomAccessFile file) throws IOException {
-        return file.length() / chunks.size();
     }
 
     private long getTotalLength(List<Chunk> chunks){
