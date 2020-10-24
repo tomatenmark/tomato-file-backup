@@ -8,15 +8,9 @@ import java.sql.*;
 class RepositoryDatabaseEngine {
 
     private final Connection connection;
-    private final String repositoryPath;
 
-    RepositoryDatabaseEngine(String repositoryPath, Connection connection) {
+    RepositoryDatabaseEngine(Connection connection) {
         this.connection = connection;
-        this.repositoryPath = repositoryPath;
-    }
-
-    void initializeRepository() throws IOException, SQLException {
-        RepositoryInitializer.initialize(repositoryPath);
     }
 
     RepositoryEntity getRepository() throws SQLException {

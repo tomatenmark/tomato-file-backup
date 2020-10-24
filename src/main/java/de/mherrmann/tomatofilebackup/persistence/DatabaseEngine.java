@@ -28,16 +28,12 @@ public class DatabaseEngine {
         this.chunkDatabaseEngine = new ChunkDatabaseEngine(connection);
         this.fileDatabaseEngine = new FileDatabaseEngine(connection);
         this.snapshotDatabaseEngine = new SnapshotDatabaseEngine(connection);
-        this.repositoryDatabaseEngine = new RepositoryDatabaseEngine(repositoryPath, connection);
+        this.repositoryDatabaseEngine = new RepositoryDatabaseEngine(connection);
         turnOnConstraints();
     }
 
     public void destroy() throws SQLException {
         connection.close();
-    }
-
-    public void initializeRepository() throws IOException, SQLException {
-        repositoryDatabaseEngine.initializeRepository();
     }
 
     public RepositoryEntity getRepository() throws SQLException {
