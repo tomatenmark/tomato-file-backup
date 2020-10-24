@@ -7,6 +7,7 @@ import de.mherrmann.tomatofilebackup.chunking.ChecksumEngine;
 import de.mherrmann.tomatofilebackup.chunking.Chunk;
 import de.mherrmann.tomatofilebackup.chunking.ChunkingEngine;
 import de.mherrmann.tomatofilebackup.persistence.DatabaseEngine;
+import de.mherrmann.tomatofilebackup.persistence.RepositoryInitializer;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -99,26 +100,6 @@ class TransferEngineTest {
         checksums.add(chunkToBeRemoved.getChecksum());
 
         engine.removeChunkFiles(chunksDirectory, checksums);
-
-        assertTrue(new File(chunksDirectory, chunkToBeRemained.getChecksum()).exists());
-        assertFalse(new File(chunksDirectory, chunkToBeRemoved.getChecksum()).exists());
-    }
-
-    @Test
-    void shouldRemoveOrphanedChunks() throws Exception {
-        Chunk chunkToBeRemained = prepareChunk();
-        Chunk chunkToBeRemoved = prepareChunk();
-        chunkToBeRemoved.setChecksum("toRemove");
-        TransferEngine engine = new TransferEngine();
-        List<Chunk> chunks = new ArrayList<>();
-        chunks.add(chunkToBeRemained);
-        chunks.add(chunkToBeRemoved);
-        engine.storeChunks(sourceFile, chunksDirectory, chunks, true);
-        DatabaseEngine databaseEngine = new DatabaseEngine(chunksDirectory.getParent());
-        databaseEngine.initializeRepository();
-        databaseEngine.addChunk(chunkToBeRemained, "fileUuid");
-
-        engine.removeOrphanedChunkFiles(chunksDirectory, databaseEngine);
 
         assertTrue(new File(chunksDirectory, chunkToBeRemained.getChecksum()).exists());
         assertFalse(new File(chunksDirectory, chunkToBeRemoved.getChecksum()).exists());
