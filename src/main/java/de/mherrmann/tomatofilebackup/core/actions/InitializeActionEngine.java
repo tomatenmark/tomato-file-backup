@@ -29,7 +29,7 @@ public class InitializeActionEngine extends ActionEngine {
         return Constants.TFB_INTRO + "\n" +
                 " Help for initialize:\n" +
                 "\n" +
-                " Usage: tfb initialize PATHTOREPOSITORY\n" +
+                " Usage: tfb initialize PATH_TO_REPOSITORY\n" +
                 "  Example: tfb initialize /mnt/backup/repo/";
     }
 

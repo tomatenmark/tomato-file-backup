@@ -17,7 +17,7 @@ public class Constants {
         INVALID_ACTION("There is no such action: %s"),
         MISSING_PATH("Missing path argument"),
         TOO_FEW_ARGUMENTS("There must be at least one argument, the name of the action."),
-        INVALID_ARGUMENT("Invalid Argument: ");
+        INVALID_ARGUMENT("Invalid Argument: %s");
 
         private final String message;
 

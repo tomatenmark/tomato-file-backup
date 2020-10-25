@@ -124,14 +124,14 @@ public class CommandLineInterfaceTest {
     @Test
     void shouldParseArgs(){
         CommandLineInterface commandLineInterface = new CommandLineInterface();
-        Map<String, String> expectedProperties = new HashMap<>();
-        expectedProperties.put("test", "testProperty");
+        Map<Option.Property, String> expectedProperties = new HashMap<>();
+        expectedProperties.put(Option.Property.repository, "testPath");
 
-
-        Command command = commandLineInterface.parseArgs(new String[]{"initialize", "-d", "-hl", "--test=testProperty", "test1", "test2"});
+        //-d -> enables debug mode and is not added to enabled switches
+        Command command = commandLineInterface.parseArgs(new String[]{"initialize", "-d", "-h", "-lv", "--repository=testPath", "test1", "test2"});
 
         assertEquals(InitializeActionEngine.class, command.actionEngine.getClass());
-        assertIterableEquals(Arrays.asList(Option.Switch.d, Option.Switch.h, Option.Switch.l), command.enabledSwitches);
+        assertIterableEquals(Arrays.asList(Option.Switch.h, Option.Switch.l, Option.Switch.v), command.enabledSwitches);
         assertIterableEquals(expectedProperties.keySet(), command.properties.keySet());
         assertIterableEquals(expectedProperties.values(), command.properties.values());
         assertLinesMatch(Arrays.asList("test1", "test2"), command.mainValues);
@@ -189,16 +189,34 @@ public class CommandLineInterfaceTest {
     void shouldFailParseArgsCausedByInvalidArgumentMalformedProperty(){
         CommandLineInterface commandLineInterface = new CommandLineInterface();
         Exception exception = null;
+        String invalidArgument = "--prop";
 
         try {
-            commandLineInterface.parseArgs(new String[]{"initialize", "--prop"});
+            commandLineInterface.parseArgs(new String[]{"initialize", invalidArgument});
         } catch(Exception ex){
             exception = ex;
         }
 
         assertNotNull(exception);
         assertEquals(IllegalCommandException.class, exception.getClass());
-        assertEquals(Constants.ErrorReport.INVALID_ARGUMENT.getMessage("--prop"), exception.getMessage());
+        assertEquals(Constants.ErrorReport.INVALID_ARGUMENT.getMessage(invalidArgument), exception.getMessage());
+    }
+
+    @Test
+    void shouldFailParseArgsCausedByInvalidArgumentInvalidProperty(){
+        CommandLineInterface commandLineInterface = new CommandLineInterface();
+        Exception exception = null;
+        String invalidArgument = "--invalid=value";
+
+        try {
+            commandLineInterface.parseArgs(new String[]{"initialize", invalidArgument});
+        } catch(Exception ex){
+            exception = ex;
+        }
+
+        assertNotNull(exception);
+        assertEquals(IllegalCommandException.class, exception.getClass());
+        assertEquals(Constants.ErrorReport.INVALID_ARGUMENT.getMessage(invalidArgument), exception.getMessage());
     }
 
 }
