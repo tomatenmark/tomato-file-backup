@@ -128,10 +128,10 @@ public class CommandLineInterfaceTest {
         expectedProperties.put("test", "testProperty");
 
 
-        Command command = commandLineInterface.parseArgs(new String[]{"initialize", "-a", "-bc", "--test=testProperty", "test1", "test2"});
+        Command command = commandLineInterface.parseArgs(new String[]{"initialize", "-d", "-hl", "--test=testProperty", "test1", "test2"});
 
         assertEquals(InitializeActionEngine.class, command.actionEngine.getClass());
-        assertLinesMatch(Arrays.asList("a", "b", "c"), command.enabledSwitches);
+        assertIterableEquals(Arrays.asList(Option.Switch.d, Option.Switch.h, Option.Switch.l), command.enabledSwitches);
         assertIterableEquals(expectedProperties.keySet(), command.properties.keySet());
         assertIterableEquals(expectedProperties.values(), command.properties.values());
         assertLinesMatch(Arrays.asList("test1", "test2"), command.mainValues);

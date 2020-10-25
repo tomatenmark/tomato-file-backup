@@ -106,8 +106,13 @@ public class CommandLineInterface {
             throw new IllegalCommandException(Constants.ErrorReport.INVALID_ARGUMENT.getMessage(arg));
         }
         String key = arg.replaceFirst(propertyParsePattern, "$1");
-        String value = arg.replaceFirst(propertyParsePattern, "$2");
-        command.addProperty(key, value);
+        try {
+            String value = arg.replaceFirst(propertyParsePattern, "$2");
+            Option.Property property = Option.Property.valueOf(key);
+            command.addProperty(property, value);
+        } catch(IllegalArgumentException exception) {
+            throw new IllegalCommandException(Constants.ErrorReport.INVALID_ARGUMENT.getMessage(arg));
+        }
     }
 
     private void parseSwitches(String arg, Command command){
@@ -115,11 +120,15 @@ public class CommandLineInterface {
             throw new IllegalCommandException(Constants.ErrorReport.INVALID_ARGUMENT.getMessage(arg));
         }
         for(int i = 1; i < arg.length(); i++){
-            String switchLetter = String.valueOf(arg.charAt(i));
-            if(!"d".equals(switchLetter)){
-                command.enableSwitch(switchLetter);
-            } else {
-                debug = true;
+            try {
+                Option.Switch switchOption = Option.Switch.valueOf(String.valueOf(arg.charAt(i)));
+                if(!Option.Switch.d.equals(switchOption)){
+                    command.enableSwitch(switchOption);
+                } else {
+                    debug = true;
+                }
+            } catch(IllegalArgumentException exception){
+                throw new IllegalCommandException(Constants.ErrorReport.INVALID_ARGUMENT.getMessage(arg));
             }
         }
     }

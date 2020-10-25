@@ -10,19 +10,19 @@ import java.util.Map;
 public class Command {
 
     protected ActionEngine actionEngine;
-    protected final Map<String, String> properties = new HashMap<>();
-    protected final List<String> enabledSwitches = new ArrayList<>();
+    protected final Map<Option.Property, String> properties = new HashMap<>();
+    protected final List<Option.Switch> enabledSwitches = new ArrayList<>();
     protected final List<String> mainValues = new ArrayList<>();
 
     void setActionEngine(ActionEngine actionEngine){
         this.actionEngine = actionEngine;
     }
 
-    void addProperty(String key, String value){
+    void addProperty(Option.Property key, String value){
         this.properties.put(key, value);
     }
 
-    void enableSwitch(String switchToEnable){
+    void enableSwitch(Option.Switch switchToEnable){
         if(!this.enabledSwitches.contains(switchToEnable)){
             this.enabledSwitches.add(switchToEnable);
         }

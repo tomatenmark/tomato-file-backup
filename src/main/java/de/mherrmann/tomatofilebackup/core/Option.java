@@ -1,13 +1,12 @@
 package de.mherrmann.tomatofilebackup.core;
 
-public enum Option {
-    repository(true);
+public class Option {
 
-    private boolean switchType;
-    private boolean propertyType;
+    public enum Switch {
+        d, h, l
+    }
 
-    Option(boolean propertyType) {
-        this.switchType = !propertyType;
-        this.propertyType = propertyType;
+    public enum Property {
+        repository
     }
 }

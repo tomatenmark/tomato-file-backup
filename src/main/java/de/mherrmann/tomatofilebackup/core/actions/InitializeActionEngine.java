@@ -1,6 +1,7 @@
 package de.mherrmann.tomatofilebackup.core.actions;
 
 import de.mherrmann.tomatofilebackup.Constants;
+import de.mherrmann.tomatofilebackup.core.Option;
 import de.mherrmann.tomatofilebackup.exceptions.IllegalActionCommandException;
 import de.mherrmann.tomatofilebackup.persistence.RepositoryInitializer;
 
@@ -14,7 +15,7 @@ import java.util.Map;
 public class InitializeActionEngine extends ActionEngine {
 
     @Override
-    public void run(Map<String, String> properties, List<String> enabledSwitches, List<String> mainValues)
+    public void run(Map<Option.Property, String> properties, List<Option.Switch> enabledSwitches, List<String> mainValues)
             throws IOException, SQLException {
         if(mainValues.isEmpty()){
             throw new IllegalActionCommandException(Constants.ErrorReport.MISSING_PATH.getMessage());
