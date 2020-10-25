@@ -101,7 +101,7 @@ public class CommandLineInterface {
     }
 
     private void addProperty(String arg, Command command){
-        String propertyParsePattern = "^--([^=]*)=([^=]*)$";
+        String propertyParsePattern = "^--([^=]+)=([^=]+)$";
         if(!arg.matches(propertyParsePattern)){
             throw new IllegalCommandException(Constants.ErrorReport.INVALID_ARGUMENT.getMessage(arg));
         }
