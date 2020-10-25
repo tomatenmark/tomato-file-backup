@@ -41,6 +41,7 @@ public class InitializeActionEngine extends ActionEngine {
     private static void initializeRepositoryDirectory(String repositoryPath) throws IOException {
         File repositoryDirectory = new File(repositoryPath);
         File repositoryDirectoryDBFile = new File(repositoryPath, Constants.DB_FILENAME);
+        File chunksDirectory = new File(repositoryPath, Constants.CHUNKS_DIRECTORY_NAME);
         File repositoryDirectoryParent = repositoryDirectory.getParentFile();
         if(!repositoryDirectoryParent.exists() || !repositoryDirectoryParent.isDirectory() || !repositoryDirectoryParent.canWrite()){
             throw new IOException(Constants.ErrorReport.PARENT_DIRECTORY_PROBLEM.getMessage(repositoryDirectoryParent.getAbsolutePath()));
@@ -54,5 +55,6 @@ public class InitializeActionEngine extends ActionEngine {
         if(!repositoryDirectory.exists()){
             Files.createDirectory(repositoryDirectory.toPath());
         }
+        Files.createDirectory(chunksDirectory.toPath());
     }
 }

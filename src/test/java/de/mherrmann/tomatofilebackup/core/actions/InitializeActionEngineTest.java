@@ -19,6 +19,7 @@ public class InitializeActionEngineTest {
 
     private static final String TEST_REPOSITORY_PATH = "./test/repo/";
     private static final String TEST_REPOSITORY_DB_PATH = "./test/repo/"+ Constants.DB_FILENAME;
+    private static final String TEST_REPOSITORY_CHUNKS_PATH = "./test/repo/"+ Constants.CHUNKS_DIRECTORY_NAME;
 
     @BeforeEach
     void setUp() {
@@ -37,6 +38,7 @@ public class InitializeActionEngineTest {
         engine.run(Collections.emptyMap(), Collections.emptyList(), Collections.singletonList(TEST_REPOSITORY_PATH));
 
         assertTrue(new File(TEST_REPOSITORY_DB_PATH).exists());
+        assertTrue(new File(TEST_REPOSITORY_CHUNKS_PATH).exists());
     }
 
     @Test
