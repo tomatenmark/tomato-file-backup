@@ -7,8 +7,14 @@ import de.mherrmann.tomatofilebackup.exceptions.IllegalCommandException;
 
 public class CommandLineInterface {
 
+    private boolean debug;
+
     boolean isHelp(String[] args){
         return args.length > 0 && args[0].equals(Constants.HELP);
+    }
+
+    boolean isDebug(){
+        return debug;
     }
 
     Command parseArgs(String[] args){
@@ -87,7 +93,7 @@ public class CommandLineInterface {
             if(arg.startsWith("--")){
                 addProperty(arg, command);
             } else if(arg.startsWith("-")){
-                enableSwitch(arg, command);
+                parseSwitches(arg, command);
             } else {
                 command.addMainValue(arg);
             }
@@ -104,12 +110,17 @@ public class CommandLineInterface {
         command.addProperty(key, value);
     }
 
-    private void enableSwitch(String arg, Command command){
+    private void parseSwitches(String arg, Command command){
         if(arg.length() == 1){
             throw new IllegalCommandException(Constants.ErrorReport.INVALID_ARGUMENT.getMessage(arg));
         }
         for(int i = 1; i < arg.length(); i++){
-            command.enableSwitch(String.valueOf(arg.charAt(i)));
+            String switchLetter = String.valueOf(arg.charAt(i));
+            if(!"d".equals(switchLetter)){
+                command.enableSwitch(switchLetter);
+            } else {
+                debug = true;
+            }
         }
     }
 }

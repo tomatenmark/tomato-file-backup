@@ -52,7 +52,9 @@ public class Application {
 
     private static void handleException(CommandLineInterface commandLineInterface, Exception exception){
         commandLineInterface.stdErr(exception.getMessage());
-        exception.printStackTrace();
+        if(commandLineInterface.isDebug()){
+            exception.printStackTrace();
+        }
     }
 
 }
