@@ -29,7 +29,9 @@ public class Command {
     }
 
     public void addMainValue(String mainValue) {
-        this.mainValues.add(mainValue);
+        if(!this.mainValues.contains(mainValue)){
+            this.mainValues.add(mainValue);
+        }
     }
 
     void run() throws Exception {
