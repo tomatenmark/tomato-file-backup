@@ -10,8 +10,6 @@ import java.util.UUID;
 
 public class RepositoryInitializer {
 
-    private RepositoryInitializer(){}
-
     public static void initialize(String repositoryPath) throws IOException, SQLException {
         initializeRepositoryDirectory(repositoryPath);
         Connection connection = createDb(repositoryPath);

@@ -33,8 +33,8 @@ public class DatabaseEngineChunkTest {
     @BeforeEach
     void setUp() throws SQLException, IOException {
         TestUtil.createTestDirectory();
+        RepositoryInitializer.initialize(TEST_REPOSITORY_PATH);
         engine = new DatabaseEngine(TEST_REPOSITORY_PATH);
-        engine.initializeRepository();
         TestUtil.turnOfConstraints(engine.connection);
     }
 
