@@ -36,102 +36,86 @@ public class CommandLineInterfaceTest {
 
     @Test
     void shouldReturnTrueForIsHelp(){
-        CommandLineInterface commandLineInterface = new CommandLineInterface();
-
-        boolean help = commandLineInterface.isHelp(new String[]{"help"});
+        boolean help = CommandLineInterface.isHelp(new String[]{"help"});
 
         assertTrue(help);
     }
 
     @Test
     void shouldReturnFalseForIsHelpOtherAction(){
-        CommandLineInterface commandLineInterface = new CommandLineInterface();
-
-        boolean help = commandLineInterface.isHelp(new String[]{"other"});
+        boolean help = CommandLineInterface.isHelp(new String[]{"other"});
 
         assertFalse(help);
     }
 
     @Test
     void shouldReturnFalseForIsHelpNoAction(){
-        CommandLineInterface commandLineInterface = new CommandLineInterface();
-
-        boolean help = commandLineInterface.isHelp(new String[]{});
+        boolean help = CommandLineInterface.isHelp(new String[]{});
 
         assertFalse(help);
     }
 
     @Test
     void shouldShowInitializeActionHelpByArgs(){
-        CommandLineInterface commandLineInterface = new CommandLineInterface();
-
-        commandLineInterface.showActionHelp(new String[]{"help", "initialize"});
+        CommandLineInterface.showActionHelp(new String[]{"help", "initialize"});
 
         assertEquals(new InitializeActionEngine().getActionHelpMessage(), outputStreamCaptor.toString().trim());
     }
 
     @Test
     void shouldShowInitializeActionHelpByActionEngine(){
-        CommandLineInterface commandLineInterface = new CommandLineInterface();
         InitializeActionEngine engine = new InitializeActionEngine();
 
-        commandLineInterface.showActionHelp(engine);
+        CommandLineInterface.showActionHelp(engine);
 
         assertEquals(engine.getActionHelpMessage(), outputStreamCaptor.toString().trim());
     }
 
     @Test
     void shouldShowInitializeActionHelpByCommand(){
-        CommandLineInterface commandLineInterface = new CommandLineInterface();
         Command command = new Command();
         InitializeActionEngine engine = new InitializeActionEngine();
         command.setActionEngine(engine);
 
-        commandLineInterface.showActionHelp(command);
+        CommandLineInterface.showActionHelp(command);
 
         assertEquals(engine.getActionHelpMessage(), outputStreamCaptor.toString().trim());
     }
 
     @Test
     void shouldShowGeneralHelp(){
-        CommandLineInterface commandLineInterface = new CommandLineInterface();
-
-        commandLineInterface.showGeneralHelp();
+        CommandLineInterface.showGeneralHelp();
 
         assertTrue(outputStreamCaptor.toString().trim().startsWith(Constants.TFB_INTRO+"\n Usage: tfb ACTION [OPTIONS]"));
     }
 
     @Test
     void shouldPrintMessageToStdOut(){
-        CommandLineInterface commandLineInterface = new CommandLineInterface();
         String testMessage = "testMessage";
 
-        commandLineInterface.stdOut("testMessage");
+        CommandLineInterface.stdOut("testMessage");
 
         assertEquals(testMessage, outputStreamCaptor.toString().trim());
     }
 
     @Test
     void shouldPrintMessageToStdErr(){
-        CommandLineInterface commandLineInterface = new CommandLineInterface();
         String testMessage = "testMessage";
 
-        commandLineInterface.stdErr("testMessage");
+        CommandLineInterface.stdErr("testMessage");
 
         assertEquals(testMessage, errStreamCaptor.toString().trim());
     }
 
     @Test
     void shouldParseArgs(){
-        CommandLineInterface commandLineInterface = new CommandLineInterface();
         Map<Option.Property, String> expectedProperties = new HashMap<>();
         expectedProperties.put(Option.Property.repository, "testPath");
 
-        //-d -> enables debug mode and is not added to enabled switches
-        Command command = commandLineInterface.parseArgs(new String[]{"initialize", "-d", "-h", "-lv", "--repository=testPath", "test1", "test2"});
+        Command command = CommandLineInterface.parseArgs(new String[]{"initialize", "-d", "-h", "-lv", "--repository=testPath", "test1", "test2"});
 
         assertEquals(InitializeActionEngine.class, command.actionEngine.getClass());
-        assertIterableEquals(Arrays.asList(Option.Switch.h, Option.Switch.l, Option.Switch.v), command.enabledSwitches);
+        assertIterableEquals(Arrays.asList(Option.Switch.d, Option.Switch.h, Option.Switch.l, Option.Switch.v), command.enabledSwitches);
         assertIterableEquals(expectedProperties.keySet(), command.properties.keySet());
         assertIterableEquals(expectedProperties.values(), command.properties.values());
         assertLinesMatch(Arrays.asList("test1", "test2"), command.mainValues);
@@ -139,11 +123,10 @@ public class CommandLineInterfaceTest {
 
     @Test
     void shouldFailParseArgsCausedByNoAction(){
-        CommandLineInterface commandLineInterface = new CommandLineInterface();
         Exception exception = null;
 
         try {
-            commandLineInterface.parseArgs(new String[]{});
+            CommandLineInterface.parseArgs(new String[]{});
         } catch(Exception ex){
             exception = ex;
         }
@@ -155,11 +138,10 @@ public class CommandLineInterfaceTest {
 
     @Test
     void shouldFailParseArgsCausedByInvalidAction(){
-        CommandLineInterface commandLineInterface = new CommandLineInterface();
         Exception exception = null;
 
         try {
-            commandLineInterface.parseArgs(new String[]{"invalid"});
+            CommandLineInterface.parseArgs(new String[]{"invalid"});
         } catch(Exception ex){
             exception = ex;
         }
@@ -171,11 +153,10 @@ public class CommandLineInterfaceTest {
 
     @Test
     void shouldFailParseArgsCausedByInvalidArgumentSingleDash(){
-        CommandLineInterface commandLineInterface = new CommandLineInterface();
         Exception exception = null;
 
         try {
-            commandLineInterface.parseArgs(new String[]{"initialize", "-"});
+            CommandLineInterface.parseArgs(new String[]{"initialize", "-"});
         } catch(Exception ex){
             exception = ex;
         }
@@ -187,12 +168,11 @@ public class CommandLineInterfaceTest {
 
     @Test
     void shouldFailParseArgsCausedByInvalidArgumentMalformedProperty(){
-        CommandLineInterface commandLineInterface = new CommandLineInterface();
         Exception exception = null;
         String invalidArgument = "--prop";
 
         try {
-            commandLineInterface.parseArgs(new String[]{"initialize", invalidArgument});
+            CommandLineInterface.parseArgs(new String[]{"initialize", invalidArgument});
         } catch(Exception ex){
             exception = ex;
         }
@@ -204,12 +184,11 @@ public class CommandLineInterfaceTest {
 
     @Test
     void shouldFailParseArgsCausedByInvalidArgumentInvalidProperty(){
-        CommandLineInterface commandLineInterface = new CommandLineInterface();
         Exception exception = null;
         String invalidArgument = "--invalid=value";
 
         try {
-            commandLineInterface.parseArgs(new String[]{"initialize", invalidArgument});
+            CommandLineInterface.parseArgs(new String[]{"initialize", invalidArgument});
         } catch(Exception ex){
             exception = ex;
         }

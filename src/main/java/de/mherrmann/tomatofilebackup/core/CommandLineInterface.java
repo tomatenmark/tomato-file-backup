@@ -7,17 +7,19 @@ import de.mherrmann.tomatofilebackup.exceptions.IllegalCommandException;
 
 public class CommandLineInterface {
 
-    private boolean debug;
+    private static boolean debug;
 
-    boolean isHelp(String[] args){
+    private CommandLineInterface(){}
+
+    static boolean isHelp(String[] args){
         return args.length > 0 && args[0].equals(Constants.HELP);
     }
 
-    boolean isDebug(){
+    static boolean isDebug(){
         return debug;
     }
 
-    Command parseArgs(String[] args){
+    static Command parseArgs(String[] args){
         if(args.length == 0){
             throw new IllegalCommandException(Constants.ErrorReport.TOO_FEW_ARGUMENTS.getMessage());
         }
@@ -33,7 +35,7 @@ public class CommandLineInterface {
         return command;
     }
 
-    public void showGeneralHelp(){
+    static void showGeneralHelp(){
         StringBuilder help = new StringBuilder();
         help.append(Constants.TFB_INTRO).append("\n");
         help.append(" Usage: tfb ACTION [OPTIONS]\n");
@@ -54,7 +56,7 @@ public class CommandLineInterface {
         stdOut(help.toString());
     }
 
-    void showActionHelp(String[] args){
+    static void showActionHelp(String[] args){
         if(args.length < 2){
             throw new IllegalCommandException(Constants.ErrorReport.MISSING_ACTION.getMessage());
         }
@@ -67,27 +69,27 @@ public class CommandLineInterface {
         }
     }
 
-    void showActionHelp(Command command){
+    static void showActionHelp(Command command){
         stdOut(command.getActionHelpMessage());
     }
 
-    void showActionHelp(ActionEngine actionEngine){
+    static void showActionHelp(ActionEngine actionEngine){
         stdOut(actionEngine.getActionHelpMessage());
     }
 
-    public void stdOut(String message){
+    static public void stdOut(String message){
         System.out.println(message);
     }
 
-    void stdErr(String message){
+    static void stdErr(String message){
         System.err.println(message);
     }
 
-    private ActionEngine getActionEngine(String action){
+    private static ActionEngine getActionEngine(String action){
         return Action.valueOf(action).getAction();
     }
 
-    private void parseOptions(String[] args, Command command){
+    private static void parseOptions(String[] args, Command command){
         for(int i = 1; i < args.length; i++){
             String arg = args[i];
             if(arg.startsWith("--")){
@@ -100,7 +102,7 @@ public class CommandLineInterface {
         }
     }
 
-    private void addProperty(String arg, Command command){
+    private static void addProperty(String arg, Command command){
         String propertyParsePattern = "^--([^=]+)=([^=]+)$";
         if(!arg.matches(propertyParsePattern)){
             throw new IllegalCommandException(Constants.ErrorReport.INVALID_ARGUMENT.getMessage(arg));
@@ -115,18 +117,17 @@ public class CommandLineInterface {
         }
     }
 
-    private void parseSwitches(String arg, Command command){
+    private static void parseSwitches(String arg, Command command){
         if(arg.length() == 1){
             throw new IllegalCommandException(Constants.ErrorReport.INVALID_ARGUMENT.getMessage(arg));
         }
         for(int i = 1; i < arg.length(); i++){
             try {
                 Option.Switch switchOption = Option.Switch.valueOf(String.valueOf(arg.charAt(i)));
-                if(!Option.Switch.d.equals(switchOption)){
-                    command.enableSwitch(switchOption);
-                } else {
+                if(Option.Switch.d.equals(switchOption)){
                     debug = true;
                 }
+                command.enableSwitch(switchOption);
             } catch(IllegalArgumentException exception){
                 throw new IllegalCommandException(Constants.ErrorReport.INVALID_ARGUMENT.getMessage(arg));
             }

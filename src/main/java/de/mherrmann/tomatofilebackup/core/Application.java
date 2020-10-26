@@ -7,52 +7,51 @@ import de.mherrmann.tomatofilebackup.exceptions.IllegalCommandException;
 public class Application {
 
     public static void run(String[] args){
-        CommandLineInterface commandLineInterface = new CommandLineInterface();
-        if(commandLineInterface.isHelp(args)){
-            showHelp(commandLineInterface, args);
+        if(CommandLineInterface.isHelp(args)){
+            showHelp(args);
         } else {
-            processCommand(args, commandLineInterface);
+            processCommand(args);
         }
     }
 
-    private static void showHelp(CommandLineInterface commandLineInterface, String[] args){
+    private static void showHelp(String[] args){
         try {
-            commandLineInterface.showActionHelp(args);
+            CommandLineInterface.showActionHelp(args);
         } catch (IllegalCommandException exception){
-            handleIllegalCommandException(commandLineInterface, exception);
+            handleIllegalCommandException(exception);
         }
     }
 
-    private static void processCommand(String[] args, CommandLineInterface commandLineInterface){
+    private static void processCommand(String[] args){
         Command command = null;
         try {
-            command = commandLineInterface.parseArgs(args);
+            command = CommandLineInterface.parseArgs(args);
             command.run();
-            commandLineInterface.stdOut(Constants.SUCCESS);
+            CommandLineInterface.stdOut(Constants.SUCCESS);
         } catch (IllegalActionCommandException exception){
-            handleIllegalActionCommandException(commandLineInterface, exception, command);
+            handleIllegalActionCommandException(exception, command);
         } catch (IllegalCommandException exception){
-            handleIllegalCommandException(commandLineInterface, exception);
+            handleIllegalCommandException(exception);
         } catch (Exception exception){
-            handleException(commandLineInterface, exception);
+            handleException(exception);
         }
     }
 
-    private static void handleIllegalActionCommandException(CommandLineInterface commandLineInterface, IllegalActionCommandException exception, Command command){
-        commandLineInterface.stdErr(exception.getMessage());
+    private static void handleIllegalActionCommandException(IllegalActionCommandException exception, Command command){
+        CommandLineInterface.stdErr(exception.getMessage());
         if(command != null){
-            commandLineInterface.showActionHelp(command);
+            CommandLineInterface.showActionHelp(command);
         }
     }
 
-    private static void handleIllegalCommandException(CommandLineInterface commandLineInterface, IllegalCommandException exception){
-        commandLineInterface.stdErr(exception.getMessage());
-        commandLineInterface.showGeneralHelp();
+    private static void handleIllegalCommandException(IllegalCommandException exception){
+        CommandLineInterface.stdErr(exception.getMessage());
+        CommandLineInterface.showGeneralHelp();
     }
 
-    private static void handleException(CommandLineInterface commandLineInterface, Exception exception){
-        commandLineInterface.stdErr(exception.getMessage());
-        if(commandLineInterface.isDebug()){
+    private static void handleException(Exception exception){
+        CommandLineInterface.stdErr(exception.getMessage());
+        if(CommandLineInterface.isDebug()){
             exception.printStackTrace();
         }
     }
