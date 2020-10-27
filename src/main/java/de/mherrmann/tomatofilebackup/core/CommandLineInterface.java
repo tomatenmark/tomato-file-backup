@@ -21,7 +21,7 @@ public class CommandLineInterface {
 
     static Command parseArgs(String[] args){
         if(args.length == 0){
-            throw new IllegalCommandException(Constants.ErrorReport.TOO_FEW_ARGUMENTS.getMessage());
+            throw new IllegalCommandException(Constants.ErrorReport.MISSING_ACTION.getMessage());
         }
         String action = args[0];
         Command command = new Command();
@@ -39,11 +39,15 @@ public class CommandLineInterface {
         StringBuilder help = new StringBuilder();
         help.append(Constants.TFB_INTRO).append("\n");
         help.append(" Usage: tfb ACTION [OPTIONS]\n");
-        help.append("  Example: tfb backup --repository=/mnt/backup/repo/ -n /home/max/\n");
-        help.append("\n");
+        help.append("  Example: tfb backup --repository=/mnt/backup/repo/ -n /home/max/");
+        help.append("\n\n");
         help.append(" Execute tfb help ACTION for action specific help\n");
-        help.append("  Example: tfb help backup\n");
-        help.append("\n");
+        help.append("  Example: tfb help backup");
+        help.append("\n\n");
+        help.append(" General Options: \n");
+        help.append("  ").append(Option.getSwitchText(Option.Switch.d)).append("\n");
+        help.append("  ").append(Option.getPropertyText(Option.Property.logFile));
+        help.append("\n\n");
         help.append(" Actions: ");
         boolean first = true;
         for (Action action : Action.values()){
@@ -58,7 +62,7 @@ public class CommandLineInterface {
 
     static void showActionHelp(String[] args){
         if(args.length < 2){
-            throw new IllegalCommandException(Constants.ErrorReport.MISSING_ACTION.getMessage());
+            throw new IllegalCommandException(Constants.ErrorReport.MISSING_ACTION_FOR_HELP.getMessage());
         }
         String action = args[1];
         try {
@@ -105,7 +109,7 @@ public class CommandLineInterface {
     private static void addProperty(String arg, Command command){
         String propertyParsePattern = "^--([^=]+)=([^=]+)$";
         if(!arg.matches(propertyParsePattern)){
-            throw new IllegalCommandException(Constants.ErrorReport.INVALID_ARGUMENT.getMessage(arg));
+            throw new IllegalCommandException(Constants.ErrorReport.INVALID_OPTION.getMessage(arg));
         }
         String key = arg.replaceFirst(propertyParsePattern, "$1");
         try {
@@ -113,13 +117,13 @@ public class CommandLineInterface {
             Option.Property property = Option.Property.valueOf(key);
             command.addProperty(property, value);
         } catch(IllegalArgumentException exception) {
-            throw new IllegalCommandException(Constants.ErrorReport.INVALID_ARGUMENT.getMessage(arg));
+            throw new IllegalCommandException(Constants.ErrorReport.INVALID_OPTION.getMessage(arg));
         }
     }
 
     private static void parseSwitches(String arg, Command command){
         if(arg.length() == 1){
-            throw new IllegalCommandException(Constants.ErrorReport.INVALID_ARGUMENT.getMessage(arg));
+            throw new IllegalCommandException(Constants.ErrorReport.INVALID_OPTION.getMessage(arg));
         }
         for(int i = 1; i < arg.length(); i++){
             try {
@@ -129,7 +133,7 @@ public class CommandLineInterface {
                 }
                 command.enableSwitch(switchOption);
             } catch(IllegalArgumentException exception){
-                throw new IllegalCommandException(Constants.ErrorReport.INVALID_ARGUMENT.getMessage(arg));
+                throw new IllegalCommandException(Constants.ErrorReport.INVALID_OPTION.getMessage(arg));
             }
         }
     }

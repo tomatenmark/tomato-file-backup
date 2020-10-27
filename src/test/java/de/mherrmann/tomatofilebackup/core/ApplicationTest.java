@@ -3,8 +3,6 @@ package de.mherrmann.tomatofilebackup.core;
 import de.mherrmann.tomatofilebackup.Constants;
 import de.mherrmann.tomatofilebackup.TestUtil;
 import de.mherrmann.tomatofilebackup.core.actions.InitializeActionEngine;
-import de.mherrmann.tomatofilebackup.exceptions.IllegalActionCommandException;
-import de.mherrmann.tomatofilebackup.persistence.RepositoryInitializer;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -12,11 +10,7 @@ import org.junit.jupiter.api.Test;
 import static org.junit.jupiter.api.Assertions.*;
 
 import java.io.ByteArrayOutputStream;
-import java.io.File;
-import java.io.IOException;
 import java.io.PrintStream;
-import java.sql.SQLException;
-import java.util.Collections;
 
 public class ApplicationTest {
 
@@ -60,7 +54,7 @@ public class ApplicationTest {
     void shouldPrintErrorAndGeneralHelpByNoArgs(){
         Application.run(new String[]{});
 
-        assertEquals(Constants.ErrorReport.TOO_FEW_ARGUMENTS.getMessage(), errStreamCaptor.toString().trim());
+        assertEquals(Constants.ErrorReport.MISSING_ACTION.getMessage(), errStreamCaptor.toString().trim());
         assertTrue(outputStreamCaptor.toString().contains("Execute tfb help ACTION for action specific help"));
     }
 
@@ -68,7 +62,7 @@ public class ApplicationTest {
     void shouldPrintErrorAndGeneralHelpByMissingAction(){
         Application.run(new String[]{"help"});
 
-        assertEquals(Constants.ErrorReport.MISSING_ACTION.getMessage(), errStreamCaptor.toString().trim());
+        assertEquals(Constants.ErrorReport.MISSING_ACTION_FOR_HELP.getMessage(), errStreamCaptor.toString().trim());
         assertTrue(outputStreamCaptor.toString().contains("Execute tfb help ACTION for action specific help"));
     }
 

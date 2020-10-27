@@ -133,7 +133,7 @@ public class CommandLineInterfaceTest {
 
         assertNotNull(exception);
         assertEquals(IllegalCommandException.class, exception.getClass());
-        assertEquals(Constants.ErrorReport.TOO_FEW_ARGUMENTS.getMessage(), exception.getMessage());
+        assertEquals(Constants.ErrorReport.MISSING_ACTION.getMessage(), exception.getMessage());
     }
 
     @Test
@@ -163,7 +163,7 @@ public class CommandLineInterfaceTest {
 
         assertNotNull(exception);
         assertEquals(IllegalCommandException.class, exception.getClass());
-        assertEquals(Constants.ErrorReport.INVALID_ARGUMENT.getMessage("-"), exception.getMessage());
+        assertEquals(Constants.ErrorReport.INVALID_OPTION.getMessage("-"), exception.getMessage());
     }
 
     @Test
@@ -179,7 +179,7 @@ public class CommandLineInterfaceTest {
 
         assertNotNull(exception);
         assertEquals(IllegalCommandException.class, exception.getClass());
-        assertEquals(Constants.ErrorReport.INVALID_ARGUMENT.getMessage(invalidArgument), exception.getMessage());
+        assertEquals(Constants.ErrorReport.INVALID_OPTION.getMessage(invalidArgument), exception.getMessage());
     }
 
     @Test
@@ -195,7 +195,7 @@ public class CommandLineInterfaceTest {
 
         assertNotNull(exception);
         assertEquals(IllegalCommandException.class, exception.getClass());
-        assertEquals(Constants.ErrorReport.INVALID_ARGUMENT.getMessage(invalidArgument), exception.getMessage());
+        assertEquals(Constants.ErrorReport.INVALID_OPTION.getMessage(invalidArgument), exception.getMessage());
     }
 
 }

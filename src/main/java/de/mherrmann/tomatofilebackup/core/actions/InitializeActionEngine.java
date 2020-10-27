@@ -9,28 +9,33 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.sql.SQLException;
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
 public class InitializeActionEngine extends ActionEngine {
 
+    private static final List<Option.Property> AVAILABLE_PROPERTIES = Collections.emptyList();
+    private static final List<Option.Switch> AVAILABLE_SWITCHES = Collections.emptyList();
+    private static final List<Option.Property> MANDATORY_PROPERTIES = Collections.emptyList();
+    private static final String ACTION_NAME = "initialize";
+    private static final String USAGE = "tfb backup --"+Option.Property.repository.name()+"="+Option.Property.repository.getPlaceholder()+" [OPTIONS] SOURCE_PATH";
+    private static final String EXAMPLE = "Example: tfb backup --repository=/mnt/backup/repo/ -p -v /home/max/";
+
+    public InitializeActionEngine(){
+        super(AVAILABLE_PROPERTIES, AVAILABLE_SWITCHES, MANDATORY_PROPERTIES, ACTION_NAME, USAGE, EXAMPLE);
+    }
+
     @Override
     public void run(Map<Option.Property, String> properties, List<Option.Switch> enabledSwitches, List<String> mainValues)
             throws IOException, SQLException {
+        checkBoundaries(properties, enabledSwitches);
         if(mainValues.isEmpty()){
             throw new IllegalActionCommandException(Constants.ErrorReport.MISSING_PATH.getMessage());
         }
         String repositoryPath = mainValues.get(0);
         initializeRepository(repositoryPath);
-    }
-
-    @Override
-    public String getActionHelpMessage() {
-        return Constants.TFB_INTRO + "\n" +
-                " Help for initialize:\n" +
-                "\n" +
-                " Usage: tfb initialize PATH_TO_REPOSITORY\n" +
-                "  Example: tfb initialize /mnt/backup/repo/";
     }
 
     private void initializeRepository(String repositoryPath) throws SQLException, IOException {

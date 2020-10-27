@@ -1,5 +1,7 @@
 package de.mherrmann.tomatofilebackup;
 
+import de.mherrmann.tomatofilebackup.core.Option;
+
 public class Constants {
     public static final String DB_FILENAME = "repository.db";
     public static final String CHUNKS_DIRECTORY_NAME = "chunks";
@@ -14,11 +16,12 @@ public class Constants {
         REPOSITORY_ALREADY_EXISTS("Repository already exists."),
         PARENT_DIRECTORY_PROBLEM("The parent directory from given path was not found, is not a directory or is not writable: %s"),
         PATH_MUST_BE_DIRECTORY("Given path must be directory."),
-        MISSING_ACTION("Missing action. Please give name of action you want help for."),
+        MISSING_ACTION("Missing action. Please give action you want to be executed."),
+        MISSING_ACTION_FOR_HELP("Missing action. Please give name of action you want help for."),
         INVALID_ACTION("There is no such action: %s"),
         MISSING_PATH("Missing path argument"),
-        TOO_FEW_ARGUMENTS("There must be at least one argument, the name of the action."),
-        INVALID_ARGUMENT("Invalid Argument: %s");
+        INVALID_OPTION("Invalid Option: %s"),
+        MISSING_PROPERTY("Missing property. You have to give the property %s");
 
         private final String message;
 
@@ -32,6 +35,12 @@ public class Constants {
 
         public String getMessage(String value) {
             return String.format(message, value);
+        }
+        public String getMessage(Option.Switch value) {
+            return String.format(message, "-"+value.name());
+        }
+        public String getMessage(Option.Property value) {
+            return String.format(message, "--"+value.name());
         }
     }
 }
