@@ -1,17 +1,21 @@
 package de.mherrmann.tomatofilebackup.core;
 
 import de.mherrmann.tomatofilebackup.Constants;
+import de.mherrmann.tomatofilebackup.core.cli.Command;
+import de.mherrmann.tomatofilebackup.core.cli.CommandLineInterface;
 import de.mherrmann.tomatofilebackup.exceptions.IllegalActionCommandException;
 import de.mherrmann.tomatofilebackup.exceptions.IllegalCommandException;
 
 public class Application {
 
     public static void run(String[] args){
+        CommandLineInterface.init();
         if(CommandLineInterface.isHelp(args)){
             showHelp(args);
         } else {
             processCommand(args);
         }
+        CommandLineInterface.finalise();
     }
 
     private static void showHelp(String[] args){
