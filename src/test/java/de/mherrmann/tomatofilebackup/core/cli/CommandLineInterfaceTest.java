@@ -1,6 +1,7 @@
-package de.mherrmann.tomatofilebackup.core;
+package de.mherrmann.tomatofilebackup.core.cli;
 
 import de.mherrmann.tomatofilebackup.Constants;
+import de.mherrmann.tomatofilebackup.core.Option;
 import de.mherrmann.tomatofilebackup.core.actions.InitializeActionEngine;
 import de.mherrmann.tomatofilebackup.exceptions.IllegalCommandException;
 import org.junit.jupiter.api.AfterEach;
@@ -22,6 +23,10 @@ public class CommandLineInterfaceTest {
     private final ByteArrayOutputStream outputStreamCaptor = new ByteArrayOutputStream();
     private final ByteArrayOutputStream errStreamCaptor = new ByteArrayOutputStream();
 
+    private static final String PREVIOUS_PROGRESS_LINES = "apple\nbanana";
+    private static final String CURRENT_PROGRESS_LINES = "citron\ndewberry";
+    private static final String MOVE_UP_2_LINES = "\033[2A";
+
     @BeforeEach
     public void setUp() {
         System.setOut(new PrintStream(outputStreamCaptor));
@@ -32,6 +37,7 @@ public class CommandLineInterfaceTest {
     public void tearDown() {
         System.setOut(standardOut);
         System.setErr(standardErr);
+        CommandLineInterface.test = false;
     }
 
     @Test
@@ -60,15 +66,6 @@ public class CommandLineInterfaceTest {
         CommandLineInterface.showActionHelp(new String[]{"help", "initialize"});
 
         assertEquals(new InitializeActionEngine().getActionHelpMessage(), outputStreamCaptor.toString().trim());
-    }
-
-    @Test
-    void shouldShowInitializeActionHelpByActionEngine(){
-        InitializeActionEngine engine = new InitializeActionEngine();
-
-        CommandLineInterface.showActionHelp(engine);
-
-        assertEquals(engine.getActionHelpMessage(), outputStreamCaptor.toString().trim());
     }
 
     @Test
@@ -112,10 +109,10 @@ public class CommandLineInterfaceTest {
         Map<Option.Property, String> expectedProperties = new HashMap<>();
         expectedProperties.put(Option.Property.repository, "testPath");
 
-        Command command = CommandLineInterface.parseArgs(new String[]{"initialize", "-d", "-h", "-lv", "--repository=testPath", "test1", "test2"});
+        Command command = CommandLineInterface.parseArgs(new String[]{"initialize", "-d", "-h", "-l", "--repository=testPath", "test1", "test2"});
 
         assertEquals(InitializeActionEngine.class, command.actionEngine.getClass());
-        assertIterableEquals(Arrays.asList(Option.Switch.d, Option.Switch.h, Option.Switch.l, Option.Switch.v), command.enabledSwitches);
+        assertIterableEquals(Arrays.asList(Option.Switch.d, Option.Switch.h, Option.Switch.l), command.enabledSwitches);
         assertIterableEquals(expectedProperties.keySet(), command.properties.keySet());
         assertIterableEquals(expectedProperties.values(), command.properties.values());
         assertLinesMatch(Arrays.asList("test1", "test2"), command.mainValues);
@@ -196,6 +193,45 @@ public class CommandLineInterfaceTest {
         assertNotNull(exception);
         assertEquals(IllegalCommandException.class, exception.getClass());
         assertEquals(Constants.ErrorReport.INVALID_OPTION.getMessage(invalidArgument), exception.getMessage());
+    }
+
+    @Test
+    void shouldShowOldAndNewProgressLinesAndAnsiSequenceBetween(){
+        CommandLineInterface.test = true;
+        TestProgress progress = new TestProgress();
+        progress.init();
+        System.out.print("\n"+PREVIOUS_PROGRESS_LINES);
+        String expected = String.format("\n%s%s\n%s", PREVIOUS_PROGRESS_LINES, MOVE_UP_2_LINES, CURRENT_PROGRESS_LINES);
+
+        CommandLineInterface.showProgress(progress);
+
+        String actual = outputStreamCaptor.toString();
+        assertEquals(expected, actual);
+    }
+
+    @Test
+    void shouldShowPreviousLinesAndFirstProgressLinesWithoutAnsiSequence(){
+        CommandLineInterface.test = true;
+        TestProgress progress = new TestProgress();
+        System.out.print("test");
+        String expected = String.format("test\n%s", CURRENT_PROGRESS_LINES);
+
+        CommandLineInterface.showProgress(progress);
+
+        String actual = outputStreamCaptor.toString();
+        assertEquals(expected, actual);
+    }
+
+    public static class TestProgress extends Progress {
+
+        public TestProgress() {
+            super(2);
+        }
+
+        @Override
+        public String buildProgressLines() {
+            return CURRENT_PROGRESS_LINES;
+        }
     }
 
 }

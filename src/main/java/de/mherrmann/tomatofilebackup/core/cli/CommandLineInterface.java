@@ -1,25 +1,44 @@
-package de.mherrmann.tomatofilebackup.core;
+package de.mherrmann.tomatofilebackup.core.cli;
 
 import de.mherrmann.tomatofilebackup.Constants;
+import de.mherrmann.tomatofilebackup.core.Option;
 import de.mherrmann.tomatofilebackup.core.actions.Action;
 import de.mherrmann.tomatofilebackup.core.actions.ActionEngine;
 import de.mherrmann.tomatofilebackup.exceptions.IllegalCommandException;
+import org.fusesource.jansi.AnsiConsole;
+
 
 public class CommandLineInterface {
+
+    protected static boolean test;
 
     private static boolean debug;
 
     private CommandLineInterface(){}
 
-    static boolean isHelp(String[] args){
+    public static void init(){
+        AnsiConsole.systemInstall();
+    }
+
+    public static void finalise(){
+        AnsiConsole.systemUninstall();
+    }
+
+    public static void showProgress(Progress progress){
+        String progressString = progress.buildProgressLines();
+        removePreviousProgressLines(progress);
+        stdOutProgress("\n"+progressString);
+    }
+
+    public static boolean isHelp(String[] args){
         return args.length > 0 && args[0].equals(Constants.HELP);
     }
 
-    static boolean isDebug(){
+    public static boolean isDebug(){
         return debug;
     }
 
-    static Command parseArgs(String[] args){
+    public static Command parseArgs(String[] args){
         if(args.length == 0){
             throw new IllegalCommandException(Constants.ErrorReport.MISSING_ACTION.getMessage());
         }
@@ -35,7 +54,7 @@ public class CommandLineInterface {
         return command;
     }
 
-    static void showGeneralHelp(){
+    public static void showGeneralHelp(){
         StringBuilder help = new StringBuilder();
         help.append(Constants.TFB_INTRO).append("\n");
         help.append(" Usage: tfb ACTION [OPTIONS]\n");
@@ -60,7 +79,7 @@ public class CommandLineInterface {
         stdOut(help.toString());
     }
 
-    static void showActionHelp(String[] args){
+    public static void showActionHelp(String[] args){
         if(args.length < 2){
             throw new IllegalCommandException(Constants.ErrorReport.MISSING_ACTION_FOR_HELP.getMessage());
         }
@@ -73,7 +92,7 @@ public class CommandLineInterface {
         }
     }
 
-    static void showActionHelp(Command command){
+    public static void showActionHelp(Command command){
         stdOut(command.getActionHelpMessage());
     }
 
@@ -81,12 +100,12 @@ public class CommandLineInterface {
         stdOut(actionEngine.getActionHelpMessage());
     }
 
-    static public void stdOut(String message){
+    public static void stdOut(String message){
         System.out.println(message);
     }
 
-    static void stdErr(String message){
-        System.err.println(message);
+    public static void stdErr(String message){
+        System.err.println("\n"+message);
     }
 
     private static ActionEngine getActionEngine(String action){
@@ -135,6 +154,22 @@ public class CommandLineInterface {
             } catch(IllegalArgumentException exception){
                 throw new IllegalCommandException(Constants.ErrorReport.INVALID_OPTION.getMessage(arg));
             }
+        }
+    }
+
+    private static void removePreviousProgressLines(Progress progress){
+        if(progress.init()){
+            int lines = progress.getLines();
+            String linesUp = String.format("\033[%dA", lines);
+            stdOutProgress(linesUp);
+        }
+    }
+
+    private static void stdOutProgress(String message){
+        if(test){
+            System.out.print(message);
+        } else {
+            AnsiConsole.out.print(message);
         }
     }
 }
