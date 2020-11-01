@@ -15,8 +15,7 @@ public class Option {
         p("preserve owners and permissions"),
         h("preserve hardlinks"),
         l("follow symlinks"),
-        m("follow mount points"),
-        v("be more verbose");
+        m("follow mount points");
 
         private final String description;
 
