@@ -3,6 +3,7 @@ package de.mherrmann.tomatofilebackup.core;
 import de.mherrmann.tomatofilebackup.Constants;
 import de.mherrmann.tomatofilebackup.TestUtil;
 import de.mherrmann.tomatofilebackup.core.actions.InitializeActionEngine;
+import org.fusesource.jansi.AnsiConsole;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -25,6 +26,7 @@ public class ApplicationTest {
     public void setUp() {
         System.setOut(new PrintStream(outputStreamCaptor));
         System.setErr(new PrintStream(errStreamCaptor));
+        AnsiConsole.systemUninstall();
     }
 
     @AfterEach
