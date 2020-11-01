@@ -1,7 +1,11 @@
 package de.mherrmann.tomatofilebackup.core.actions;
 
+import de.mherrmann.tomatofilebackup.Constants;
 import de.mherrmann.tomatofilebackup.core.Option;
+import de.mherrmann.tomatofilebackup.core.backup.BackupEngine;
+import de.mherrmann.tomatofilebackup.exceptions.IllegalActionCommandException;
 
+import java.io.File;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
@@ -14,11 +18,12 @@ public class BackupActionEngine extends ActionEngine {
             Option.Property.compressTypes, Option.Property.compressTypesInFile, Option.Property.repository
     );
     private static final List<Option.Switch> AVAILABLE_SWITCHES = Arrays.asList(
-            Option.Switch.v, Option.Switch.p, Option.Switch.l, Option.Switch.m
+            Option.Switch.p, Option.Switch.l, Option.Switch.m
     );
     private static final List<Option.Property> MANDATORY_PROPERTIES = Collections.singletonList(Option.Property.repository);
     private static final String ACTION_NAME = "backup";
-    private static final String USAGE = "tfb backup --"+Option.Property.repository.name()+"="+Option.Property.repository.getPlaceholder()+" [OPTIONS] SOURCE_PATH";
+    private static final String USAGE = "tfb backup --"+Option.Property.repository.name()+"="
+            +Option.Property.repository.getPlaceholder()+" [OPTIONS] SOURCE_PATH";
     private static final String EXAMPLE = "Example: tfb backup --repository=/mnt/backup/repo/ -p -v /home/max/";
 
     public BackupActionEngine(){
@@ -28,5 +33,14 @@ public class BackupActionEngine extends ActionEngine {
     @Override
     public void run(Map<Option.Property, String> properties, List<Option.Switch> enabledSwitches, List<String> mainValues) {
         checkBoundaries(properties, enabledSwitches);
+        if(mainValues.isEmpty()){
+            throw new IllegalActionCommandException(Constants.ErrorReport.MISSING_PATH.getMessage());
+        }
+        String sourcePath = mainValues.get(0);
+        File source = new File(sourcePath);
+        if(!source.exists() || !source.isDirectory()){
+            throw new IllegalActionCommandException(Constants.ErrorReport.PATH_MUST_BE_DIRECTORY.getMessage(sourcePath));
+        }
+        new BackupEngine().run(properties, enabledSwitches, source);
     }
 }
