@@ -1,5 +1,6 @@
-package de.mherrmann.tomatofilebackup.core;
+package de.mherrmann.tomatofilebackup.core.cli;
 
+import de.mherrmann.tomatofilebackup.core.Option;
 import de.mherrmann.tomatofilebackup.core.actions.ActionEngine;
 
 import java.util.ArrayList;
@@ -14,15 +15,19 @@ public class Command {
     protected final List<Option.Switch> enabledSwitches = new ArrayList<>();
     protected final List<String> mainValues = new ArrayList<>();
 
-    void setActionEngine(ActionEngine actionEngine){
+    public void setActionEngine(ActionEngine actionEngine){
         this.actionEngine = actionEngine;
     }
 
-    void addProperty(Option.Property key, String value){
+    public String getActionHelpMessage(){
+        return actionEngine.getActionHelpMessage();
+    }
+
+    public void addProperty(Option.Property key, String value){
         this.properties.put(key, value);
     }
 
-    void enableSwitch(Option.Switch switchToEnable){
+    public void enableSwitch(Option.Switch switchToEnable){
         if(!this.enabledSwitches.contains(switchToEnable)){
             this.enabledSwitches.add(switchToEnable);
         }
@@ -34,11 +39,7 @@ public class Command {
         }
     }
 
-    void run() throws Exception {
+    public void run() throws Exception {
         actionEngine.run(properties, enabledSwitches, mainValues);
-    }
-
-    String getActionHelpMessage(){
-        return actionEngine.getActionHelpMessage();
     }
 }
