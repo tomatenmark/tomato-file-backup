@@ -2,15 +2,15 @@ package de.mherrmann.tomatofilebackup.core.cli;
 
 public class BackupProgress {
 
-    private static final int LINES = 3;
+    private static final int LINES = 6;
 
-    private static volatile long totalBytes;
+    private static volatile long totalBytes = -1;
     private static volatile long fileBytes;
     private static volatile long totalBytesProcessed;
     private static volatile long fileBytesChunked;
     private static volatile long fileBytesWritten;
-    private static volatile String currentFileChunking;
-    private static volatile String currentFileWriting;
+    private static volatile String currentFileChunking = "";
+    private static volatile String currentFileWriting = "";
 
     private BackupProgress(){}
 
@@ -63,23 +63,52 @@ public class BackupProgress {
     }
 
     private static String buildProgressLines() {
-        return String.format("Running backup...\n" +
-                    "Finished %s / %s (%s %%)\n" +
-                    " Chunking %s\n" +
-                    "   %s / %s (%s %%)\n" +
-                    " Storing %s\n" +
-                    "   %s / %s (%s %%)\n",
-                    ProgressHelper.getFormattedBytes(totalBytesProcessed),
-                    ProgressHelper.getFormattedBytes(totalBytes),
-                    ProgressHelper.getPercent(totalBytesProcessed, totalBytes),
-                    ProgressHelper.getShortPath(currentFileChunking),
-                    ProgressHelper.getFormattedBytes(fileBytesChunked),
-                    ProgressHelper.getFormattedBytes(fileBytes),
-                    ProgressHelper.getPercent(fileBytesChunked, fileBytes),
-                    ProgressHelper.getShortPath(currentFileWriting),
-                    ProgressHelper.getFormattedBytes(fileBytesWritten),
-                    ProgressHelper.getFormattedBytes(fileBytes),
-                    ProgressHelper.getPercent(fileBytesWritten, fileBytes)
-                );
+        StringBuilder progress = new StringBuilder();
+        progress.append("Running backup...\n");
+        appendTotalProgress(progress);
+        appendChunkingProgress(progress);
+        appendStoringProgress(progress);
+        return progress.toString();
+    }
+
+    private static void appendTotalProgress(StringBuilder progress) {
+        if(totalBytes < 0){
+            progress.append("Calculating directory size...\n");
+            return;
+        }
+        progress.append(String.format(
+                "Finished %s / %s (%s %%)\n",
+                ProgressHelper.getFormattedBytes(totalBytesProcessed),
+                ProgressHelper.getFormattedBytes(totalBytes),
+                ProgressHelper.getFormattedPercent(totalBytesProcessed, totalBytes)
+        ));
+    }
+
+    private static void appendChunkingProgress(StringBuilder progress) {
+        if(currentFileChunking.isEmpty()){
+            progress.append(" Wait for Chunking\n   ...\n");
+            return;
+        }
+        progress.append(String.format(
+                " Chunking %s\n   %s / %s (%s %%)\n",
+                ProgressHelper.getShortPath(currentFileChunking),
+                ProgressHelper.getFormattedBytes(fileBytesChunked),
+                ProgressHelper.getFormattedBytes(fileBytes),
+                ProgressHelper.getFormattedPercent(fileBytesChunked, fileBytes)
+        ));
+    }
+
+    private static void appendStoringProgress(StringBuilder progress) {
+        if(currentFileWriting.isEmpty()){
+            progress.append(" Wait for storing\n   ...\n");
+            return;
+        }
+        progress.append(String.format(
+                " Storing  %s\n   %s / %s (%s %%)\n",
+                ProgressHelper.getShortPath(currentFileWriting),
+                ProgressHelper.getFormattedBytes(fileBytesWritten),
+                ProgressHelper.getFormattedBytes(fileBytes),
+                ProgressHelper.getFormattedPercent(fileBytesWritten, fileBytes)
+        ));
     }
 }

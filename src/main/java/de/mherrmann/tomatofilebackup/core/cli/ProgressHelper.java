@@ -22,11 +22,12 @@ public class ProgressHelper {
         return String.format("%5s %5s", formattedDoubleStr, unit[unitC]);
     }
 
-    public static int getPercent(long current, long total){
+    public static String getFormattedPercent(long current, long total){
         if(current < total){
-            return (int) (total / 100 * current);
+            int percent = (int) (total / 100 * current);
+            return String.format("%3d", percent);
         }
-        return 100;
+        return "100";
     }
 
     public static String getShortPath(String path){
