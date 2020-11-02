@@ -1,101 +1,85 @@
 package de.mherrmann.tomatofilebackup.core.cli;
 
-public class BackupProgress extends Progress {
-    private volatile long totalBytes;
-    private volatile long totalFiles;
-    private volatile long fileBytes;
-    private volatile long totalBytesProcessed;
-    private volatile long fileBytesChunked;
-    private volatile long fileBytesWritten;
-    private volatile String currentFileChunking;
-    private volatile String currentFileWriting;
+public class BackupProgress {
 
-    public BackupProgress(){
-        super(3);
+    private static final int LINES = 3;
+
+    private static volatile long totalBytes;
+    private static volatile long fileBytes;
+    private static volatile long totalBytesProcessed;
+    private static volatile long fileBytesChunked;
+    private static volatile long fileBytesWritten;
+    private static volatile String currentFileChunking;
+    private static volatile String currentFileWriting;
+
+    private BackupProgress(){}
+
+    public static void init(){
+        CommandLineInterface.initProgress(LINES);
     }
 
-    public long getTotalBytes() {
-        return totalBytes;
+    public static void reset(){
+        CommandLineInterface.resetProgress(LINES);
     }
 
-    public void setTotalBytes(long totalBytes) {
-        this.totalBytes = totalBytes;
+    public static void setTotalBytes(long totalBytes) {
+        BackupProgress.totalBytes = totalBytes;
+        showProgress();
     }
 
-    public long getTotalFiles() {
-        return totalFiles;
+    public static void setFileBytes(long fileBytes) {
+        BackupProgress.fileBytes = fileBytes;
+        showProgress();
     }
 
-    public void setTotalFiles(long totalFiles) {
-        this.totalFiles = totalFiles;
+    public static void setTotalBytesProcessed(long totalBytesProcessed) {
+        BackupProgress.totalBytesProcessed = totalBytesProcessed;
+        showProgress();
     }
 
-    public long getFileBytes() {
-        return fileBytes;
+    public static void setFileBytesChunked(long fileBytesChunked) {
+        BackupProgress.fileBytesChunked = fileBytesChunked;
+        showProgress();
     }
 
-    public void setFileBytes(long fileBytes) {
-        this.fileBytes = fileBytes;
+    public static void setFileBytesWritten(long fileBytesWritten) {
+        BackupProgress.fileBytesWritten = fileBytesWritten;
+        showProgress();
     }
 
-    public long getTotalBytesProcessed() {
-        return totalBytesProcessed;
+    public static void setCurrentFileChunking(String currentFileChunking) {
+        BackupProgress.currentFileChunking = currentFileChunking;
+        showProgress();
     }
 
-    public void setTotalBytesProcessed(long totalBytesProcessed) {
-        this.totalBytesProcessed = totalBytesProcessed;
+    public static void setCurrentFileWriting(String currentFileWriting) {
+        BackupProgress.currentFileWriting = currentFileWriting;
+        showProgress();
     }
 
-    public long getFileBytesChunked() {
-        return fileBytesChunked;
+    private static void showProgress(){
+        String progressString = buildProgressLines();
+        CommandLineInterface.showProgress(progressString, LINES);
     }
 
-    public void setFileBytesChunked(long fileBytesChunked) {
-        this.fileBytesChunked = fileBytesChunked;
-    }
-
-    public long getFileBytesWritten() {
-        return fileBytesWritten;
-    }
-
-    public void setFileBytesWritten(long fileBytesWritten) {
-        this.fileBytesWritten = fileBytesWritten;
-    }
-
-    public String getCurrentFileChunking() {
-        return currentFileChunking;
-    }
-
-    public void setCurrentFileChunking(String currentFileChunking) {
-        this.currentFileChunking = currentFileChunking;
-    }
-
-    public String getCurrentFileWriting() {
-        return currentFileWriting;
-    }
-
-    public void setCurrentFileWriting(String currentFileWriting) {
-        this.currentFileWriting = currentFileWriting;
-    }
-
-    public String buildProgressLines() {
+    private static String buildProgressLines() {
         return String.format("Running backup...\n" +
                     "Finished %s / %s (%s %%)\n" +
                     " Chunking %s\n" +
                     "   %s / %s (%s %%)\n" +
                     " Storing %s\n" +
                     "   %s / %s (%s %%)\n",
-                    getFormattedBytes(totalBytesProcessed),
-                    getFormattedBytes(totalBytes),
-                    getPercent(totalBytesProcessed, totalBytes),
-                    getShortPath(currentFileChunking),
-                    getFormattedBytes(fileBytesChunked),
-                    getFormattedBytes(fileBytes),
-                    getPercent(fileBytesChunked, fileBytes),
-                    getShortPath(currentFileWriting),
-                    getFormattedBytes(fileBytesWritten),
-                    getFormattedBytes(fileBytes),
-                    getPercent(fileBytesWritten, fileBytes)
+                    ProgressHelper.getFormattedBytes(totalBytesProcessed),
+                    ProgressHelper.getFormattedBytes(totalBytes),
+                    ProgressHelper.getPercent(totalBytesProcessed, totalBytes),
+                    ProgressHelper.getShortPath(currentFileChunking),
+                    ProgressHelper.getFormattedBytes(fileBytesChunked),
+                    ProgressHelper.getFormattedBytes(fileBytes),
+                    ProgressHelper.getPercent(fileBytesChunked, fileBytes),
+                    ProgressHelper.getShortPath(currentFileWriting),
+                    ProgressHelper.getFormattedBytes(fileBytesWritten),
+                    ProgressHelper.getFormattedBytes(fileBytes),
+                    ProgressHelper.getPercent(fileBytesWritten, fileBytes)
                 );
     }
 }

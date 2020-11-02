@@ -16,7 +16,7 @@ public class BackupEngine {
     }
 
     public void doBackup(String repositoryPath, String sourcePath, Map<Option.Property, String> properties, List<Option.Switch> enabledSwitches){
-        backupProgress = new BackupProgress();
+
     }
 
     public void calculateDirectorySize(String path) {

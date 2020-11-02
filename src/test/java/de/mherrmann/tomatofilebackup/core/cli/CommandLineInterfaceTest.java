@@ -198,40 +198,14 @@ public class CommandLineInterfaceTest {
     @Test
     void shouldShowOldAndNewProgressLinesAndAnsiSequenceBetween(){
         CommandLineInterface.test = true;
-        TestProgress progress = new TestProgress();
-        progress.init();
+
         System.out.print("\n"+PREVIOUS_PROGRESS_LINES);
         String expected = String.format("\n%s%s\n%s", PREVIOUS_PROGRESS_LINES, MOVE_UP_2_LINES, CURRENT_PROGRESS_LINES);
 
-        CommandLineInterface.showProgress(progress);
+        CommandLineInterface.showProgress(CURRENT_PROGRESS_LINES, 2);
 
         String actual = outputStreamCaptor.toString();
         assertEquals(expected, actual);
-    }
-
-    @Test
-    void shouldShowPreviousLinesAndFirstProgressLinesWithoutAnsiSequence(){
-        CommandLineInterface.test = true;
-        TestProgress progress = new TestProgress();
-        System.out.print("test");
-        String expected = String.format("test\n%s", CURRENT_PROGRESS_LINES);
-
-        CommandLineInterface.showProgress(progress);
-
-        String actual = outputStreamCaptor.toString();
-        assertEquals(expected, actual);
-    }
-
-    public static class TestProgress extends Progress {
-
-        public TestProgress() {
-            super(2);
-        }
-
-        @Override
-        public String buildProgressLines() {
-            return CURRENT_PROGRESS_LINES;
-        }
     }
 
 }

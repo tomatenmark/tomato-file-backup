@@ -24,10 +24,18 @@ public class CommandLineInterface {
         AnsiConsole.systemUninstall();
     }
 
-    public static void showProgress(Progress progress){
-        String progressString = progress.buildProgressLines();
-        removePreviousProgressLines(progress);
+    public static void showProgress(String progressString, int lines){
+        removePreviousProgressLines(lines);
         stdOutProgress("\n"+progressString);
+    }
+
+    public static void initProgress(int lines){
+        stdOutProgress("\n".repeat(lines));
+    }
+
+    public static void resetProgress(int lines){
+        removePreviousProgressLines(lines);
+        stdOutProgress("\n");
     }
 
     public static boolean isHelp(String[] args){
@@ -157,12 +165,9 @@ public class CommandLineInterface {
         }
     }
 
-    private static void removePreviousProgressLines(Progress progress){
-        if(progress.init()){
-            int lines = progress.getLines();
-            String linesUp = String.format("\033[%dA", lines);
-            stdOutProgress(linesUp);
-        }
+    private static void removePreviousProgressLines(int lines){
+        String linesUp = String.format("\033[%dA", lines);
+        stdOutProgress(linesUp);
     }
 
     private static void stdOutProgress(String message){
