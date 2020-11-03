@@ -1,65 +1,72 @@
 package de.mherrmann.tomatofilebackup.core.cli;
 
+import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicLong;
+
 public class BackupProgress {
 
     private static final int LINES = 6;
 
-    private static volatile long totalBytes = -1;
-    private static volatile long fileBytes;
-    private static volatile long totalBytesProcessed;
-    private static volatile long fileBytesChunked;
-    private static volatile long fileBytesWritten;
+    private static final AtomicBoolean goalSet = new AtomicBoolean(false);
+    private static final AtomicBoolean chunkingRegistered = new AtomicBoolean(false);
+    private static final AtomicBoolean transferRegistered = new AtomicBoolean(false);
+    private static final AtomicLong totalBytes = new AtomicLong();
+    private static final AtomicLong totalBytesTransferred = new AtomicLong();
+    private static final AtomicLong totalBytesChunked = new AtomicLong();
+    private static final AtomicLong fileBytesToTransfer = new AtomicLong();
+    private static final AtomicLong fileBytesToChunk = new AtomicLong();
+    private static final AtomicLong fileBytesChunked = new AtomicLong();
+    private static final AtomicLong fileBytesTransferred = new AtomicLong();
     private static volatile String currentFileChunking = "";
-    private static volatile String currentFileWriting = "";
+    private static volatile String currentFileTransfer = "";
 
     private BackupProgress(){}
 
-    public static void init(){
-        CommandLineInterface.initProgress(LINES);
-    }
-
-    public static void reset(){
-        CommandLineInterface.resetProgress(LINES);
-    }
-
-    public static void setTotalBytes(long totalBytes) {
-        BackupProgress.totalBytes = totalBytes;
+    public static void setGoal(long bytes){
+        goalSet.set(true);
+        totalBytes.set(bytes);
+        totalBytesTransferred.set(0);
         showProgress();
     }
 
-    public static void setFileBytes(long fileBytes) {
-        BackupProgress.fileBytes = fileBytes;
+    public static void registerChunking(String path, long bytes){
+        chunkingRegistered.set(true);
+        currentFileChunking = path;
+        fileBytesToChunk.set(bytes);
+        fileBytesChunked.set(0);
         showProgress();
     }
 
-    public static void setTotalBytesProcessed(long totalBytesProcessed) {
-        BackupProgress.totalBytesProcessed = totalBytesProcessed;
+    public static void registerTransfer(String path, long bytes){
+        transferRegistered.set(true);
+        currentFileTransfer = path;
+        fileBytesToTransfer.set(bytes);
+        fileBytesTransferred.set(0);
         showProgress();
     }
 
-    public static void setFileBytesChunked(long fileBytesChunked) {
-        BackupProgress.fileBytesChunked = fileBytesChunked;
+    public static void updateChunkingProgress(long bytesIncrement){
+        fileBytesChunked.addAndGet(bytesIncrement);
+        totalBytesChunked.addAndGet(bytesIncrement);
+        if(totalBytesChunked.get() >= totalBytes.get()){
+            chunkingRegistered.set(false);
+        }
         showProgress();
     }
 
-    public static void setFileBytesWritten(long fileBytesWritten) {
-        BackupProgress.fileBytesWritten = fileBytesWritten;
-        showProgress();
-    }
-
-    public static void setCurrentFileChunking(String currentFileChunking) {
-        BackupProgress.currentFileChunking = currentFileChunking;
-        showProgress();
-    }
-
-    public static void setCurrentFileWriting(String currentFileWriting) {
-        BackupProgress.currentFileWriting = currentFileWriting;
+    public static void updateTransferProgress(long bytesIncrement){
+        fileBytesTransferred.addAndGet(bytesIncrement);
+        totalBytesTransferred.addAndGet(bytesIncrement);
         showProgress();
     }
 
     private static void showProgress(){
+        init();
         String progressString = buildProgressLines();
         CommandLineInterface.showProgress(progressString, LINES);
+        if(totalBytesTransferred.get() >= totalBytes.get()){
+            reset();
+        }
     }
 
     private static String buildProgressLines() {
@@ -72,43 +79,54 @@ public class BackupProgress {
     }
 
     private static void appendTotalProgress(StringBuilder progress) {
-        if(totalBytes < 0){
-            progress.append("Calculating directory size...\n");
+        if(!goalSet.get()){
+            progress.append(String.format(
+                    "Finished %s /     ... Bytes (... %%)\n",
+                    ProgressHelper.getFormattedBytes(totalBytesTransferred.get())
+            ));
             return;
         }
         progress.append(String.format(
                 "Finished %s / %s (%s %%)\n",
-                ProgressHelper.getFormattedBytes(totalBytesProcessed),
-                ProgressHelper.getFormattedBytes(totalBytes),
-                ProgressHelper.getFormattedPercent(totalBytesProcessed, totalBytes)
+                ProgressHelper.getFormattedBytes(totalBytesTransferred.get()),
+                ProgressHelper.getFormattedBytes(totalBytes.get()),
+                ProgressHelper.getFormattedPercent(totalBytesTransferred.get(), totalBytes.get())
         ));
     }
 
     private static void appendChunkingProgress(StringBuilder progress) {
         if(currentFileChunking.isEmpty()){
-            progress.append(" Wait for Chunking\n   ...\n");
+            progress.append(" Chunking ...\n   ...\n");
             return;
         }
         progress.append(String.format(
                 " Chunking %s\n   %s / %s (%s %%)\n",
                 ProgressHelper.getShortPath(currentFileChunking),
-                ProgressHelper.getFormattedBytes(fileBytesChunked),
-                ProgressHelper.getFormattedBytes(fileBytes),
-                ProgressHelper.getFormattedPercent(fileBytesChunked, fileBytes)
+                ProgressHelper.getFormattedBytes(fileBytesChunked.get()),
+                ProgressHelper.getFormattedBytes(fileBytesToChunk.get()),
+                ProgressHelper.getFormattedPercent(fileBytesChunked.get(), fileBytesToChunk.get())
         ));
     }
 
     private static void appendStoringProgress(StringBuilder progress) {
-        if(currentFileWriting.isEmpty()){
-            progress.append(" Wait for storing\n   ...\n");
+        if(currentFileTransfer.isEmpty()){
+            progress.append(" Transfer ...\n   ...\n");
             return;
         }
         progress.append(String.format(
-                " Storing  %s\n   %s / %s (%s %%)\n",
-                ProgressHelper.getShortPath(currentFileWriting),
-                ProgressHelper.getFormattedBytes(fileBytesWritten),
-                ProgressHelper.getFormattedBytes(fileBytes),
-                ProgressHelper.getFormattedPercent(fileBytesWritten, fileBytes)
+                " Transfer %s\n   %s / %s (%s %%)\n",
+                ProgressHelper.getShortPath(currentFileTransfer),
+                ProgressHelper.getFormattedBytes(fileBytesTransferred.get()),
+                ProgressHelper.getFormattedBytes(fileBytesToTransfer.get()),
+                ProgressHelper.getFormattedPercent(fileBytesTransferred.get(), fileBytesToTransfer.get())
         ));
+    }
+
+    private static void init(){
+        CommandLineInterface.initProgress(LINES);
+    }
+
+    private static void reset(){
+        CommandLineInterface.resetProgress(LINES);
     }
 }
